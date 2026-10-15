@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-2 CSS Animation 幻灯片</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            padding: 36px 20px;
+            color: #26332f;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #eef2ed;
+        }
+
+        main { width: min(900px, 100%); margin: 0 auto; }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .subtitle { margin: 0 0 24px; color: #68756f; }
+
+        .slide {
+            overflow: hidden;
+            background: #d8ded9;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .track {
+            display: flex;
+            width: 400%;
+            animation: slide-show 12s ease-in-out infinite;
+        }
+
+        .track img {
+            display: block;
+            flex: 0 0 25%;
+            width: 25%;
+            height: clamp(230px, 52vw, 480px);
+            object-fit: cover;
+        }
+
+        @keyframes slide-show {
+            0%, 20% { transform: translateX(0); }
+            26%, 46% { transform: translateX(-25%); }
+            52%, 72% { transform: translateX(-50%); }
+            78%, 100% { transform: translateX(-75%); }
+        }
+
+        .caption {
+            padding: 18px 22px;
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .caption h2 { margin: 0 0 6px; font-size: 20px; }
+        .caption p { margin: 0; color: #68756f; line-height: 1.7; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .track { animation-duration: 0.01ms; animation-iteration-count: 1; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>CSS Animation 幻灯片</h1>
+        <p class="subtitle">图片通过横向位置动画依次切换</p>
+        <section aria-label="自动播放的图片幻灯片">
+            <div class="slide">
+                <div class="track">
+                    <img src="img/1.jpg" alt="幻灯片图片一">
+                    <img src="img/2.jpg" alt="幻灯片图片二">
+                    <img src="img/3.jpg" alt="幻灯片图片三">
+                    <img src="img/1.jpg" alt="" aria-hidden="true">
+                </div>
+            </div>
+            <div class="caption">
+                <h2>孟梦的图片放映</h2>
+                <p>使用 CSS @keyframes 改变图片轨道的位置，形成上图下文的连续播放效果。</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CSS 变量练习 · 孟梦</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			/* 全局 CSS 变量（自定义属性）定义在 :root 上 */
+			--meng-primary: #5b4bdb;
+			--meng-primary-dark: #4033a8;
+			--meng-accent: #0e9f9a;
+			--meng-ink: #1f2937;
+			--meng-muted: #64748b;
+			--meng-surface: #ffffff;
+			--meng-line: rgba(91, 75, 219, .16);
+			--meng-radius: 14px;
+			--meng-shadow: 0 12px 30px rgba(64, 51, 168, .1);
+			color: var(--meng-ink);
+			background: #f4f2ff;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 48px 24px;
+			background-image:
+				radial-gradient(circle at 10% 8%, rgba(255, 255, 255, .9) 0 6%, transparent 22%),
+				linear-gradient(135deg, #ebe8ff 0%, #f7f1ff 50%, #e4f7f5 100%);
+		}
+
+		main {
+			width: min(920px, 100%);
+			margin: 0 auto;
+		}
+
+		.meng_eyebrow {
+			margin: 0 0 10px;
+			color: var(--meng-primary);
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 7vw, 52px);
+			line-height: 1.15;
+		}
+
+		h1 .meng_name {
+			color: var(--meng-primary);
+		}
+
+		.meng_intro {
+			max-width: 640px;
+			margin: 14px 0 32px;
+			color: var(--meng-muted);
+			line-height: 1.85;
+		}
+
+		code {
+			padding: 2px 6px;
+			color: var(--meng-primary-dark);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: .92em;
+			background: #efeaff;
+			border-radius: 4px;
+		}
+
+		.meng_section-title {
+			margin: 38px 0 12px;
+			font-size: 19px;
+		}
+
+		.meng_note {
+			margin: -4px 0 14px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		.meng_panel {
+			padding: 22px;
+			background: var(--meng-surface);
+			border: 1px solid var(--meng-line);
+			border-radius: var(--meng-radius);
+			box-shadow: var(--meng-shadow);
+		}
+
+		.meng_code-block {
+			margin: 0;
+			padding: 16px 18px;
+			overflow-x: auto;
+			color: #d7e3ff;
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 13px;
+			line-height: 1.75;
+			background: #232b3a;
+			border-radius: 10px;
+		}
+
+		.meng_code-block .meng_c-key { color: #9db8ff; }
+		.meng_code-block .meng_c-var { color: #7fe0c3; }
+		.meng_code-block .meng_c-val { color: #f6c177; }
+		.meng_code-block .meng_c-cmt { color: #7a8699; }
+
+		/* ---------- 1. 变量取色卡片 ---------- */
+
+		.meng_swatch-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 14px;
+		}
+
+		.meng_swatch {
+			display: grid;
+			gap: 10px;
+			padding: 14px;
+			border: 1px solid var(--meng-line);
+			border-radius: 10px;
+		}
+
+		.meng_swatch-chip {
+			height: 74px;
+			border-radius: 8px;
+		}
+
+		.meng_swatch code {
+			font-size: 12px;
+		}
+
+		.meng_swatch p {
+			margin: 0;
+			color: var(--meng-muted);
+			font-size: 12px;
+		}
+
+		.meng_chip-primary   { background: var(--meng-primary); }
+		.meng_chip-dark      { background: var(--meng-primary-dark); }
+		.meng_chip-accent    { background: var(--meng-accent); }
+		.meng_chip-ink       { background: var(--meng-ink); }
+
+		/* ---------- 2. 主题切换演示 ---------- */
+
+		.meng_theme-box {
+			/* 局部变量：只在本容器内生效，覆盖 :root 的同名变量 */
+			--meng-demo-bg: #efeaff;
+			--meng-demo-fg: #2b2350;
+			--meng-demo-btn: var(--meng-primary);
+			--meng-demo-btn-fg: #fff;
+			padding: 26px;
+			color: var(--meng-demo-fg);
+			background: var(--meng-demo-bg);
+			border-radius: 12px;
+			border: 1px dashed var(--meng-line);
+			transition: background .3s ease, color .3s ease;
+		}
+
+		.meng_toggle {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin: 0 0 18px;
+			font-size: 14px;
+			cursor: pointer;
+			user-select: none;
+		}
+
+		.meng_theme-toggle {
+			width: 18px;
+			height: 18px;
+			margin: 0 0 18px;
+			accent-color: var(--meng-primary);
+			cursor: pointer;
+		}
+
+		.meng_demo-title {
+			margin: 0 0 8px;
+			font-size: 20px;
+		}
+
+		.meng_demo-text {
+			margin: 0 0 18px;
+			font-size: 13px;
+			line-height: 1.8;
+			opacity: .85;
+		}
+
+		.meng_demo-btn {
+			display: inline-block;
+			padding: 10px 22px;
+			color: var(--meng-demo-btn-fg);
+			font-size: 14px;
+			font-weight: 700;
+			background: var(--meng-demo-btn);
+			border: none;
+			border-radius: 9px;
+			transition: transform .2s ease;
+		}
+
+		.meng_demo-btn:hover {
+			transform: translateY(-2px);
+		}
+
+		/* 勾选复选框后，通过后代选择器一次性改写整组变量 */
+		.meng_theme-toggle:checked ~ .meng_theme-box {
+			--meng-demo-bg: #12343b;
+			--meng-demo-fg: #d8f3f0;
+			--meng-demo-btn: #0e9f9a;
+			--meng-demo-btn-fg: #062a28;
+		}
+
+		/* ---------- 3. 作用域演示 ---------- */
+
+		.meng_scope-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 14px;
+		}
+
+		.meng_scope-card {
+			padding: 18px;
+			border-radius: 10px;
+			border: 1px solid var(--meng-line);
+			background: #fff;
+		}
+
+		.meng_scope-card h3 {
+			margin: 0 0 8px;
+			font-size: 15px;
+		}
+
+		.meng_scope-card p {
+			margin: 0;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		.meng_scope-a {
+			/* 局部变量：仅对本元素及子元素生效 */
+			--meng-tag: #e85d4a;
+		}
+
+		.meng_scope-b {
+			--meng-tag: #43a982;
+		}
+
+		.meng_scope-c {
+			--meng-tag: #477fce;
+		}
+
+		.meng_tag {
+			display: inline-block;
+			margin-bottom: 10px;
+			padding: 4px 12px;
+			color: #fff;
+			font-size: 12px;
+			font-weight: 700;
+			background: var(--meng-tag);
+			border-radius: 999px;
+		}
+
+		/* ---------- 4. 回退值演示 ---------- */
+
+		.meng_fallback-list {
+			display: grid;
+			gap: 10px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		.meng_fallback-list li {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 10px;
+			padding: 12px 14px;
+			font-size: 13px;
+			background: #f8f7ff;
+			border-radius: 8px;
+		}
+
+		.meng_dot {
+			width: 16px;
+			height: 16px;
+			border-radius: 50%;
+			/* 变量存在时用变量，不存在时使用回退值 */
+			background: var(--meng-primary);
+		}
+
+		.meng_dot-fallback {
+			background: var(--meng-not-exist, #e85d4a);
+		}
+
+		.meng_dot-mixed {
+			background: linear-gradient(135deg, var(--meng-accent, #999), var(--meng-not-exist, #f2ae3d));
+		}
+
+		/* ---------- 5. 速查表 ---------- */
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+
+		th, td {
+			padding: 10px 12px;
+			text-align: left;
+			border-bottom: 1px solid var(--meng-line);
+		}
+
+		th {
+			color: var(--meng-muted);
+			font-weight: 700;
+			background: #f6f4ff;
+		}
+
+		tr:last-child td {
+			border-bottom: none;
+		}
+
+		.meng_footer {
+			margin: 40px 0 8px;
+			color: var(--meng-muted);
+			text-align: center;
+			font-size: 13px;
+		}
+
+		@media (max-width: 560px) {
+			body { padding: 32px 16px; }
+			.meng_panel { padding: 16px; }
+			.meng_theme-box { padding: 18px; }
+			table { font-size: 12px; }
+			th, td { padding: 8px; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="meng_eyebrow">CSS · Custom Properties</p>
+		<h1>会变色的 CSS 变量 —— <span class="meng_name">孟梦</span>的练习页</h1>
+		<p class="meng_intro">CSS 变量（正式名称：CSS 自定义属性）让我们把常用的颜色、间距等值先命名保存，再通过 <code>var()</code> 随处引用。改一处变量，全页联动更新。本页由 <strong>孟梦</strong> 使用原生 HTML + CSS 完成，无 JavaScript、无 CDN。</p>
+
+		<h2 class="meng_section-title">一、定义与引用</h2>
+		<p class="meng_note">变量写在 <code>:root</code> 里成为全局变量，用 <code>--</code> 前缀命名；使用时写 <code>var(--变量名)</code>。下面色块的颜色全部来自本页顶部 <code>:root</code> 中的定义。</p>
+		<section class="meng_panel" aria-label="变量取色演示">
+			<div class="meng_swatch-grid">
+				<div class="meng_swatch">
+					<div class="meng_swatch-chip meng_chip-primary"></div>
+					<code>var(--meng-primary)</code>
+					<p>页面主色</p>
+				</div>
+				<div class="meng_swatch">
+					<div class="meng_swatch-chip meng_chip-dark"></div>
+					<code>var(--meng-primary-dark)</code>
+					<p>主色加深</p>
+				</div>
+				<div class="meng_swatch">
+					<div class="meng_swatch-chip meng_chip-accent"></div>
+					<code>var(--meng-accent)</code>
+					<p>强调色</p>
+				</div>
+				<div class="meng_swatch">
+					<div class="meng_swatch-chip meng_chip-ink"></div>
+					<code>var(--meng-ink)</code>
+					<p>正文墨色</p>
+				</div>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">二、一段定义，处处生效</h2>
+		<p class="meng_note">这是本页 <code>:root</code> 中的变量定义代码。所有以 <code>--</code> 开头的行都是自定义属性，本身不产生样式，只为 <code>var()</code> 提供值。</p>
+		<pre class="meng_code-block"><span class="meng_c-cmt">/* 定义：写在 :root 上，全页可用 */</span>
+<span class="meng_c-key">:root</span> {
+  <span class="meng_c-var">--meng-primary</span>: <span class="meng_c-val">#5b4bdb</span>;
+  <span class="meng_c-var">--meng-accent</span>: <span class="meng_c-val">#0e9f9a</span>;
+  <span class="meng_c-var">--meng-radius</span>: <span class="meng_c-val">14px</span>;
+}
+
+<span class="meng_c-cmt">/* 使用：任何选择器里都能引用 */</span>
+<span class="meng_c-key">h1</span> { <span class="meng_c-var">color</span>: <span class="meng_c-fn" style="color:#7fe0c3">var</span>(<span class="meng_c-var">--meng-primary</span>); }</pre>
+
+		<h2 class="meng_section-title">三、主题切换：一次改写整组变量</h2>
+		<p class="meng_note">勾选下面的开关，后代选择器 <code>:checked ~ ...</code> 会把容器上的多个变量同时换值 —— 背景、文字、按钮颜色一起更新，这就是"换肤"的原理。</p>
+		<input type="checkbox" id="meng-theme-toggle" class="meng_theme-toggle">
+		<label class="meng_toggle" for="meng-theme-toggle">切换深色主题（勾选后整组变量换肤）</label>
+		<div class="meng_theme-box">
+			<h3 class="meng_demo-title">孟梦的主题卡片</h3>
+			<p class="meng_demo-text">这张卡片的背景、文字、按钮颜色都由 <code>--meng-demo-*</code> 三组变量控制。勾选上方复选框，三组变量同时改写，整张卡片瞬间换肤。</p>
+			<span class="meng_demo-btn">var(--meng-demo-btn)</span>
+		</div>
+
+		<h2 class="meng_section-title">四、作用域：全局与局部</h2>
+		<p class="meng_note">写在 <code>:root</code> 上是全局变量；写在普通选择器上则是局部变量，只在该元素及其子元素内生效。三张卡片各自定义了同名变量 <code>--meng-tag</code>，互不干扰。</p>
+		<div class="meng_scope-grid">
+			<div class="meng_scope-card meng_scope-a">
+				<span class="meng_tag">局部 A</span>
+				<h3>--meng-tag: #e85d4a</h3>
+				<p>定义在 .meng_scope-a 上，只有这张卡片里的徽章是红色。</p>
+			</div>
+			<div class="meng_scope-card meng_scope-b">
+				<span class="meng_tag">局部 B</span>
+				<h3>--meng-tag: #43a982</h3>
+				<p>同名变量在不同选择器里可以取不同值，这正是层叠与作用域的魅力。</p>
+			</div>
+			<div class="meng_scope-card meng_scope-c">
+				<span class="meng_tag">局部 C</span>
+				<h3>--meng-tag: #477fce</h3>
+				<p>孟梦的三张卡片，三种颜色，一个变量名。</p>
+			</div>
+		</div>
+
+		<h2 class="meng_section-title">五、回退值：var() 的保险丝</h2>
+		<p class="meng_note"><code>var(--名称, 备用值)</code> 的第二个参数是回退值：变量不存在时自动使用备用值，避免样式"整段失效"。</p>
+		<div class="meng_panel">
+			<ul class="meng_fallback-list">
+				<li>
+					<span class="meng_dot"></span>
+					<code>var(--meng-primary)</code> —— 变量存在，显示主色紫
+				</li>
+				<li>
+					<span class="meng_dot meng_dot-fallback"></span>
+					<code>var(--meng-not-exist, #e85d4a)</code> —— 变量不存在，回退为橙红
+				</li>
+				<li>
+					<span class="meng_dot meng_dot-mixed"></span>
+					<code>linear-gradient(var(--meng-accent), var(--meng-not-exist, #f2ae3d))</code> —— 存在与回退混用，渐变从青绿到金黄
+				</li>
+			</ul>
+		</div>
+
+		<h2 class="meng_section-title">六、CSS 变量速查表</h2>
+		<div class="meng_panel">
+			<table>
+				<thead>
+					<tr>
+						<th>语法</th>
+						<th>含义</th>
+						<th>本页示例</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><code>--名称: 值;</code></td>
+						<td>声明自定义属性（变量）</td>
+						<td><code>--meng-primary: #5b4bdb</code></td>
+					</tr>
+					<tr>
+						<td><code>var(--名称)</code></td>
+						<td>引用变量的值</td>
+						<td>色块、按钮、徽章的颜色</td>
+					</tr>
+					<tr>
+						<td><code>var(--名称, 回退值)</code></td>
+						<td>变量无效时使用回退值</td>
+						<td>第三组圆点演示</td>
+					</tr>
+					<tr>
+						<td><code>:root { ... }</code></td>
+						<td>定义全局变量的最佳位置</td>
+						<td>本页全部 <code>--meng-*</code> 全局变量</td>
+					</tr>
+					<tr>
+						<td><code>元素 { --x: ...; }</code></td>
+						<td>局部变量，仅本元素及子元素可用</td>
+						<td>主题卡片与三张作用域卡片</td>
+					</tr>
+					<tr>
+						<td><code>calc(var(--x) + 10px)</code></td>
+						<td>变量参与计算</td>
+						<td>本页圆角 <code>--meng-radius</code> 可配合 calc 缩放</td>
+					</tr>
+					<tr>
+						<td><code>@property --名称</code></td>
+						<td>注册变量类型，使其可被动画过渡</td>
+						<td>进阶特性，现代浏览器支持</td>
+					</tr>
+					<tr>
+						<td><code>变量命名规范</code></td>
+						<td>必须以 <code>--</code> 开头，区分大小写</td>
+						<td>本页统一使用 <code>--meng-</code> 前缀</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<p class="meng_footer">孟梦 · 高级网页设计课堂实践 · CSS 变量（自定义属性）</p>
+	</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-3 Media Query 全屏背景</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        :root { font-size: 16px; }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        .screen {
+            display: grid;
+            min-height: 100vh;
+            min-height: 100svh;
+            place-items: center;
+            padding: 24px;
+            color: #fff;
+            text-align: center;
+            background: #d65d48;
+            transition: background-color 0.35s ease;
+        }
+
+        .screen h1 {
+            margin: 0;
+            font-size: 3rem;
+        }
+
+        .screen p {
+            margin: 14px 0 0;
+            font-size: 1.125rem;
+        }
+
+        @media (min-width: 600px) {
+            :root { font-size: 18px; }
+            .screen { background: #238b83; }
+        }
+
+        @media (min-width: 1000px) {
+            :root { font-size: 22px; }
+            .screen { background: #426fc0; }
+        }
+    </style>
+</head>
+<body>
+    <main class="screen">
+        <div>
+            <h1>孟梦</h1>
+            <p>调整视口宽度，观察背景颜色与文字大小变化</p>
+        </div>
+    </main>
+</body>
+</html>

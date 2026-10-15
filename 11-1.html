@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CSS 长度单位练习</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			color: #202a35;
+			background: #f3f5f2;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 48px 24px;
+			background-image: radial-gradient(#cbd2cc 0.7px, transparent 0.7px);
+			background-size: 20px 20px;
+		}
+
+		main {
+			width: min(880px, 100%);
+			margin: 0 auto;
+		}
+
+		.eyebrow {
+			margin: 0 0 10px;
+			color: #66736a;
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 7vw, 54px);
+			line-height: 1.15;
+		}
+
+		.intro {
+			max-width: 620px;
+			margin: 14px 0 32px;
+			color: #5d6871;
+			line-height: 1.8;
+		}
+
+		.section-title {
+			margin: 34px 0 14px;
+			font-size: 19px;
+		}
+
+		.note {
+			margin: -6px 0 14px;
+			color: #5d6871;
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		code {
+			padding: 2px 6px;
+			color: #477fce;
+			font-family: Consolas, "Courier New", monospace;
+			font-size: .92em;
+			background: #eaf0fa;
+			border-radius: 4px;
+		}
+
+		.panel {
+			background: #fff;
+			border: 1px solid #dce2dc;
+			border-radius: 8px;
+			padding: 20px;
+		}
+
+		/* ---------- 绝对单位 ---------- */
+
+		.unit-row {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			margin-bottom: 12px;
+		}
+
+		.unit-row:last-child {
+			margin-bottom: 0;
+		}
+
+		.unit-name {
+			flex: 0 0 92px;
+			font-weight: 700;
+			font-size: 14px;
+		}
+
+		.bar-wrap {
+			flex: 1;
+		}
+
+		.bar {
+			height: 22px;
+			background: linear-gradient(90deg, #477fce, #6f9ae8);
+			border-radius: 4px;
+		}
+
+		.bar-96px  { width: 96px; }
+		.bar-72px  { width: 72px; background: linear-gradient(90deg, #43a982, #6cc4a3); }
+		.bar-36px  { width: 36px; background: linear-gradient(90deg, #f2ae3d, #f6c66e); }
+		.bar-1in   { width: 1in; background: linear-gradient(90deg, #e85d4a, #ef8979); }
+		.bar-2cm   { width: 2cm; }
+		.bar-6pc   { width: 6pc; background: linear-gradient(90deg, #8a63d2, #a98ae0); }
+
+		.unit-desc {
+			flex: 0 0 auto;
+			color: #5d6871;
+			font-size: 12px;
+		}
+
+		/* ---------- em 与 rem ---------- */
+
+		.duo {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 14px;
+		}
+
+		.demo-box {
+			padding: 16px;
+			background: #fff;
+			border: 1px solid #dce2dc;
+			border-radius: 8px;
+		}
+
+		.demo-box h3 {
+			margin: 0 0 12px;
+			font-size: 15px;
+		}
+
+		/* em：盒子宽度跟着父级字号一起放大 */
+		.em-level-1 {
+			font-size: 12px;
+		}
+
+		.em-level-2 {
+			font-size: 16px;
+		}
+
+		.em-level-3 {
+			font-size: 22px;
+		}
+
+		.em-block {
+			width: 8em;
+			height: 2em;
+			margin-bottom: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 13px;
+			background: #477fce;
+			border-radius: 4px;
+		}
+
+		/* rem：只跟根字号 (16px) 走，父级字号变了也不变 */
+		.rem-block {
+			width: 8rem;
+			height: 2rem;
+			margin-bottom: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 13px;
+			background: #43a982;
+			border-radius: 4px;
+		}
+
+		/* ---------- 百分比 ---------- */
+
+		.percent-track {
+			padding: 14px;
+			background: #f4f6f4;
+			border-radius: 6px;
+		}
+
+		.percent-bar {
+			height: 22px;
+			margin-bottom: 10px;
+			color: #fff;
+			font-size: 12px;
+			line-height: 22px;
+			text-align: center;
+			background: #e85d4a;
+			border-radius: 4px;
+		}
+
+		.percent-bar:last-child {
+			margin-bottom: 0;
+		}
+
+		.p25 { width: 25%; }
+		.p50 { width: 50%; background: #f2ae3d; }
+		.p75 { width: 75%; background: #477fce; }
+		.p100 { width: 100%; background: #43a982; }
+
+		/* ---------- 视口单位 vw / vh / vmin / vmax ---------- */
+
+		.viewport-stage {
+			padding: 16px;
+			background: #f4f6f4;
+			border-radius: 6px;
+		}
+
+		.vw-box {
+			width: 40vw;
+			min-width: 120px;
+			height: 34px;
+			margin-bottom: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 13px;
+			background: #8a63d2;
+			border-radius: 4px;
+		}
+
+		.vh-box {
+			width: 220px;
+			max-width: 100%;
+			height: 8vh;
+			min-height: 36px;
+			margin-bottom: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 13px;
+			background: #477fce;
+			border-radius: 4px;
+		}
+
+		.vmin-box {
+			width: 18vmin;
+			height: 18vmin;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 12px;
+			background: #e85d4a;
+			border-radius: 4px;
+		}
+
+		/* ---------- ex 与 ch ---------- */
+
+		.glyph-demo {
+			padding: 16px;
+			background: #f4f6f4;
+			border-radius: 6px;
+		}
+
+		.glyph-row {
+			margin-bottom: 12px;
+		}
+
+		.glyph-row:last-child {
+			margin-bottom: 0;
+		}
+
+		.glyph-label {
+			display: block;
+			margin-bottom: 5px;
+			color: #5d6871;
+			font-size: 12px;
+		}
+
+		.glyph-text {
+			display: inline-block;
+			padding: 6px 0;
+			font-size: 24px;
+			font-weight: 700;
+			border-bottom: 3px solid #f2ae3d;
+		}
+
+		.glyph-ex { width: 4ex; background: rgba(242, 174, 61, .18); }
+		.glyph-ch { width: 4ch; background: rgba(71, 127, 206, .18); border-bottom-color: #477fce; }
+
+		/* ---------- 对照表 ---------- */
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+
+		th, td {
+			padding: 9px 12px;
+			text-align: left;
+			border-bottom: 1px solid #e6ebe6;
+		}
+
+		th {
+			color: #5d6871;
+			font-weight: 700;
+			background: #f7f9f7;
+		}
+
+		tr:last-child td {
+			border-bottom: none;
+		}
+
+		@media (max-width: 560px) {
+			body { padding: 32px 16px; }
+			.duo { grid-template-columns: 1fr; }
+			.unit-name { flex-basis: 70px; }
+			.unit-desc { display: none; }
+			table { font-size: 12px; }
+			th, td { padding: 8px; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="eyebrow">CSS · Length Units</p>
+		<h1>CSS 里的长度单位</h1>
+		<p class="intro">写样式时，宽度、高度、边距、字号都需要长度值。本页用纯 CSS 对照演示绝对单位、相对单位与视口单位，直观感受它们之间的差别。</p>
+
+		<h2 class="section-title">一、绝对单位</h2>
+		<p class="note">屏幕开发中基本只用 <code>px</code>；其他绝对单位来自印刷领域。换算关系：<code>1in = 96px = 2.54cm = 72pt = 6pc</code>。</p>
+		<div class="panel" aria-label="绝对单位长度对照">
+			<div class="unit-row">
+				<span class="unit-name">96px</span>
+				<div class="bar-wrap"><div class="bar bar-96px"></div></div>
+				<span class="unit-desc">像素，屏幕最小显示单位</span>
+			</div>
+			<div class="unit-row">
+				<span class="unit-name">1in</span>
+				<div class="bar-wrap"><div class="bar bar-1in"></div></div>
+				<span class="unit-desc">1 英寸 = 96px</span>
+			</div>
+			<div class="unit-row">
+				<span class="unit-name">2cm</span>
+				<div class="bar-wrap"><div class="bar bar-2cm"></div></div>
+				<span class="unit-desc">2 厘米 ≈ 75.6px</span>
+			</div>
+			<div class="unit-row">
+				<span class="unit-name">6pc</span>
+				<div class="bar-wrap"><div class="bar bar-6pc"></div></div>
+				<span class="unit-desc">6 派卡 = 1in</span>
+			</div>
+			<div class="unit-row">
+				<span class="unit-name">72px</span>
+				<div class="bar-wrap"><div class="bar bar-72px"></div></div>
+				<span class="unit-desc">≈ 0.75in</span>
+			</div>
+			<div class="unit-row">
+				<span class="unit-name">36px</span>
+				<div class="bar-wrap"><div class="bar bar-36px"></div></div>
+				<span class="unit-desc">36 磅 ≈ 0.375in</span>
+			</div>
+		</div>
+
+		<h2 class="section-title">二、em 与 rem</h2>
+		<p class="note"><code>em</code> 相对<strong>父元素</strong>的字号：父级字号被逐层放大后，同为 <code>width: 8em</code> 的盒子一层比一层宽。<code>rem</code> 只相对<strong>根元素 (html)</strong> 的字号（默认 16px），无论嵌套多深、父级字号怎么变，大小始终一致。</p>
+		<div class="duo">
+			<div class="demo-box">
+				<h3>em · 跟着父级字号变</h3>
+				<div class="em-level-1">
+					<div class="em-block">12px 父级</div>
+					<div class="em-level-2">
+						<div class="em-block">16px 父级</div>
+						<div class="em-level-3">
+							<div class="em-block">22px 父级</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="demo-box">
+				<h3>rem · 只跟根字号走</h3>
+				<div class="em-level-1">
+					<div class="rem-block">12px 父级</div>
+					<div class="em-level-2">
+						<div class="rem-block">16px 父级</div>
+						<div class="em-level-3">
+							<div class="rem-block">22px 父级</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<h2 class="section-title">三、百分比 %</h2>
+		<p class="note"><code>%</code> 相对<strong>父容器</strong>的对应尺寸，是流式布局的基础。下面四条色带相对外层灰色容器的宽度。</p>
+		<div class="panel">
+			<div class="percent-track">
+				<div class="percent-bar p25">width: 25%</div>
+				<div class="percent-bar p50">width: 50%</div>
+				<div class="percent-bar p75">width: 75%</div>
+				<div class="percent-bar p100">width: 100%</div>
+			</div>
+		</div>
+
+		<h2 class="section-title">四、视口单位 vw / vh / vmin / vmax</h2>
+		<p class="note">以浏览器<strong>可视区域</strong>为参照：<code>vw</code> = 视口宽度的 1%，<code>vh</code> = 视口高度的 1%，<code>vmin</code> 取宽高中较小者，<code>vmax</code> 取较大者。拖动浏览器窗口大小，下面的方块会跟着变化。</p>
+		<div class="panel">
+			<div class="viewport-stage">
+				<div class="vw-box">width: 40vw</div>
+				<div class="vh-box">height: 8vh</div>
+				<div class="vmin-box">18vmin</div>
+			</div>
+		</div>
+
+		<h2 class="section-title">五、字体相关 ex 与 ch</h2>
+		<p class="note">以当前字体的字形尺寸为参照：<code>ex</code> ≈ 字母 x 的高度，<code>ch</code> ≈ 数字 “0” 的宽度。黄色下划线为 4ex 宽，蓝色下划线为 4ch 宽。</p>
+		<div class="panel">
+			<div class="glyph-demo">
+				<div class="glyph-row">
+					<span class="glyph-label">width: 4ex（x 高度 × 4）</span>
+					<span class="glyph-text glyph-ex">Hxox</span>
+				</div>
+				<div class="glyph-row">
+					<span class="glyph-label">width: 4ch（字符 0 宽度 × 4）</span>
+					<span class="glyph-text glyph-ch">H0000</span>
+				</div>
+			</div>
+		</div>
+
+		<h2 class="section-title">六、单位速查表</h2>
+		<div class="panel">
+			<table>
+				<thead>
+					<tr>
+						<th>类别</th>
+						<th>单位</th>
+						<th>参照对象</th>
+						<th>常见用途</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td rowspan="6">绝对单位</td>
+						<td><code>px</code></td>
+						<td>设备像素</td>
+						<td>网页尺寸的默认选择</td>
+					</tr>
+					<tr>
+						<td><code>cm / mm / in</code></td>
+						<td>物理长度</td>
+						<td>打印样式</td>
+					</tr>
+					<tr>
+						<td><code>pt</code></td>
+						<td>1/72 英寸</td>
+						<td>印刷字号</td>
+					</tr>
+					<tr>
+						<td><code>pc</code></td>
+						<td>1/6 英寸</td>
+						<td>印刷字号</td>
+					</tr>
+					<tr>
+						<td><code>Q</code></td>
+						<td>1/4 毫米</td>
+						<td>物理长度（较少用）</td>
+					</tr>
+					<tr>
+						<td><code>px</code> 换算</td>
+						<td>1in = 96px</td>
+						<td>CSS 标准换算基准</td>
+					</tr>
+					<tr>
+						<td rowspan="4">相对父级</td>
+						<td><code>%</code></td>
+						<td>父容器尺寸</td>
+						<td>流式布局、弹性宽度</td>
+					</tr>
+					<tr>
+						<td><code>em</code></td>
+						<td>父元素字号 / 元素自身（用于 border-width 等）</td>
+						<td>内边距、缩放型组件</td>
+					</tr>
+					<tr>
+						<td><code>ex</code></td>
+						<td>字体 x 高度</td>
+						<td>精细的字体排版对齐</td>
+					</tr>
+					<tr>
+						<td><code>ch</code></td>
+						<td>字符 “0” 宽度</td>
+						<td>按字符数限制行宽</td>
+					</tr>
+					<tr>
+						<td rowspan="2">相对根级</td>
+						<td><code>rem</code></td>
+						<td>根元素 (html) 字号</td>
+						<td>组件固定尺寸、响应式缩放</td>
+					</tr>
+					<tr>
+						<td><code>lh</code></td>
+						<td>元素自身 line-height</td>
+						<td>基于行高的间距</td>
+					</tr>
+					<tr>
+						<td rowspan="4">视口单位</td>
+						<td><code>vw / vh</code></td>
+						<td>视口宽 / 高的 1%</td>
+						<td>全屏区块、大标题</td>
+					</tr>
+					<tr>
+						<td><code>vmin</code></td>
+						<td>宽高中较小者的 1%</td>
+						<td>正方形自适应缩放</td>
+					</tr>
+					<tr>
+						<td><code>vmax</code></td>
+						<td>宽高中较大者的 1%</td>
+						<td>覆盖横竖屏场景</td>
+					</tr>
+					<tr>
+						<td><code>svw…lvmax</code></td>
+						<td>动态 / 小 / 大视口</td>
+						<td>移动端地址栏适配</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</main>
+</body>
+</html>

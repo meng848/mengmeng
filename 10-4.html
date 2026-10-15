@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-4 Media Query 响应式布局</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            padding: 32px 20px;
+            color: #26332f;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #f1f3ee;
+        }
+
+        main { width: min(1100px, 100%); margin: 0 auto; }
+
+        h1 { margin: 0 0 8px; font-size: 30px; }
+
+        .intro { margin: 0 0 24px; color: #68756f; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .box {
+            display: grid;
+            min-height: 130px;
+            place-items: center;
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            background: #278b83;
+            border-radius: 6px;
+        }
+
+        .box:nth-child(3n + 2) { background: #e4774e; }
+        .box:nth-child(3n) { background: #4e77bd; }
+
+        @media (min-width: 320px) and (max-width: 599px) {
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (min-width: 600px) and (max-width: 899px) {
+            .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+
+        @media (min-width: 900px) {
+            .grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>孟梦的响应式盒子</h1>
+        <p class="intro">改变视口宽度，每行显示的盒子数量随媒体查询变化。</p>
+        <section class="grid" aria-label="八个响应式盒子">
+            <div class="box">1</div>
+            <div class="box">2</div>
+            <div class="box">3</div>
+            <div class="box">4</div>
+            <div class="box">5</div>
+            <div class="box">6</div>
+            <div class="box">7</div>
+            <div class="box">8</div>
+        </section>
+    </main>
+</body>
+</html>

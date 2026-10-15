@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CSS Animation 动画练习</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			color: #202a35;
+			background: #f3f5f2;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 48px 24px;
+			background-image: radial-gradient(#cbd2cc 0.7px, transparent 0.7px);
+			background-size: 20px 20px;
+		}
+
+		main {
+			width: min(880px, 100%);
+			margin: 0 auto;
+		}
+
+		.eyebrow {
+			margin: 0 0 10px;
+			color: #66736a;
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 7vw, 54px);
+			line-height: 1.15;
+		}
+
+		.intro {
+			max-width: 600px;
+			margin: 14px 0 32px;
+			color: #5d6871;
+			line-height: 1.8;
+		}
+
+		.stage {
+			display: grid;
+			min-height: 310px;
+			place-items: center;
+			overflow: hidden;
+			background: #fff;
+			border: 1px solid #dce2dc;
+			border-radius: 8px;
+		}
+
+		.color-box {
+			display: grid;
+			width: min(210px, 62vw);
+			aspect-ratio: 1;
+			place-items: center;
+			color: #fff;
+			font-size: 20px;
+			font-weight: 700;
+			border-radius: 8px;
+			box-shadow: 0 18px 35px rgba(27, 39, 32, 0.18);
+			animation: color-cycle 8s ease-in-out infinite;
+		}
+
+		@keyframes color-cycle {
+			0%, 100% { background-color: #e85d4a; }
+			25% { background-color: #f2ae3d; }
+			50% { background-color: #43a982; }
+			75% { background-color: #477fce; }
+		}
+
+		.section-title {
+			margin: 34px 0 14px;
+			font-size: 19px;
+		}
+
+		.examples {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 14px;
+		}
+
+		.example {
+			display: grid;
+			min-height: 150px;
+			place-items: center;
+			overflow: hidden;
+			background: #fff;
+			border: 1px solid #dce2dc;
+			border-radius: 8px;
+		}
+
+		.shape {
+			width: 48px;
+			height: 48px;
+			background: #e85d4a;
+		}
+
+		.float {
+			border-radius: 50%;
+			animation: float 1.8s ease-in-out infinite alternate;
+		}
+
+		.pulse {
+			background: #477fce;
+			border-radius: 50%;
+			animation: pulse 1.2s ease-in-out infinite;
+		}
+
+		.spin {
+			background: #f2ae3d;
+			animation: spin 2.5s linear infinite;
+		}
+
+		@keyframes float {
+			to { transform: translateY(-24px); }
+		}
+
+		@keyframes pulse {
+			50% { transform: scale(1.35); opacity: 0.55; }
+		}
+
+		@keyframes spin {
+			to { transform: rotate(1turn); }
+		}
+
+		.labels {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 14px;
+			margin-top: 9px;
+			color: #5d6871;
+			font-size: 13px;
+			text-align: center;
+		}
+
+		@media (max-width: 560px) {
+			body { padding: 32px 16px; }
+			.stage { min-height: 260px; }
+			.examples, .labels { gap: 8px; }
+			.example { min-height: 125px; }
+			.labels { font-size: 12px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after {
+				animation-duration: 0.01ms !important;
+				animation-iteration-count: 1 !important;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="eyebrow">CSS · @keyframes</p>
+		<h1>让颜色动起来</h1>
+		<p class="intro">一个盒子，四种背景色。使用纯 CSS 动画让颜色随时间平滑变化，无需 JavaScript。</p>
+
+		<section class="stage" aria-label="四色背景循环动画演示">
+			<div class="color-box">Color cycle</div>
+		</section>
+
+		<h2 class="section-title">更多动画</h2>
+		<div class="examples" aria-label="其他 CSS 动画演示">
+			<div class="example"><div class="shape float"></div></div>
+			<div class="example"><div class="shape pulse"></div></div>
+			<div class="example"><div class="shape spin"></div></div>
+		</div>
+		<div class="labels" aria-hidden="true">
+			<span>上下浮动</span>
+			<span>缩放脉冲</span>
+			<span>持续旋转</span>
+		</div>
+	</main>
+</body>
+</html>
