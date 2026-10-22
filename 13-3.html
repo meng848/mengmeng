@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<title>字体图标底部导航 · 孟梦</title>
+	<link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			--meng-primary: #5b4bdb;
+			--meng-primary-dark: #4033a8;
+			--meng-muted: #64748b;
+			--meng-ink: #1f2937;
+			--meng-line: rgba(91, 75, 219, .16);
+			--meng-danger: #ff3b30;
+			--meng-surface: #ffffff;
+			--meng-nav-h: 62px;
+			color: var(--meng-ink);
+			background: #f4f2ff;
+		}
+
+		body {
+			min-width: 280px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 32px 16px calc(var(--meng-nav-h) + 24px + env(safe-area-inset-bottom));
+			background-image:
+				radial-gradient(circle at 10% 8%, rgba(255, 255, 255, .9) 0 6%, transparent 22%),
+				linear-gradient(135deg, #ebe8ff 0%, #f7f1ff 50%, #e4f7f5 100%);
+		}
+
+		main {
+			width: min(720px, 100%);
+			margin: 0 auto;
+		}
+
+		.meng_eyebrow {
+			margin: 0 0 10px;
+			color: var(--meng-primary);
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(26px, 8vw, 44px);
+			line-height: 1.2;
+		}
+
+		h1 .meng_name {
+			color: var(--meng-primary);
+		}
+
+		.meng_intro {
+			margin: 14px 0 28px;
+			color: var(--meng-muted);
+			font-size: 14px;
+			line-height: 1.85;
+		}
+
+		code {
+			padding: 2px 6px;
+			color: var(--meng-primary-dark);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: .92em;
+			background: #efeaff;
+			border-radius: 4px;
+		}
+
+		.meng_section-title {
+			margin: 32px 0 12px;
+			font-size: 18px;
+		}
+
+		.meng_note {
+			margin: -4px 0 14px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		.meng_note b {
+			color: var(--meng-primary-dark);
+		}
+
+		.meng_panel {
+			padding: 18px;
+			background: var(--meng-surface);
+			border: 1px solid var(--meng-line);
+			border-radius: 14px;
+			box-shadow: 0 12px 30px rgba(64, 51, 168, .1);
+		}
+
+		/* ---------- 图标集画廊 ---------- */
+
+		.meng_icon-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+			gap: 10px;
+		}
+
+		.meng_icon-cell {
+			display: grid;
+			place-items: center;
+			gap: 8px;
+			padding: 14px 6px 10px;
+			text-align: center;
+			background: #f8f7ff;
+			border: 1px solid var(--meng-line);
+			border-radius: 10px;
+			transition: transform .2s ease, background .2s ease, color .2s ease;
+		}
+
+		.meng_icon-cell:hover {
+			color: var(--meng-primary);
+			background: #efeaff;
+			transform: translateY(-3px);
+		}
+
+		.meng_icon-cell .iconfont {
+			font-size: 28px;
+		}
+
+		.meng_icon-name {
+			color: var(--meng-muted);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 10px;
+			word-break: break-all;
+		}
+
+		/* ---------- 代码块 ---------- */
+
+		.meng_code-block {
+			margin: 0;
+			padding: 16px 18px;
+			overflow-x: auto;
+			color: #d7e3ff;
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 12.5px;
+			line-height: 1.75;
+			background: #232b3a;
+			border-radius: 10px;
+		}
+
+		.meng_code-block .meng_c-key { color: #9db8ff; }
+		.meng_code-block .meng_c-val { color: #f6c177; }
+		.meng_code-block .meng_c-tag { color: #7fe0c3; }
+		.meng_code-block .meng_c-cmt { color: #7a8699; }
+
+		.meng_list {
+			margin: 0;
+			padding-left: 20px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 2;
+		}
+
+		.meng_list b {
+			color: var(--meng-ink);
+		}
+
+		.meng_footer {
+			margin: 32px 0 0;
+			color: var(--meng-muted);
+			text-align: center;
+			font-size: 12px;
+		}
+
+		/* ---------- 底部导航（全屏宽度 · 固定定位 · 自适应等分） ---------- */
+
+		.meng_tabbar {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 50;
+			display: flex;
+			width: 100%;
+			height: calc(var(--meng-nav-h) + env(safe-area-inset-bottom));
+			padding-bottom: env(safe-area-inset-bottom);
+			background: #ffffff;
+			border-top: 1px solid var(--meng-line);
+			box-shadow: 0 -8px 24px rgba(31, 41, 55, .1);
+		}
+
+		.meng_tab {
+			position: relative;
+			flex: 1 1 0;
+			min-width: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 4px;
+			padding: 9px 4px 8px;
+			color: var(--meng-muted);
+			text-decoration: none;
+			-webkit-tap-highlight-color: transparent;
+			transition: color .2s ease;
+		}
+
+		.meng_tab:hover,
+		.meng_tab-active {
+			color: var(--meng-primary);
+		}
+
+		.meng_tab-ico {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 26px;
+			height: 26px;
+		}
+
+		.meng_tab-ico .iconfont {
+			font-size: 24px;
+		}
+
+		/* 数字徽章：贴在图标右上角 */
+		.meng_badge {
+			position: absolute;
+			top: -6px;
+			right: -12px;
+			min-width: 15px;
+			height: 15px;
+			padding: 0 4px;
+			color: #fff;
+			font-size: 9px;
+			font-weight: 700;
+			line-height: 12px;
+			text-align: center;
+			background: var(--meng-danger);
+			border: 1.5px solid #fff;
+			border-radius: 999px;
+			z-index: 2;
+		}
+
+		/* 红点：贴在导航项右上角 */
+		.meng_dot {
+			position: absolute;
+			top: 4px;
+			right: 4px;
+			width: 9px;
+			height: 9px;
+			background: var(--meng-danger);
+			border: 1.5px solid #fff;
+			border-radius: 50%;
+			animation: meng_blink 1.6s ease-in-out infinite;
+		}
+
+		@keyframes meng_blink {
+			0%, 100% { opacity: 1; transform: scale(1); }
+			50% { opacity: .45; transform: scale(.8); }
+		}
+
+		.meng_tab-text {
+			max-width: 100%;
+			overflow: hidden;
+			font-size: 11px;
+			line-height: 1.2;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		@media (min-width: 721px) {
+			.meng_tabbar {
+				height: calc(var(--meng-nav-h) + 4px + env(safe-area-inset-bottom));
+				padding-bottom: calc(4px + env(safe-area-inset-bottom));
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="meng_eyebrow">Mobile Nav · Iconfont 字体图标</p>
+		<h1>移动端底部导航 —— <span class="meng_name">字体图标</span>版</h1>
+		<p class="meng_intro">导航图标来自 <code>font/font_5244875_7pxofbmupmt/</code> 里的 iconfont 字体包（Project id 5244875，22 个图标）。页面底部是一条<strong>固定定位、实底背景、全屏宽度</strong>的下导航：4 个导航项用 flex 等分自适应任何屏宽，每项都带<strong>数字徽章</strong>和右上角<strong>红点</strong>，并用 <code>env(safe-area-inset-bottom)</code> 避开 iPhone 底部横条。作者：<strong>孟梦</strong>。</p>
+
+		<h2 class="meng_section-title">一、iconfont 图标集（22 个）</h2>
+		<p class="meng_note">每个图标都是一个空的 <code>&lt;i&gt;</code>，靠 <code>iconfont.css</code> 里的 <code>::before { content: "\e64f" }</code> 输出字体字符。</p>
+		<section class="meng_panel" aria-label="iconfont 图标画廊">
+			<div class="meng_icon-grid">
+				<div class="meng_icon-cell"><i class="iconfont icon-shouye1"></i><span class="meng_icon-name">shouye1 · 首页</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-shouye"></i><span class="meng_icon-name">shouye · 首页</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-xiaoxi"></i><span class="meng_icon-name">xiaoxi · 消息</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-shoucang"></i><span class="meng_icon-name">shoucang · 收藏</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-gengduo"></i><span class="meng_icon-name">gengduo · 更多</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-xinxi"></i><span class="meng_icon-name">xinxi · 信息</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-yuedu"></i><span class="meng_icon-name">yuedu · 阅读</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-jifen"></i><span class="meng_icon-name">jifen · 积分</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-paizhao"></i><span class="meng_icon-name">paizhao · 拍照</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-fankui"></i><span class="meng_icon-name">fankui · 反馈</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-baocun"></i><span class="meng_icon-name">baocun · 保存</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-wancheng"></i><span class="meng_icon-name">wancheng · 完成</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-zhengque"></i><span class="meng_icon-name">zhengque · 正确</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-tianjia"></i><span class="meng_icon-name">tianjia · 添加</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-shanchu"></i><span class="meng_icon-name">shanchu · 删除</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-guanbi-1"></i><span class="meng_icon-name">guanbi-1 · 关闭</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-huhuan"></i><span class="meng_icon-name">huhuan · 互换</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-tuichu"></i><span class="meng_icon-name">tuichu · 退出</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-a-236_biaoqian-06"></i><span class="meng_icon-name">biaoqian · 标签</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-a-236_dengji-19"></i><span class="meng_icon-name">dengji · 等级</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-a-236_xitong"></i><span class="meng_icon-name">xitong · 系统</span></div>
+				<div class="meng_icon-cell"><i class="iconfont icon-a-236_xihuan"></i><span class="meng_icon-name">xihuan · 喜欢</span></div>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">二、下导航的结构</h2>
+		<p class="meng_note">4 个导航项：首页 / 消息 / 收藏 / 更多。每项 = 图标 + 文字 + 数字徽章 + 右上角红点。看一眼底部导航，再对照代码：</p>
+		<pre class="meng_code-block"><span class="meng_c-tag">&lt;nav</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_tabbar"</span><span class="meng_c-tag">&gt;</span>
+  <span class="meng_c-tag">&lt;a</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_tab meng_tab-active"</span><span class="meng_c-tag">&gt;</span>
+    <span class="meng_c-tag">&lt;span</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_tab-ico"</span><span class="meng_c-tag">&gt;</span>
+      <span class="meng_c-cmt">&lt;!-- 字体图标：一个空 i + 类名 --&gt;</span>
+      <span class="meng_c-tag">&lt;i</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"iconfont icon-shouye1"</span><span class="meng_c-tag">&gt;&lt;/i&gt;</span>
+      <span class="meng_c-tag">&lt;span</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_badge"</span><span class="meng_c-tag">&gt;</span>8<span class="meng_c-tag">&lt;/span&gt;</span>  <span class="meng_c-cmt">&lt;!-- 数字徽章 --&gt;</span>
+    <span class="meng_c-tag">&lt;/span&gt;</span>
+    <span class="meng_c-tag">&lt;span</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_tab-text"</span><span class="meng_c-tag">&gt;</span>首页<span class="meng_c-tag">&lt;/span&gt;</span>
+    <span class="meng_c-tag">&lt;span</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"meng_dot"</span><span class="meng_c-tag">&gt;&lt;/span&gt;</span>  <span class="meng_c-cmt">&lt;!-- 右上角红点 --&gt;</span>
+  <span class="meng_c-tag">&lt;/a&gt;</span>
+  <span class="meng_c-cmt">&lt;!-- 消息 36 · 收藏 12 · 更多 3，同结构重复 4 项 --&gt;</span>
+<span class="meng_c-tag">&lt;/nav&gt;</span>
+
+<span class="meng_c-cmt">/* CSS 关键三行：贴底、全屏、等分自适应 */</span>
+<span class="meng_c-key">.meng_tabbar</span> {
+  <span class="meng_c-key">position</span>: <span class="meng_c-val">fixed</span>; <span class="meng_c-key">left</span>: <span class="meng_c-val">0</span>; <span class="meng_c-key">right</span>: <span class="meng_c-val">0</span>; <span class="meng_c-key">bottom</span>: <span class="meng_c-val">0</span>;
+  <span class="meng_c-key">width</span>: <span class="meng_c-val">100%</span>;                 <span class="meng_c-cmt">/* 全屏宽度 */</span>
+  <span class="meng_c-key">padding-bottom</span>: <span class="meng_c-tag">env</span>(<span class="meng_c-val">safe-area-inset-bottom</span>);
+}
+<span class="meng_c-key">.meng_tab</span> { <span class="meng_c-key">flex</span>: <span class="meng_c-val">1 1 0</span>; <span class="meng_c-cmt">/* 4 项均分，宽度随屏幕自适应 */</span> }</pre>
+
+		<h2 class="meng_section-title">三、实现要点</h2>
+		<ul class="meng_list">
+			<li><b>全屏宽度</b>：<code>position: fixed</code> + <code>left/right: 0</code> + <code>width: 100%</code>，任何屏宽都贴满底部。</li>
+			<li><b>自适应等分</b>：导航项 <code>flex: 1 1 0</code>，320px 小屏到桌面宽屏永远四等分，不会溢出换行。</li>
+			<li><b>数字徽章</b>：<code>position: absolute; top: -6px; right: -12px;</code> 挂在图标右上角，白描边浮在导航条上。</li>
+			<li><b>红点</b>：绝对定位在导航项右上角 <code>top: 4px; right: 4px;</code>，带白色描边与呼吸闪烁动画。</li>
+			<li><b>安全区</b>：<code>viewport-fit=cover</code> + <code>env(safe-area-inset-bottom)</code>，刘海屏底部不被遮挡；正文用 <code>padding-bottom</code> 让位。</li>
+			<li><b>字体图标</b>：图标大小改 <code>font-size</code>，颜色改 <code>color</code>（激活项变主题色），与文字完全一致的操控方式。</li>
+		</ul>
+
+		<p class="meng_footer">孟梦 · 高级网页设计课堂实践 · iconfont 字体图标底部导航（font_5244875_7pxofbmupmt）</p>
+	</main>
+
+	<nav class="meng_tabbar" aria-label="底部导航">
+		<a class="meng_tab meng_tab-active" href="#">
+			<span class="meng_tab-ico">
+				<i class="iconfont icon-shouye1"></i>
+				<span class="meng_badge">8</span>
+			</span>
+			<span class="meng_tab-text">首页</span>
+			<span class="meng_dot" aria-hidden="true"></span>
+		</a>
+		<a class="meng_tab" href="#">
+			<span class="meng_tab-ico">
+				<i class="iconfont icon-xiaoxi"></i>
+				<span class="meng_badge">36</span>
+			</span>
+			<span class="meng_tab-text">消息</span>
+			<span class="meng_dot" aria-hidden="true"></span>
+		</a>
+		<a class="meng_tab" href="#">
+			<span class="meng_tab-ico">
+				<i class="iconfont icon-shoucang"></i>
+				<span class="meng_badge">12</span>
+			</span>
+			<span class="meng_tab-text">收藏</span>
+			<span class="meng_dot" aria-hidden="true"></span>
+		</a>
+		<a class="meng_tab" href="#">
+			<span class="meng_tab-ico">
+				<i class="iconfont icon-gengduo"></i>
+				<span class="meng_badge">3</span>
+			</span>
+			<span class="meng_tab-text">更多</span>
+			<span class="meng_dot" aria-hidden="true"></span>
+		</a>
+	</nav>
+
+	<script>
+		document.querySelectorAll('.meng_tab').forEach(function (meng_tab) {
+			meng_tab.addEventListener('click', function (meng_event) {
+				meng_event.preventDefault();
+				var meng_on = document.querySelector('.meng_tab-active');
+				if (meng_on) { meng_on.classList.remove('meng_tab-active'); }
+				meng_tab.classList.add('meng_tab-active');
+			});
+		});
+	</script>
+</body>
+</html>

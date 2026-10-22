@@ -39,3 +39,31 @@
 ```
 以上内容再重新上传一下，从创建skill：提交项目：使用git  commit并push当前项目到https://gitee.com/dnui_mm/gaowang 开始重新上传，
 ```
+
+## 2026-10-19-15-58
+- **模型**: opencode/mimo-v2.6-flash-free
+- **提示词**:
+```
+编写两个网页13-1.html和13-2的html，分别显示font awesome图标和lucide图标，前者采用字体图标的形式，后者使用svg的形式。下载相关cdn文件到当前目录下的cdn目录。
+```
+
+## 2026-10-19-16-38
+- **模型**: opencode/mimo-v2.6-flash-free
+- **提示词**:
+```
+根据font目录下的iconfont的图标，分别完成13-3.html和13-4.html，使用字体图标和svg的方法完成移动端的自适应宽度的固体的下导航，下导航有4项内容，导航项包括数字徽章和右上角的红点，全屏宽度。
+```
+
+## 2026-10-22-16-15
+- **模型**: Trae（自研模型）
+- **提示词**:
+```
+把我上节课的SKILL接着创建下去
+```
+
+## 2026-10-22-16-16
+- **模型**: Trae（自研模型）
+- **提示词**:
+```
+`d:\gaowang/.opencode\skills\git-commit-push-gitee\SKILL.md`根据给定文件创建trae和skill
+```

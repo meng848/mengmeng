@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Font Awesome 字体图标 · 孟梦</title>
+	<link rel="stylesheet" href="cdn/fontawesome/css/all.min.css">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			--meng-primary: #5b4bdb;
+			--meng-primary-dark: #4033a8;
+			--meng-accent: #0e9f9a;
+			--meng-warm: #e85d4a;
+			--meng-ink: #1f2937;
+			--meng-muted: #64748b;
+			--meng-surface: #ffffff;
+			--meng-line: rgba(91, 75, 219, .16);
+			--meng-radius: 14px;
+			--meng-shadow: 0 12px 30px rgba(64, 51, 168, .1);
+			color: var(--meng-ink);
+			background: #f4f2ff;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 48px 24px;
+			background-image:
+				radial-gradient(circle at 10% 8%, rgba(255, 255, 255, .9) 0 6%, transparent 22%),
+				linear-gradient(135deg, #ebe8ff 0%, #f7f1ff 50%, #e4f7f5 100%);
+		}
+
+		main {
+			width: min(960px, 100%);
+			margin: 0 auto;
+		}
+
+		.meng_eyebrow {
+			margin: 0 0 10px;
+			color: var(--meng-primary);
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 7vw, 52px);
+			line-height: 1.15;
+		}
+
+		h1 .meng_name {
+			color: var(--meng-primary);
+		}
+
+		.meng_intro {
+			max-width: 720px;
+			margin: 14px 0 32px;
+			color: var(--meng-muted);
+			line-height: 1.85;
+		}
+
+		code {
+			padding: 2px 6px;
+			color: var(--meng-primary-dark);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: .92em;
+			background: #efeaff;
+			border-radius: 4px;
+		}
+
+		.meng_section-title {
+			margin: 38px 0 12px;
+			font-size: 19px;
+		}
+
+		.meng_note {
+			margin: -4px 0 14px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		.meng_panel {
+			padding: 22px;
+			background: var(--meng-surface);
+			border: 1px solid var(--meng-line);
+			border-radius: var(--meng-radius);
+			box-shadow: var(--meng-shadow);
+		}
+
+		.meng_sub {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin: 0 0 14px;
+			font-size: 15px;
+		}
+
+		.meng_tag {
+			padding: 3px 10px;
+			color: #fff;
+			font-size: 12px;
+			font-weight: 700;
+			background: var(--meng-primary);
+			border-radius: 999px;
+		}
+
+		.meng_tag-regular {
+			background: var(--meng-accent);
+		}
+
+		.meng_tag-brand {
+			background: var(--meng-warm);
+		}
+
+		/* ---------- 图标网格 ---------- */
+
+		.meng_icon-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+			gap: 10px;
+			margin: 0 0 26px;
+		}
+
+		.meng_icon-cell {
+			display: grid;
+			place-items: center;
+			gap: 8px;
+			padding: 16px 8px 12px;
+			color: var(--meng-ink);
+			font-size: 26px;
+			text-align: center;
+			background: #f8f7ff;
+			border: 1px solid var(--meng-line);
+			border-radius: 10px;
+			transition: transform .2s ease, background .2s ease, color .2s ease;
+		}
+
+		.meng_icon-cell:hover {
+			color: var(--meng-primary);
+			background: #efeaff;
+			transform: translateY(-3px);
+		}
+
+		.meng_icon-name {
+			color: var(--meng-muted);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 11px;
+		}
+
+		/* ---------- 特性演示 ---------- */
+
+		.meng_demo-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 26px;
+			padding: 16px;
+			margin-bottom: 12px;
+			background: #f8f7ff;
+			border: 1px dashed var(--meng-line);
+			border-radius: 10px;
+		}
+
+		.meng_demo-row:last-child {
+			margin-bottom: 0;
+		}
+
+		.meng_demo-label {
+			min-width: 92px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			font-weight: 700;
+		}
+
+		.meng_fa-s { font-size: 18px; }
+		.meng_fa-m { font-size: 38px; }
+		.meng_fa-l { font-size: 64px; }
+
+		.meng_c-primary   { color: var(--meng-primary); }
+		.meng_c-accent    { color: var(--meng-accent); }
+		.meng_c-warm      { color: var(--meng-warm); }
+		.meng_c-ink       { color: var(--meng-ink); }
+
+		.meng_text-line {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 15px;
+		}
+
+		/* ---------- 代码块 ---------- */
+
+		.meng_code-block {
+			margin: 0;
+			padding: 16px 18px;
+			overflow-x: auto;
+			color: #d7e3ff;
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 13px;
+			line-height: 1.75;
+			background: #232b3a;
+			border-radius: 10px;
+		}
+
+		.meng_code-block .meng_c-key { color: #9db8ff; }
+		.meng_code-block .meng_c-val { color: #f6c177; }
+		.meng_code-block .meng_c-tag { color: #7fe0c3; }
+		.meng_code-block .meng_c-cmt { color: #7a8699; }
+
+		/* ---------- 速查表 ---------- */
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+
+		th, td {
+			padding: 10px 12px;
+			text-align: left;
+			border-bottom: 1px solid var(--meng-line);
+		}
+
+		th {
+			color: var(--meng-muted);
+			font-weight: 700;
+			background: #f6f4ff;
+		}
+
+		tr:last-child td {
+			border-bottom: none;
+		}
+
+		.meng_footer {
+			margin: 40px 0 8px;
+			color: var(--meng-muted);
+			text-align: center;
+			font-size: 13px;
+		}
+
+		@media (max-width: 560px) {
+			body { padding: 32px 16px; }
+			.meng_panel { padding: 16px; }
+			.meng_icon-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+			.meng_demo-row { gap: 16px; }
+			table { font-size: 12px; }
+			th, td { padding: 8px; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="meng_eyebrow">Icons · Font Awesome 6 Free</p>
+		<h1>字体图标 —— <span class="meng_name">Font Awesome</span> 图标集</h1>
+		<p class="meng_intro">Font Awesome 把上千个图标做成了一套<strong>网页字体</strong>：每个图标都是字体文件里的一个"字符"。本页不连接外网，全部资源都已下载到本地 —— 样式表 <code>cdn/fontawesome/css/all.min.css</code> 加上 <code>cdn/fontawesome/webfonts/</code> 下的 woff2 字体文件。图标写法只是一个 <code>&lt;i&gt;</code> 标签加类名，然后就能像文字一样改大小、改颜色。作者：<strong>孟梦</strong>。</p>
+
+		<h2 class="meng_section-title">一、三类图标：实心、线性、品牌</h2>
+		<p class="meng_note">前缀 <code>fa-solid</code>（实心，900 字重）、<code>fa-regular</code>（线性，400 字重）、<code>fa-brands</code>（品牌 logo）。每个图标都是 <code>&lt;i class="fa-solid fa-house"&gt;&lt;/i&gt;</code> 这样一行标签。</p>
+		<section class="meng_panel" aria-label="Font Awesome 实心图标">
+			<h3 class="meng_sub"><span class="meng_tag">fa-solid</span> 实心图标（solid）</h3>
+			<div class="meng_icon-grid">
+				<div class="meng_icon-cell"><i class="fa-solid fa-house"></i><span class="meng_icon-name">fa-house</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-heart"></i><span class="meng_icon-name">fa-heart</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-star"></i><span class="meng_icon-name">fa-star</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-user"></i><span class="meng_icon-name">fa-user</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-gear"></i><span class="meng_icon-name">fa-gear</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-magnifying-glass"></i><span class="meng_icon-name">fa-search</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-bell"></i><span class="meng_icon-name">fa-bell</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-envelope"></i><span class="meng_icon-name">fa-envelope</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-camera"></i><span class="meng_icon-name">fa-camera</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-music"></i><span class="meng_icon-name">fa-music</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-cart-shopping"></i><span class="meng_icon-name">fa-cart</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-bookmark"></i><span class="meng_icon-name">fa-bookmark</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-circle-check"></i><span class="meng_icon-name">fa-check</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-comment"></i><span class="meng_icon-name">fa-comment</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-calendar"></i><span class="meng_icon-name">fa-calendar</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-clock"></i><span class="meng_icon-name">fa-clock</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-play"></i><span class="meng_icon-name">fa-play</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-lock"></i><span class="meng_icon-name">fa-lock</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-cloud"></i><span class="meng_icon-name">fa-cloud</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-wifi"></i><span class="meng_icon-name">fa-wifi</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-leaf"></i><span class="meng_icon-name">fa-leaf</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-fire"></i><span class="meng_icon-name">fa-fire</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-mug-hot"></i><span class="meng_icon-name">fa-mug-hot</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-file"></i><span class="meng_icon-name">fa-file</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-image"></i><span class="meng_icon-name">fa-image</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-trash"></i><span class="meng_icon-name">fa-trash</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-pen"></i><span class="meng_icon-name">fa-pen</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-phone"></i><span class="meng_icon-name">fa-phone</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-globe"></i><span class="meng_icon-name">fa-globe</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-flag"></i><span class="meng_icon-name">fa-flag</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-download"></i><span class="meng_icon-name">fa-download</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-upload"></i><span class="meng_icon-name">fa-upload</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-link"></i><span class="meng_icon-name">fa-link</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-bolt"></i><span class="meng_icon-name">fa-bolt</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-shield"></i><span class="meng_icon-name">fa-shield</span></div>
+				<div class="meng_icon-cell"><i class="fa-solid fa-folder"></i><span class="meng_icon-name">fa-folder</span></div>
+			</div>
+
+			<h3 class="meng_sub"><span class="meng_tag meng_tag-regular">fa-regular</span> 线性图标（regular，同名不同字重）</h3>
+			<div class="meng_icon-grid">
+				<div class="meng_icon-cell"><i class="fa-regular fa-heart"></i><span class="meng_icon-name">far fa-heart</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-star"></i><span class="meng_icon-name">far fa-star</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-bell"></i><span class="meng_icon-name">far fa-bell</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-envelope"></i><span class="meng_icon-name">far fa-envelope</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-user"></i><span class="meng_icon-name">far fa-user</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-comment"></i><span class="meng_icon-name">far fa-comment</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-calendar"></i><span class="meng_icon-name">far fa-calendar</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-clock"></i><span class="meng_icon-name">far fa-clock</span></div>
+				<div class="meng_icon-cell"><i class="fa-regular fa-bookmark"></i><span class="meng_icon-name">far fa-bookmark</span></div>
+			</div>
+
+			<h3 class="meng_sub"><span class="meng_tag meng_tag-brand">fa-brands</span> 品牌图标（brands）</h3>
+			<div class="meng_icon-grid">
+				<div class="meng_icon-cell"><i class="fa-brands fa-html5"></i><span class="meng_icon-name">fa-html5</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-css3-alt"></i><span class="meng_icon-name">fa-css3</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-js"></i><span class="meng_icon-name">fa-js</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-react"></i><span class="meng_icon-name">fa-react</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-node-js"></i><span class="meng_icon-name">fa-node</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-npm"></i><span class="meng_icon-name">fa-npm</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-github"></i><span class="meng_icon-name">fa-github</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-gitlab"></i><span class="meng_icon-name">fa-gitlab</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-google"></i><span class="meng_icon-name">fa-google</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-windows"></i><span class="meng_icon-name">fa-windows</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-apple"></i><span class="meng_icon-name">fa-apple</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-android"></i><span class="meng_icon-name">fa-android</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-linux"></i><span class="meng_icon-name">fa-linux</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-twitter"></i><span class="meng_icon-name">fa-twitter</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-telegram"></i><span class="meng_icon-name">fa-telegram</span></div>
+				<div class="meng_icon-cell"><i class="fa-brands fa-youtube"></i><span class="meng_icon-name">fa-youtube</span></div>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">二、字体图标的特性：像文字一样操控</h2>
+		<p class="meng_note">既然是字体，<code>font-size</code> 控制大小、<code>color</code> 控制颜色、可以旋转、可以做动画 —— 全部用普通 CSS 就能实现，不需要切图。</p>
+		<section class="meng_panel" aria-label="字体图标特性演示">
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">大小</span>
+				<i class="fa-solid fa-heart meng_fa-s"></i>
+				<i class="fa-solid fa-heart meng_fa-m"></i>
+				<i class="fa-solid fa-heart meng_fa-l"></i>
+				<code>font-size: 18px / 38px / 64px</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">颜色</span>
+				<i class="fa-solid fa-heart meng_fa-m meng_c-primary"></i>
+				<i class="fa-solid fa-heart meng_fa-m meng_c-accent"></i>
+				<i class="fa-solid fa-heart meng_fa-m meng_c-warm"></i>
+				<i class="fa-solid fa-heart meng_fa-m meng_c-ink"></i>
+				<code>color: ...</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">旋转</span>
+				<i class="fa-solid fa-arrow-right fa-rotate-90"></i>
+				<i class="fa-solid fa-arrow-right fa-rotate-180"></i>
+				<i class="fa-solid fa-arrow-right"></i>
+				<code>fa-rotate-90 / fa-rotate-180</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">动画</span>
+				<i class="fa-solid fa-gear fa-spin fa-fw"></i>
+				<i class="fa-solid fa-heart fa-beat fa-fw"></i>
+				<code>fa-spin 旋转 / fa-beat 心跳</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">堆叠</span>
+				<span class="fa-stack fa-2x">
+					<i class="fa-solid fa-circle fa-stack-2x"></i>
+					<i class="fa-solid fa-check fa-stack-1x fa-inverse"></i>
+				</span>
+				<span class="fa-stack fa-2x">
+					<i class="fa-solid fa-circle fa-stack-2x"></i>
+					<i class="fa-solid fa-camera fa-stack-1x fa-inverse"></i>
+				</span>
+				<code>fa-stack 两层叠加出徽标</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">随文混排</span>
+				<span class="meng_text-line"><i class="fa-solid fa-bell"></i> 收到 6 条新消息</span>
+				<span class="meng_text-line"><i class="fa-solid fa-triangle-exclamation meng_c-warm"></i> 请先保存再退出</span>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">三、字体图标的原理</h2>
+		<p class="meng_note">标签本身是空的，图标来自 CSS 的 <code>::before</code> 伪元素：它把一个十六进制编码"翻译"成字体文件里的字形，浏览器把 woff2 当作字体画出来。</p>
+		<pre class="meng_code-block"><span class="meng_c-cmt">&lt;!-- HTML：一个空的 &lt;i&gt; 占位标签 --&gt;</span>
+<span class="meng_c-tag">&lt;i</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"fa-solid fa-heart"</span><span class="meng_c-tag">&gt;&lt;/i&gt;</span>
+
+<span class="meng_c-cmt">/* CSS（all.min.css 内部简化）：伪元素输出字体字符 */</span>
+<span class="meng_c-key">.fa-heart::before</span> {
+  <span class="meng_c-key">content</span>: <span class="meng_c-val">"\f004"</span>;                 <span class="meng_c-cmt">/* 图标在字体中的编码 */</span>
+  <span class="meng_c-key">font-family</span>: <span class="meng_c-val">"Font Awesome 6 Free"</span>; <span class="meng_c-cmt">/* 来自 webfonts/*.woff2 */</span>
+  <span class="meng_c-key">font-weight</span>: <span class="meng_c-val">900</span>;
+}</pre>
+
+		<h2 class="meng_section-title">四、常用写法速查表</h2>
+		<div class="meng_panel">
+			<table>
+				<thead>
+					<tr>
+						<th>写法</th>
+						<th>作用</th>
+						<th>本页示例</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><code>fa-solid / fas</code></td>
+						<td>实心图标（900 字重）</td>
+						<td>第一组图标</td>
+					</tr>
+					<tr>
+						<td><code>fa-regular / far</code></td>
+						<td>线性图标（400 字重）</td>
+						<td>第二组图标</td>
+					</tr>
+					<tr>
+						<td><code>fa-brands / fab</code></td>
+						<td>品牌 logo 图标</td>
+						<td>第三组图标</td>
+					</tr>
+					<tr>
+						<td><code>fa-2x / fa-3x</code></td>
+						<td>相对当前字号放大 2 / 3 倍</td>
+						<td>堆叠演示的 fa-stack</td>
+					</tr>
+					<tr>
+						<td><code>fa-fw</code></td>
+						<td>固定宽度，多行图标左右对齐</td>
+						<td>动画演示行</td>
+					</tr>
+					<tr>
+						<td><code>fa-rotate-90</code></td>
+						<td>旋转图标（可 -90 / 180）</td>
+						<td>旋转演示行</td>
+					</tr>
+					<tr>
+						<td><code>fa-spin / fa-beat</code></td>
+						<td>旋转动画 / 心跳动画</td>
+						<td>动画演示行</td>
+					</tr>
+					<tr>
+						<td><code>fa-stack</code></td>
+						<td>把两个图标叠成徽标</td>
+						<td>堆叠演示行</td>
+					</tr>
+					<tr>
+						<td><code>color / font-size</code></td>
+						<td>像文字一样改颜色与大小</td>
+						<td>大小、颜色演示行</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<p class="meng_footer">孟梦 · 高级网页设计课堂实践 · Font Awesome 字体图标（本地资源 cdn/fontawesome/）</p>
+	</main>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Lucide SVG 图标 · 孟梦</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			--meng-primary: #0e9f9a;
+			--meng-primary-dark: #0a6f6c;
+			--meng-accent: #5b4bdb;
+			--meng-warm: #e85d4a;
+			--meng-ink: #1f2937;
+			--meng-muted: #64748b;
+			--meng-surface: #ffffff;
+			--meng-line: rgba(14, 159, 154, .18);
+			--meng-radius: 14px;
+			--meng-shadow: 0 12px 30px rgba(10, 111, 108, .1);
+			color: var(--meng-ink);
+			background: #f2fbfa;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			padding: 48px 24px;
+			background-image:
+				radial-gradient(circle at 12% 8%, rgba(255, 255, 255, .9) 0 6%, transparent 22%),
+				linear-gradient(135deg, #e2f7f5 0%, #f3fbff 50%, #ece9ff 100%);
+		}
+
+		main {
+			width: min(960px, 100%);
+			margin: 0 auto;
+		}
+
+		.meng_eyebrow {
+			margin: 0 0 10px;
+			color: var(--meng-primary);
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 7vw, 52px);
+			line-height: 1.15;
+		}
+
+		h1 .meng_name {
+			color: var(--meng-primary);
+		}
+
+		.meng_intro {
+			max-width: 740px;
+			margin: 14px 0 32px;
+			color: var(--meng-muted);
+			line-height: 1.85;
+		}
+
+		code {
+			padding: 2px 6px;
+			color: var(--meng-primary-dark);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: .92em;
+			background: #e4f7f5;
+			border-radius: 4px;
+		}
+
+		.meng_section-title {
+			margin: 38px 0 12px;
+			font-size: 19px;
+		}
+
+		.meng_note {
+			margin: -4px 0 14px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			line-height: 1.8;
+		}
+
+		.meng_panel {
+			padding: 22px;
+			background: var(--meng-surface);
+			border: 1px solid var(--meng-line);
+			border-radius: var(--meng-radius);
+			box-shadow: var(--meng-shadow);
+		}
+
+		.meng_sub {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin: 0 0 14px;
+			font-size: 15px;
+		}
+
+		.meng_tag {
+			padding: 3px 10px;
+			color: #fff;
+			font-size: 12px;
+			font-weight: 700;
+			background: var(--meng-primary);
+			border-radius: 999px;
+		}
+
+		.meng_tag-static {
+			background: var(--meng-accent);
+		}
+
+		/* ---------- 图标网格（data-lucide 占位标签 → SVG） ---------- */
+
+		.meng_icon-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+			gap: 10px;
+			margin: 0;
+		}
+
+		.meng_icon-cell {
+			display: grid;
+			place-items: center;
+			gap: 8px;
+			padding: 16px 8px 12px;
+			color: var(--meng-ink);
+			text-align: center;
+			background: #f4fdfc;
+			border: 1px solid var(--meng-line);
+			border-radius: 10px;
+			transition: transform .2s ease, background .2s ease, color .2s ease;
+		}
+
+		.meng_icon-cell:hover {
+			color: var(--meng-primary);
+			background: #e4f7f5;
+			transform: translateY(-3px);
+		}
+
+		.meng_icon-cell svg {
+			width: 30px;
+			height: 30px;
+		}
+
+		.meng_icon-name {
+			color: var(--meng-muted);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 11px;
+		}
+
+		/* ---------- SVG 特性演示 ---------- */
+
+		.meng_demo-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 26px;
+			padding: 16px;
+			margin-bottom: 12px;
+			background: #f4fdfc;
+			border: 1px dashed var(--meng-line);
+			border-radius: 10px;
+		}
+
+		.meng_demo-row:last-child {
+			margin-bottom: 0;
+		}
+
+		.meng_demo-label {
+			min-width: 92px;
+			color: var(--meng-muted);
+			font-size: 13px;
+			font-weight: 700;
+		}
+
+		.meng_sz-s svg { width: 18px; height: 18px; }
+		.meng_sz-m svg { width: 34px; height: 34px; }
+		.meng_sz-l svg { width: 62px; height: 62px; }
+
+		.meng_line-thin svg { stroke-width: 1; }
+		.meng_line-thick svg { stroke-width: 3.5; }
+
+		.meng_c-primary { color: var(--meng-primary); }
+		.meng_c-accent  { color: var(--meng-accent); }
+		.meng_c-warm    { color: var(--meng-warm); }
+		.meng_c-ink     { color: var(--meng-ink); }
+
+		.meng_rot-45 svg { transform: rotate(45deg); }
+
+		.meng_text-line {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 15px;
+		}
+
+		.meng_text-line svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		/* ---------- 内联 SVG（不依赖任何脚本） ---------- */
+
+		.meng_static-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 14px;
+			margin-top: 14px;
+		}
+
+		.meng_static-card {
+			display: grid;
+			place-items: center;
+			gap: 8px;
+			width: 108px;
+			padding: 16px 8px 12px;
+			color: var(--meng-accent);
+			background: #f6f4ff;
+			border: 1px solid rgba(91, 75, 219, .16);
+			border-radius: 10px;
+		}
+
+		.meng_static-card span {
+			color: var(--meng-muted);
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 11px;
+		}
+
+		.meng_static-card svg {
+			width: 34px;
+			height: 34px;
+		}
+
+		/* ---------- 代码块 ---------- */
+
+		.meng_code-block {
+			margin: 0;
+			padding: 16px 18px;
+			overflow-x: auto;
+			color: #d7e3ff;
+			font-family: Consolas, "Courier New", monospace;
+			font-size: 13px;
+			line-height: 1.75;
+			background: #232b3a;
+			border-radius: 10px;
+		}
+
+		.meng_code-block .meng_c-key { color: #9db8ff; }
+		.meng_code-block .meng_c-val { color: #f6c177; }
+		.meng_code-block .meng_c-tag { color: #7fe0c3; }
+		.meng_code-block .meng_c-cmt { color: #7a8699; }
+
+		/* ---------- 对比表 ---------- */
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+
+		th, td {
+			padding: 10px 12px;
+			text-align: left;
+			border-bottom: 1px solid var(--meng-line);
+		}
+
+		th {
+			color: var(--meng-muted);
+			font-weight: 700;
+			background: #f0faf9;
+		}
+
+		tr:last-child td {
+			border-bottom: none;
+		}
+
+		.meng_footer {
+			margin: 40px 0 8px;
+			color: var(--meng-muted);
+			text-align: center;
+			font-size: 13px;
+		}
+
+		@media (max-width: 560px) {
+			body { padding: 32px 16px; }
+			.meng_panel { padding: 16px; }
+			.meng_icon-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+			.meng_demo-row { gap: 16px; }
+			table { font-size: 12px; }
+			th, td { padding: 8px; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<p class="meng_eyebrow">Icons · Lucide</p>
+		<h1>SVG 图标 —— <span class="meng_name">Lucide</span> 图标库</h1>
+		<p class="meng_intro">Lucide 是一套<strong>SVG 矢量图标</strong>库。本页的图标不是字体字符，而是一个个真正的 <code>&lt;svg&gt;</code> 图形：线条路径画出来的，能无损缩放、能用 CSS 直接改描边粗细。图标库文件已下载到本地 <code>cdn/lucide/lucide.min.js</code>，页面通过 <code>data-lucide</code> 占位标签把它渲染成 SVG。作者：<strong>孟梦</strong>。</p>
+
+		<h2 class="meng_section-title">一、常用图标</h2>
+		<p class="meng_note">HTML 里只写 <code>&lt;i data-lucide="house"&gt;&lt;/i&gt;</code>，页面底部的 <code>lucide.createIcons()</code> 会把每个占位标签替换成一段 <code>&lt;svg&gt;</code> 代码。把鼠标放到图标上看效果。</p>
+		<section class="meng_panel" aria-label="Lucide 图标网格">
+			<div class="meng_icon-grid">
+				<div class="meng_icon-cell"><i data-lucide="house"></i><span class="meng_icon-name">house</span></div>
+				<div class="meng_icon-cell"><i data-lucide="heart"></i><span class="meng_icon-name">heart</span></div>
+				<div class="meng_icon-cell"><i data-lucide="star"></i><span class="meng_icon-name">star</span></div>
+				<div class="meng_icon-cell"><i data-lucide="user"></i><span class="meng_icon-name">user</span></div>
+				<div class="meng_icon-cell"><i data-lucide="bell"></i><span class="meng_icon-name">bell</span></div>
+				<div class="meng_icon-cell"><i data-lucide="search"></i><span class="meng_icon-name">search</span></div>
+				<div class="meng_icon-cell"><i data-lucide="settings"></i><span class="meng_icon-name">settings</span></div>
+				<div class="meng_icon-cell"><i data-lucide="camera"></i><span class="meng_icon-name">camera</span></div>
+				<div class="meng_icon-cell"><i data-lucide="music"></i><span class="meng_icon-name">music</span></div>
+				<div class="meng_icon-cell"><i data-lucide="bookmark"></i><span class="meng_icon-name">bookmark</span></div>
+				<div class="meng_icon-cell"><i data-lucide="circle-check"></i><span class="meng_icon-name">circle-check</span></div>
+				<div class="meng_icon-cell"><i data-lucide="triangle-alert"></i><span class="meng_icon-name">triangle-alert</span></div>
+				<div class="meng_icon-cell"><i data-lucide="calendar"></i><span class="meng_icon-name">calendar</span></div>
+				<div class="meng_icon-cell"><i data-lucide="clock"></i><span class="meng_icon-name">clock</span></div>
+				<div class="meng_icon-cell"><i data-lucide="mail"></i><span class="meng_icon-name">mail</span></div>
+				<div class="meng_icon-cell"><i data-lucide="lock"></i><span class="meng_icon-name">lock</span></div>
+				<div class="meng_icon-cell"><i data-lucide="wifi"></i><span class="meng_icon-name">wifi</span></div>
+				<div class="meng_icon-cell"><i data-lucide="cloud"></i><span class="meng_icon-name">cloud</span></div>
+				<div class="meng_icon-cell"><i data-lucide="flame"></i><span class="meng_icon-name">flame</span></div>
+				<div class="meng_icon-cell"><i data-lucide="coffee"></i><span class="meng_icon-name">coffee</span></div>
+				<div class="meng_icon-cell"><i data-lucide="shopping-cart"></i><span class="meng_icon-name">shopping-cart</span></div>
+				<div class="meng_icon-cell"><i data-lucide="file-text"></i><span class="meng_icon-name">file-text</span></div>
+				<div class="meng_icon-cell"><i data-lucide="image"></i><span class="meng_icon-name">image</span></div>
+				<div class="meng_icon-cell"><i data-lucide="moon"></i><span class="meng_icon-name">moon</span></div>
+				<div class="meng_icon-cell"><i data-lucide="sun"></i><span class="meng_icon-name">sun</span></div>
+				<div class="meng_icon-cell"><i data-lucide="trash-2"></i><span class="meng_icon-name">trash-2</span></div>
+				<div class="meng_icon-cell"><i data-lucide="pencil"></i><span class="meng_icon-name">pencil</span></div>
+				<div class="meng_icon-cell"><i data-lucide="phone"></i><span class="meng_icon-name">phone</span></div>
+				<div class="meng_icon-cell"><i data-lucide="map-pin"></i><span class="meng_icon-name">map-pin</span></div>
+				<div class="meng_icon-cell"><i data-lucide="globe"></i><span class="meng_icon-name">globe</span></div>
+				<div class="meng_icon-cell"><i data-lucide="zap"></i><span class="meng_icon-name">zap</span></div>
+				<div class="meng_icon-cell"><i data-lucide="shield"></i><span class="meng_icon-name">shield</span></div>
+				<div class="meng_icon-cell"><i data-lucide="flag"></i><span class="meng_icon-name">flag</span></div>
+				<div class="meng_icon-cell"><i data-lucide="folder"></i><span class="meng_icon-name">folder</span></div>
+				<div class="meng_icon-cell"><i data-lucide="download"></i><span class="meng_icon-name">download</span></div>
+				<div class="meng_icon-cell"><i data-lucide="upload"></i><span class="meng_icon-name">upload</span></div>
+				<div class="meng_icon-cell"><i data-lucide="link"></i><span class="meng_icon-name">link</span></div>
+				<div class="meng_icon-cell"><i data-lucide="play"></i><span class="meng_icon-name">play</span></div>
+				<div class="meng_icon-cell"><i data-lucide="menu"></i><span class="meng_icon-name">menu</span></div>
+				<div class="meng_icon-cell"><i data-lucide="filter"></i><span class="meng_icon-name">filter</span></div>
+				<div class="meng_icon-cell"><i data-lucide="layers"></i><span class="meng_icon-name">layers</span></div>
+				<div class="meng_icon-cell"><i data-lucide="palette"></i><span class="meng_icon-name">palette</span></div>
+				<div class="meng_icon-cell"><i data-lucide="code"></i><span class="meng_icon-name">code</span></div>
+				<div class="meng_icon-cell"><i data-lucide="terminal"></i><span class="meng_icon-name">terminal</span></div>
+				<div class="meng_icon-cell"><i data-lucide="database"></i><span class="meng_icon-name">database</span></div>
+				<div class="meng_icon-cell"><i data-lucide="monitor"></i><span class="meng_icon-name">monitor</span></div>
+				<div class="meng_icon-cell"><i data-lucide="smartphone"></i><span class="meng_icon-name">smartphone</span></div>
+				<div class="meng_icon-cell"><i data-lucide="lightbulb"></i><span class="meng_icon-name">lightbulb</span></div>
+				<div class="meng_icon-cell"><i data-lucide="rocket"></i><span class="meng_icon-name">rocket</span></div>
+				<div class="meng_icon-cell"><i data-lucide="target"></i><span class="meng_icon-name">target</span></div>
+				<div class="meng_icon-cell"><i data-lucide="thumbs-up"></i><span class="meng_icon-name">thumbs-up</span></div>
+				<div class="meng_icon-cell"><i data-lucide="message-circle"></i><span class="meng_icon-name">message-circle</span></div>
+				<div class="meng_icon-cell"><i data-lucide="log-out"></i><span class="meng_icon-name">log-out</span></div>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">二、SVG 的优势：直接改图形本身</h2>
+		<p class="meng_note">Lucide 的 SVG 用 <code>stroke="currentColor"</code> 画线，所以颜色继承文字的 <code>color</code>；线宽由 <code>stroke-width</code> 决定；矢量路径让任何尺寸都清晰锐利。这些属性都能被普通 CSS 覆盖。</p>
+		<section class="meng_panel" aria-label="SVG 特性演示">
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">尺寸缩放</span>
+				<span class="meng_sz-s"><i data-lucide="star"></i></span>
+				<span class="meng_sz-m"><i data-lucide="star"></i></span>
+				<span class="meng_sz-l"><i data-lucide="star"></i></span>
+				<code>width / height: 18 → 34 → 62px</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">描边粗细</span>
+				<span class="meng_sz-m meng_line-thin"><i data-lucide="search"></i></span>
+				<span class="meng_sz-m"><i data-lucide="search"></i></span>
+				<span class="meng_sz-m meng_line-thick"><i data-lucide="search"></i></span>
+				<code>stroke-width: 1 → 2 → 3.5</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">颜色继承</span>
+				<span class="meng_sz-m meng_c-primary"><i data-lucide="heart"></i></span>
+				<span class="meng_sz-m meng_c-accent"><i data-lucide="heart"></i></span>
+				<span class="meng_sz-m meng_c-warm"><i data-lucide="heart"></i></span>
+				<span class="meng_sz-m meng_c-ink"><i data-lucide="heart"></i></span>
+				<code>color: ...（SVG 跟随文字颜色）</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">任意旋转</span>
+				<span class="meng_sz-m"><i data-lucide="arrow-right"></i></span>
+				<span class="meng_sz-m meng_rot-45"><i data-lucide="arrow-right"></i></span>
+				<span class="meng_sz-m" style="transform: rotate(90deg)"><i data-lucide="arrow-right"></i></span>
+				<code>transform: rotate(...)</code>
+			</div>
+			<div class="meng_demo-row">
+				<span class="meng_demo-label">随文混排</span>
+				<span class="meng_text-line"><i data-lucide="bell"></i> 收到 3 条新消息</span>
+				<span class="meng_text-line meng_c-warm"><i data-lucide="triangle-alert"></i> 离线状态下无法同步</span>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">三、两种使用方式</h2>
+		<p class="meng_note">方式一（本页采用）：先在 HTML 写占位标签，再用本地 <code>lucide.min.js</code> 批量替换成 SVG。方式二：把 SVG 代码直接写进 HTML，完全不需要脚本。</p>
+		<pre class="meng_code-block"><span class="meng_c-cmt">&lt;!-- 方式一：运行时渲染（本页写法） --&gt;</span>
+<span class="meng_c-tag">&lt;script</span> <span class="meng_c-key">src</span>=<span class="meng_c-val">"cdn/lucide/lucide.min.js"</span><span class="meng_c-tag">&gt;&lt;/script&gt;</span>
+<span class="meng_c-tag">&lt;script&gt;</span>lucide.createIcons();<span class="meng_c-tag">&lt;/script&gt;</span>
+<span class="meng_c-tag">&lt;i</span> <span class="meng_c-key">data-lucide</span>=<span class="meng_c-val">"heart"</span><span class="meng_c-tag">&gt;&lt;/i&gt;</span>
+<span class="meng_c-cmt">↑ 渲染后变成 ↓</span>
+<span class="meng_c-tag">&lt;svg</span> <span class="meng_c-key">xmlns</span>=<span class="meng_c-val">"http://www.w3.org/2000/svg"</span> <span class="meng_c-key">width</span>=<span class="meng_c-val">"24"</span> <span class="meng_c-key">height</span>=<span class="meng_c-val">"24"</span>
+     <span class="meng_c-key">viewBox</span>=<span class="meng_c-val">"0 0 24 24"</span> <span class="meng_c-key">fill</span>=<span class="meng_c-val">"none"</span> <span class="meng_c-key">stroke</span>=<span class="meng_c-val">"currentColor"</span>
+     <span class="meng_c-key">stroke-width</span>=<span class="meng_c-val">"2"</span> <span class="meng_c-key">stroke-linecap</span>=<span class="meng_c-val">"round"</span> <span class="meng_c-key">class</span>=<span class="meng_c-val">"lucide lucide-heart"</span><span class="meng_c-tag">&gt;</span>
+  <span class="meng_c-tag">&lt;path</span> <span class="meng_c-key">d</span>=<span class="meng_c-val">"M19 14c1.49-1.46 3-3.21 3-5.5A5.5..."</span><span class="meng_c-tag">/&gt;</span>
+<span class="meng_c-tag">&lt;/svg&gt;</span></pre>
+
+		<p class="meng_note" style="margin-top:18px;">方式二的活例子 —— 下面三个图标是直接写在 HTML 里的 SVG 源码，禁用 JS 也照样显示：</p>
+		<section class="meng_panel" aria-label="手写内联 SVG 示例">
+			<h3 class="meng_sub"><span class="meng_tag meng_tag-static">内联 SVG</span> 手写路径，不依赖脚本</h3>
+			<div class="meng_static-row">
+				<div class="meng_static-card">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle></svg>
+					<span>&lt;circle&gt;</span>
+				</div>
+				<div class="meng_static-card">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
+					<span>&lt;rect&gt;</span>
+				</div>
+				<div class="meng_static-card">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+					<span>&lt;path&gt;</span>
+				</div>
+			</div>
+		</section>
+
+		<h2 class="meng_section-title">四、字体图标 vs SVG 图标</h2>
+		<div class="meng_panel">
+			<table>
+				<thead>
+					<tr>
+						<th>对比项</th>
+						<th>字体图标（Font Awesome，见 13-1）</th>
+						<th>SVG 图标（Lucide，本页）</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>本质</td>
+						<td>字体文件里的一个字符</td>
+						<td>画出来的矢量图形</td>
+					</tr>
+					<tr>
+						<td>本页依赖</td>
+						<td>all.min.css + woff2 字体</td>
+						<td>lucide.min.js（或直接内联 SVG）</td>
+					</tr>
+					<tr>
+						<td>缩放</td>
+						<td>跟随 font-size</td>
+						<td>任意放大缩小不失真</td>
+					</tr>
+					<tr>
+						<td>颜色</td>
+						<td>color 改字体色</td>
+						<td>color 继承给 stroke</td>
+					</tr>
+					<tr>
+						<td>线宽</td>
+						<td>整套字体统一，不可单独调</td>
+						<td>可用 stroke-width 逐个调整</td>
+					</tr>
+					<tr>
+						<td>多色图标</td>
+						<td>需要堆叠技巧</td>
+						<td>可给不同 path 单独上色</td>
+					</tr>
+					<tr>
+						<td>代表库</td>
+						<td>Font Awesome、iconfont</td>
+						<td>Lucide、Feather、Heroicons</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<p class="meng_footer">孟梦 · 高级网页设计课堂实践 · Lucide SVG 图标（本地资源 cdn/lucide/）</p>
+	</main>
+	<script src="cdn/lucide/lucide.min.js"></script>
+	<script>lucide.createIcons();</script>
+</body>
+</html>
