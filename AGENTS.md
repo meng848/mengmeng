@@ -1,7 +1,15 @@
 # AGENTS.md
 
 ## 项目规则 (user-mandated, always apply)
-- **命名前缀**: 所有新的 CSS 类名、id 名、JS 变量名必须以 `meng_` 开头（如 `meng_card`、`meng_hero`）。既有页面 (`index.html`、`11-1.html` 等) 是加规则前创建的，不要为套规则而批量重命名。
+- **命名前缀**: 所有新的 CSS 类名、id 名、JS 变量名必须以 `mm_` 开头（如 `mm_card`、`mm_hero`、`mm_btn`）。既有页面（`index.html`、`11-1.html`–`14-1.html` 等）在本规则生效前使用的是 `meng_` 前缀，不要为套规则而批量重命名旧文件；新建或重构时一律使用 `mm_`。
+- **页面头部注释**: 每个 HTML 页面的 `<head>` 内、`<meta charset>` 之后必须紧跟一条 HTML 注释，格式固定为：
+  ```html
+  <!-- 姓名：孟梦，日期：2026-10-22，功能名称：页面功能简述 -->
+  ```
+  日期以页面创建/主要修改日期为准；功能名称用一句话说清该页面做什么。
+- **技术栈约束**: 全部使用**原生 HTML + CSS + JavaScript**（ES6+ 语法可），**不使用任何第三方库/框架**，**不使用 CDN**（包括 Font Awesome、Bootstrap、Lodash、Vue、React 等）。内联 `<style>` 和 `<script>` 即可，不引外部文件。
+- **图标统一用 iconfont**: 所有页面需要图标时，从本地 `font/` 目录引用 iconfont（`font/font_5244875_7pxofbmupmt/iconfont.css` + `iconfont.ttf/woff/woff2`），用 `<i class="iconfont icon-xxx"></i>` 或 `<svg><use xlink:href="#icon-xxx"></use></svg>`，不再新建 Font Awesome / Lucide 等第三方图标目录。
+- **数据请求**: 需从服务器获取数据时，统一使用原生 `fetch()` API，不要用 `XMLHttpRequest` 或 jQuery `$.ajax`。
 - **提示词留痕**: 每次执行用户提示词**之前**，先以**追加**方式写入 `meng_prompt.md`（绝不覆盖/清空已有内容），每条记录包含三部分：时间（格式 `yyyy-mm-dd-hh-mm`）、使用的模型、提示词原文。格式见 `meng_prompt.md` 现有条目。
 - **新页面必须入首页**: 每次新建 HTML 文件后，必须在 `index.html` 的作品网格中加一张 `<article class="card">` 超链接卡片（中文文件名的 href 要百分号编码），并把计数徽章 `共 N 个页面` +1。此规则适用于所有新 HTML，即使提示词没要求。
 
