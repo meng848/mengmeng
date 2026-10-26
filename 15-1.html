@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-26，功能名称：数7游戏 - 100个盒子按规则显示数字或空盒 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-1 · 数7游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #be123c 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #1f2937;
+        }
+        .mm_container {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+        .mm_back {
+            display: inline-block;
+            margin-bottom: 14px;
+            color: #fff;
+            text-decoration: none;
+            opacity: .85;
+            font-size: .95rem;
+        }
+        .mm_back:hover { opacity: 1; text-decoration: underline; }
+        header.mm_header {
+            text-align: center;
+            color: #fff;
+            padding: 10px 0 26px;
+        }
+        header.mm_header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        header.mm_header p { opacity: .9; font-size: 1rem; line-height: 1.8; }
+        .mm_author {
+            display: inline-block;
+            background: rgba(255,255,255,.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: .9rem;
+        }
+
+        .mm_grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+        }
+
+        /* 普通盒子：显示内部数字 */
+        .mm_box {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            background: #f0f9ff;
+            border: 2px solid #38bdf8;
+            color: #0369a1;
+            font-family: Consolas, Monaco, monospace;
+            transition: transform .15s;
+        }
+        .mm_box:hover { transform: scale(1.08); }
+
+        /* 命中规则的空盒子：有虚线边框，不显示数字，内部显示 "过" */
+        .mm_box.mmm_hit {
+            background: #fee2e2;
+            border: 2px dashed #dc2626;
+            color: #dc2626;
+            font-size: 1.2rem;
+        }
+
+        .mm_legend {
+            background: rgba(255,255,255,.95);
+            border-radius: 14px;
+            padding: 18px 24px;
+            margin-top: 22px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.15);
+        }
+        .mm_legend h2 {
+            font-size: 1.1rem;
+            color: #be123c;
+            margin-bottom: 12px;
+        }
+        .mm_legend ul {
+            list-style: none;
+            line-height: 2;
+            font-size: .92rem;
+            color: #374151;
+        }
+        .mm_legend li::before {
+            content: "🎯";
+            margin-right: 8px;
+        }
+        .mm_legend code {
+            background: #fef3c7;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            color: #b45309;
+        }
+        .mm_stat {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            font-size: .88rem;
+            color: #6b7280;
+        }
+        .mm_stat strong { color: #be123c; }
+
+        @media (max-width: 600px) {
+            .mm_grid { grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 12px; }
+            .mm_box { font-size: .8rem; border-radius: 6px; }
+            .mm_box.mmm_hit { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mm_container">
+        <a href="index.html" class="mm_back">← 返回首页</a>
+
+        <header class="mm_header">
+            <h1>🎲 数 7 游 戏</h1>
+            <p>1 ~ 100 共 100 个盒子<br>
+            7 的倍数 & 末尾是 7 的数 → <strong>空盒子（过）</strong><br>
+            其余 → <strong>盒子内部显示数字</strong></p>
+            <span class="mm_author">作者：孟梦</span>
+        </header>
+
+        <div class="mm_grid" id="mm_grid"></div>
+
+        <section class="mm_legend">
+            <h2>📖 规则说明</h2>
+            <ul>
+                <li>盒子编号 <code>1 ~ 100</code>，逐个检查</li>
+                <li>满足以下<strong>任一条件</strong> → 空盒子（显示 "过"）：
+                    <br>① <code>n % 7 === 0</code>（7 的倍数，如 7、14、21、28…）
+                    <br>② <code>n % 10 === 7</code>（个位是 7，如 7、17、27、37…）
+                </li>
+                <li>两个条件都满足的数（如 <code>7、77</code>）仍然是一个空盒子</li>
+                <li>其余数字正常显示在盒子中央</li>
+            </ul>
+            <div class="mm_stat" id="mm_stat"></div>
+        </section>
+    </div>
+
+    <script>
+        // ===== 数 7 规则判断 =====
+        // 命中规则返回 true → 空盒子
+        function mm_isHit(n) {
+            return (n % 7 === 0) || (n % 10 === 7);
+        }
+
+        // ===== 渲染 100 个盒子 =====
+        function mm_render() {
+            let mm_grid = document.getElementById("mm_grid");
+            let mm_hitCount = 0;
+            let mm_hitNumbers = [];
+
+            for (let mm_i = 1; mm_i <= 100; mm_i++) {
+                let mm_box = document.createElement("div");
+                mm_box.className = "mm_box";
+
+                if (mm_isHit(mm_i)) {
+                    mm_box.classList.add("mmm_hit");
+                    mm_box.textContent = "过";
+                    mm_hitCount++;
+                    mm_hitNumbers.push(mm_i);
+                } else {
+                    mm_box.textContent = mm_i;
+                }
+                mm_grid.appendChild(mm_box);
+            }
+
+            // ===== 统计 =====
+            let mm_stat = document.getElementById("mm_stat");
+            mm_stat.innerHTML =
+                "命中规则共 <strong>" + mm_hitCount + "</strong> 个<br>" +
+                "命中的数字：<code>" + mm_hitNumbers.join("、") + "</code>";
+        }
+
+        // 页面加载完成立即渲染
+        mm_render();
+    </script>
+</body>
+</html>
