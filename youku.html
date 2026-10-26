@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-26，功能名称：优酷风格首页 - 完整 PC + 移动端自适应视频网站 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优酷 Youku · 这世界很酷</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        :root {
+            --mm-red: #FF1E32;
+            --mm-red-dark: #d5162a;
+            --mm-bg: #f5f6f8;
+            --mm-card: #fff;
+            --mm-text: #1f2937;
+            --mm-text-sub: #6b7280;
+            --mm-text-light: #9ca3af;
+            --mm-border: #e5e7eb;
+            --mm-shadow: 0 4px 20px rgba(0,0,0,.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: var(--mm-bg);
+            color: var(--mm-text);
+            min-height: 100vh;
+            padding-bottom: 72px; /* 给移动端底部导航留空间 */
+        }
+        a { color: inherit; text-decoration: none; }
+
+        /* ========== 顶部红色导航 ========== */
+        header.mm_header {
+            background: var(--mm-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(255,30,50,.3);
+        }
+        .mm_header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 58px;
+            gap: 24px;
+        }
+        .mm_logo {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+        .mm_logo i { font-size: 1.3rem; margin-right: 4px; }
+
+        /* 搜索 */
+        .mm_search {
+            flex: 1;
+            max-width: 360px;
+            position: relative;
+        }
+        .mm_search input {
+            width: 100%;
+            height: 36px;
+            border: none;
+            border-radius: 18px;
+            padding: 0 44px 0 16px;
+            background: rgba(255,255,255,.22);
+            color: #fff;
+            font-size: .88rem;
+            font-family: inherit;
+            outline: none;
+        }
+        .mm_search input::placeholder { color: rgba(255,255,255,.75); }
+        .mm_search button {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: #fff;
+            color: var(--mm-red);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 右侧按钮 */
+        .mm_header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: #fff;
+            font-size: .88rem;
+            flex-shrink: 0;
+        }
+        .mm_header-right a {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: .92;
+        }
+        .mm_header-right a:hover { opacity: 1; }
+        .mm_header-right .mm_avatar {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* ========== 频道 Tab 栏 ========== */
+        nav.mm_channels {
+            background: #fff;
+            border-bottom: 1px solid var(--mm-border);
+            position: sticky;
+            top: 58px;
+            z-index: 99;
+        }
+        .mm_channels-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 28px;
+            height: 44px;
+            align-items: center;
+            overflow-x: auto;
+        }
+        .mm_channels-inner::-webkit-scrollbar { display: none; }
+        .mm_channels-inner a {
+            font-size: .92rem;
+            color: var(--mm-text-sub);
+            position: relative;
+            white-space: nowrap;
+            padding: 4px 0;
+            transition: color .2s;
+        }
+        .mm_channels-inner a:hover { color: var(--mm-red); }
+        .mm_channels-inner a.mmm_active {
+            color: var(--mm-red);
+            font-weight: bold;
+        }
+        .mm_channels-inner a.mmm_active::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -8px;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: var(--mm-red);
+            border-radius: 2px;
+        }
+
+        /* ========== 主内容区 ========== */
+        main.mm_main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px 100px;
+        }
+
+        /* Banner 轮播 */
+        .mm_banner {
+            position: relative;
+            height: 340px;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 28px;
+            box-shadow: var(--mm-shadow);
+        }
+        .mm_banner-slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 32px;
+            color: #fff;
+            transition: opacity .5s;
+            opacity: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        .mm_banner-slide.mmm_show { opacity: 1; }
+        .mm_banner-slide.mmm_bg1 {
+            background: linear-gradient(135deg, #FF1E32 0%, #7f1d1d 60%, #1a1a2e 100%);
+        }
+        .mm_banner-slide.mmm_bg2 {
+            background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 60%, #1a1a2e 100%);
+        }
+        .mm_banner-slide.mmm_bg3 {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 60%, #1a1a2e 100%);
+        }
+        .mm_banner-slide::before {
+            content: "";
+            position: absolute;
+            top: 0; right: 0;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,.08));
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+        }
+        .mm_banner-content { position: relative; z-index: 1; max-width: 520px; }
+        .mm_banner-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.3);
+            border-radius: 4px;
+            font-size: .75rem;
+            margin-bottom: 12px;
+        }
+        .mm_banner-content h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .mm_banner-content p {
+            font-size: .95rem;
+            opacity: .9;
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+        .mm_banner-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            background: #fff;
+            color: var(--mm-red);
+            border-radius: 20px;
+            font-size: .88rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: transform .15s;
+        }
+        .mm_banner-btn:hover { transform: scale(1.05); }
+        .mm_banner-dots {
+            position: absolute;
+            bottom: 16px;
+            right: 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 2;
+        }
+        .mm_banner-dots span {
+            width: 26px; height: 4px;
+            background: rgba(255,255,255,.4);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .mm_banner-dots span.mmm_active { background: #fff; }
+
+        /* 快捷分类 */
+        .mm_quick {
+            background: var(--mm-card);
+            border-radius: 14px;
+            padding: 22px 16px;
+            margin-bottom: 28px;
+            box-shadow: var(--mm-shadow);
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+        }
+        .mm_quick-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 8px 0;
+            border-radius: 10px;
+            transition: background .2s, transform .15s;
+        }
+        .mm_quick-item:hover { background: #fef2f2; transform: translateY(-2px); }
+        .mm_quick-item i {
+            display: block;
+            font-size: 1.8rem;
+            color: var(--mm-red);
+            margin-bottom: 6px;
+        }
+        .mm_quick-item span { font-size: .82rem; color: var(--mm-text-sub); }
+
+        /* 热播榜 + 猜你喜欢 */
+        .mm_section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .mm_section-header h2 {
+            font-size: 1.25rem;
+            color: var(--mm-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mm_section-header h2::before {
+            content: "";
+            width: 4px; height: 20px;
+            background: var(--mm-red);
+            border-radius: 2px;
+        }
+        .mm_section-header a { font-size: .85rem; color: var(--mm-text-light); }
+        .mm_section-header a:hover { color: var(--mm-red); }
+
+        /* 热播榜横向列表 */
+        .mm_hot {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .mm_hot-list {
+            background: var(--mm-card);
+            border-radius: 14px;
+            padding: 18px 22px;
+            box-shadow: var(--mm-shadow);
+        }
+        .mm_hot-list ol {
+            list-style: none;
+            counter-reset: mm_rank;
+        }
+        .mm_hot-list li {
+            counter-increment: mm_rank;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--mm-border);
+            font-size: .9rem;
+            cursor: pointer;
+            transition: color .2s;
+        }
+        .mm_hot-list li:last-child { border-bottom: none; }
+        .mm_hot-list li:hover { color: var(--mm-red); }
+        .mm_hot-list li::before {
+            content: counter(mm_rank);
+            width: 22px; height: 22px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: bold;
+            color: var(--mm-text-sub);
+            flex-shrink: 0;
+        }
+        .mm_hot-list li:nth-child(1)::before { background: var(--mm-red); color: #fff; }
+        .mm_hot-list li:nth-child(2)::before { background: #f97316; color: #fff; }
+        .mm_hot-list li:nth-child(3)::before { background: #fbbf24; color: #fff; }
+        .mm_hot-list li span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mm_hot-list li small { color: var(--mm-text-light); font-size: .78rem; }
+
+        /* 猜你喜欢 视频网格 */
+        .mm_video-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .mm_video-card {
+            background: var(--mm-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--mm-shadow);
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .mm_video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,.15);
+        }
+        .mm_video-thumb {
+            height: 160px;
+            position: relative;
+            background: linear-gradient(135deg, #fca5a5, #f87171);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,.6);
+            font-size: 2.5rem;
+        }
+        .mm_video-thumb.mmm_t1 { background: linear-gradient(135deg, #fda4af, #f43f5e); }
+        .mm_video-thumb.mmm_t2 { background: linear-gradient(135deg, #fcd34d, #f59e0b); }
+        .mm_video-thumb.mmm_t3 { background: linear-gradient(135deg, #86efac, #10b981); }
+        .mm_video-thumb.mmm_t4 { background: linear-gradient(135deg, #93c5fd, #3b82f6); }
+        .mm_video-thumb.mmm_t5 { background: linear-gradient(135deg, #c4b5fd, #8b5cf6); }
+        .mm_video-thumb.mmm_t6 { background: linear-gradient(135deg, #f9a8d4, #ec4899); }
+        .mm_video-play {
+            position: absolute;
+            bottom: 8px; right: 10px;
+            width: 30px; height: 30px;
+            background: rgba(0,0,0,.5);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-size: .85rem;
+        }
+        .mm_video-duration {
+            position: absolute;
+            bottom: 8px; left: 10px;
+            background: rgba(0,0,0,.6);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: .72rem;
+        }
+        .mm_video-info { padding: 10px 14px 14px; }
+        .mm_video-title {
+            font-size: .9rem;
+            color: var(--mm-text);
+            margin-bottom: 4px;
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .mm_video-meta {
+            font-size: .76rem;
+            color: var(--mm-text-light);
+            display: flex;
+            justify-content: space-between;
+        }
+        .mm_video-meta i { font-size: .85rem; }
+
+        /* ========== 底部导航（移动端） ========== */
+        nav.mm_tabbar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            background: #fff;
+            border-top: 1px solid var(--mm-border);
+            height: 60px;
+            z-index: 100;
+        }
+        .mm_tabbar-inner {
+            display: flex;
+            height: 100%;
+        }
+        .mm_tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            font-size: .72rem;
+            color: var(--mm-text-sub);
+            cursor: pointer;
+            transition: color .2s;
+            position: relative;
+        }
+        .mm_tab-item i { font-size: 1.35rem; font-style: normal; }
+        .mm_tab-item.mmm_active { color: var(--mm-red); }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 768px) {
+            .mm_header-right .mm_user-text { display: none; }
+            .mm_banner { height: 220px; border-radius: 12px; }
+            .mm_banner-content h2 { font-size: 1.3rem; }
+            .mm_banner-content p { font-size: .82rem; }
+            .mm_quick { grid-template-columns: repeat(4, 1fr); padding: 18px 10px; }
+            .mm_hot { grid-template-columns: 1fr; }
+            .mm_video-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .mm_video-thumb { height: 110px; }
+            nav.mm_tabbar { display: flex; }
+            body { padding-bottom: 72px; }
+            .mm_header-inner { gap: 12px; padding: 0 14px; }
+            .mm_logo { font-size: 1.2rem; }
+            main.mm_main { padding: 16px 14px 80px; }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .mm_video-grid { grid-template-columns: repeat(3, 1fr); }
+            .mm_quick { grid-template-columns: repeat(6, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ 顶部红色导航 ============ -->
+    <header class="mm_header">
+        <div class="mm_header-inner">
+            <div class="mm_logo"><i class="iconfont icon-paizhao"></i>YOUKU</div>
+            <div class="mm_search">
+                <input type="text" id="mm_search_input" placeholder="搜索：庆余年、繁花、狂飙…">
+                <button onclick="mm_doSearch()" aria-label="搜索">🔍</button>
+            </div>
+            <div class="mm_header-right">
+                <a href="#" class="mm_user-text" onclick="return false"><i class="iconfont icon-jifen"></i> VIP会员</a>
+                <a href="#" class="mm_user-text" onclick="return false"><i class="iconfont icon-xinxi"></i> 消息</a>
+                <a href="#" class="mm_user-text" onclick="return false">登录</a>
+                <a href="#" class="mm_avatar" onclick="return false"><i class="iconfont icon-shouye1"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ 频道 Tab 栏 ============ -->
+    <nav class="mm_channels">
+        <div class="mm_channels-inner">
+            <a href="#" class="mmm_active" onclick="return false">首页</a>
+            <a href="#" onclick="return false">电视剧</a>
+            <a href="#" onclick="return false">电影</a>
+            <a href="#" onclick="return false">综艺</a>
+            <a href="#" onclick="return false">动漫</a>
+            <a href="#" onclick="return false">纪录片</a>
+            <a href="#" onclick="return false">少儿</a>
+            <a href="#" onclick="return false">体育</a>
+            <a href="#" onclick="return false">游戏</a>
+            <a href="#" onclick="return false">音乐</a>
+            <a href="#" onclick="return false">公开课</a>
+            <a href="#" onclick="return false">资讯</a>
+        </div>
+    </nav>
+
+    <!-- ============ 主内容 ============ -->
+    <main class="mm_main">
+
+        <!-- Banner 轮播 -->
+        <section class="mm_banner" id="mm_banner">
+            <div class="mm_banner-slide mmm_show mmm_bg1">
+                <div class="mm_banner-content">
+                    <span class="mm_banner-tag">🔥 独播大剧</span>
+                    <h2>庆余年 · 第二季</h2>
+                    <p>范闲回京，权谋再起！张若昀、李沁领衔主演，爆款续作震撼上线。</p>
+                    <button class="mm_banner-btn"><i class="iconfont icon-shouye1"></i> 立即播放</button>
+                </div>
+            </div>
+            <div class="mm_banner-slide mmm_bg2">
+                <div class="mm_banner-content">
+                    <span class="mm_banner-tag">✨ 古装传奇</span>
+                    <h2>繁花 · 王家卫</h2>
+                    <p>金宇澄茅盾文学奖同名小说改编，王家卫执导，胡歌、马伊琍、唐嫣主演。</p>
+                    <button class="mm_banner-btn"><i class="iconfont icon-shouye1"></i> 立即播放</button>
+                </div>
+            </div>
+            <div class="mm_banner-slide mmm_bg3">
+                <div class="mm_banner-content">
+                    <span class="mm_banner-tag">🚀 科幻巨制</span>
+                    <h2>三体 · 地球往事</h2>
+                    <p>刘慈欣同名小说改编，张鲁一、于和伟主演，东方科幻世界观震撼呈现。</p>
+                    <button class="mm_banner-btn"><i class="iconfont icon-shouye1"></i> 立即播放</button>
+                </div>
+            </div>
+            <div class="mm_banner-dots">
+                <span class="mmm_active" data-index="0"></span>
+                <span data-index="1"></span>
+                <span data-index="2"></span>
+            </div>
+        </section>
+
+        <!-- 快捷分类 -->
+        <section class="mm_quick">
+            <div class="mm_quick-item"><i class="iconfont icon-paizhao"></i><span>电影</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-xiangji"></i><span>电视剧</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-yuedu"></i><span>综艺</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-a-236_xitong"></i><span>动漫</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-shouye1"></i><span>纪录片</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-jifen"></i><span>少儿</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-gengduo"></i><span>体育</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-tianjia"></i><span>游戏</span></div>
+        </section>
+
+        <!-- 热播榜 -->
+        <section>
+            <div class="mm_section-header">
+                <h2>🔥 热播榜 TOP 10</h2>
+                <a href="#" onclick="return false">查看更多 →</a>
+            </div>
+            <div class="mm_hot">
+                <div class="mm_hot-list">
+                    <div style="font-weight:bold;font-size:.95rem;margin-bottom:10px;color:var(--mm-red);">📺 电视剧榜</div>
+                    <ol>
+                        <li><span>庆余年 第二季</span><small>热度 9982</small></li>
+                        <li><span>繁花</span><small>热度 9756</small></li>
+                        <li><span>狂飙</span><small>热度 9420</small></li>
+                        <li><span>三体</span><small>热度 8912</small></li>
+                        <li><span>长相思</span><small>热度 8534</small></li>
+                        <li><span>莲花楼</span><small>热度 8120</small></li>
+                        <li><span>长风渡</span><small>热度 7890</small></li>
+                        <li><span>云之羽</span><small>热度 7655</small></li>
+                        <li><span>宁安如梦</span><small>热度 7421</small></li>
+                        <li><span>一念关山</span><small>热度 7108</small></li>
+                    </ol>
+                </div>
+                <div class="mm_hot-list">
+                    <div style="font-weight:bold;font-size:.95rem;margin-bottom:10px;color:#7c3aed;">🎬 电影榜</div>
+                    <ol>
+                        <li><span>流浪地球 3</span><small>热度 9988</small></li>
+                        <li><span>封神 第二部</span><small>热度 9642</small></li>
+                        <li><span>满江红</span><small>热度 9215</small></li>
+                        <li><span>消失的她</span><small>热度 8890</small></li>
+                        <li><span>孤注一掷</span><small>热度 8623</small></li>
+                        <li><span>涉过愤怒的海</span><small>热度 8311</small></li>
+                        <li><span>我本是高山</span><small>热度 8005</small></li>
+                        <li><span>三大队</span><small>热度 7732</small></li>
+                        <li><span>金手指</span><small>热度 7480</small></li>
+                        <li><span>热辣滚烫</span><small>热度 7215</small></li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- 猜你喜欢 -->
+        <section>
+            <div class="mm_section-header">
+                <h2>✨ 猜你喜欢</h2>
+                <a href="#" onclick="return false">换一换 ↻</a>
+            </div>
+            <div class="mm_video-grid" id="mm_video_grid"></div>
+        </section>
+
+    </main>
+
+    <!-- ========== 移动端底部导航（iconfont 字体图标） ========== -->
+    <nav class="mm_tabbar">
+        <div class="mm_tabbar-inner">
+            <div class="mm_tab-item mmm_active" onclick="mm_switchTabMobile(this)">
+                <i class="iconfont icon-shouye1"></i><span>首页</span>
+            </div>
+            <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                <i class="iconfont icon-gengduo"></i><span>发现</span>
+            </div>
+            <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                <i class="iconfont icon-xiaoxi"></i><span>消息</span>
+            </div>
+            <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                <i class="iconfont icon-a-236_xihuan"></i><span>我的</span>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // ===== Banner 自动轮播 =====
+        let mm_bannerIndex = 0;
+        const mm_bannerSlides = document.querySelectorAll(".mm_banner-slide");
+        const mm_bannerDots = document.querySelectorAll(".mm_banner-dots span");
+        function mm_showBanner(n) {
+            mm_bannerSlides[mm_bannerIndex].classList.remove("mmm_show");
+            mm_bannerDots[mm_bannerIndex].classList.remove("mmm_active");
+            mm_bannerIndex = (n + mm_bannerSlides.length) % mm_bannerSlides.length;
+            mm_bannerSlides[mm_bannerIndex].classList.add("mmm_show");
+            mm_bannerDots[mm_bannerIndex].classList.add("mmm_active");
+        }
+        setInterval(() => mm_showBanner(mm_bannerIndex + 1), 3500);
+        mm_bannerDots.forEach((el, i) => {
+            el.addEventListener("click", () => mm_showBanner(i));
+        });
+
+        // ===== 频道 Tab 切换 =====
+        document.querySelectorAll(".mm_channels-inner a").forEach(a => {
+            a.addEventListener("click", e => {
+                e.preventDefault();
+                document.querySelectorAll(".mm_channels-inner a").forEach(x => x.classList.remove("mmm_active"));
+                a.classList.add("mmm_active");
+            });
+        });
+
+        // ===== 移动端底部 Tab 切换 =====
+        function mm_switchTabMobile(el) {
+            document.querySelectorAll(".mm_tab-item").forEach(x => x.classList.remove("mmm_active"));
+            el.classList.add("mmm_active");
+        }
+
+        // ===== 搜索 =====
+        function mm_doSearch() {
+            let mm_val = document.getElementById("mm_search_input").value.trim();
+            if (!mm_val) { alert("请输入要搜索的内容"); return; }
+            alert("搜索：" + mm_val + "\n（演示页面，实际需要后端接口）");
+        }
+        document.getElementById("mm_search_input").addEventListener("keydown", e => {
+            if (e.key === "Enter") mm_doSearch();
+        });
+
+        // ===== 动态生成 16 个视频卡片 =====
+        const mm_videoData = [
+            { title: "庆余年 第二季 · 第36集",     heat: "热度 9982", dur: "45:23", type: "mmm_t1" },
+            { title: "繁花 · 第12集 李李告别宝总", heat: "热度 9756", dur: "52:10", type: "mmm_t1" },
+            { title: "狂飙 · 第39集 大结局",       heat: "热度 9420", dur: "48:05", type: "mmm_t2" },
+            { title: "三体 · 第24集 黑暗森林",     heat: "热度 8912", dur: "50:00", type: "mmm_t2" },
+            { title: "长相思 · 玱玹小夭重逢",      heat: "热度 8534", dur: "46:33", type: "mmm_t3" },
+            { title: "莲花楼 · 李相夷之死",        heat: "热度 8120", dur: "44:18", type: "mmm_t3" },
+            { title: "长风渡 · 顾九思参军",        heat: "热度 7890", dur: "43:55", type: "mmm_t4" },
+            { title: "云之羽 · 虞书欣新剧",        heat: "热度 7655", dur: "47:22", type: "mmm_t4" },
+            { title: "流浪地球 3 · 预告",          heat: "热度 9988", dur: "03:28", type: "mmm_t5" },
+            { title: "封神 第二部 · 妲己重生",     heat: "热度 9642", dur: "02:55", type: "mmm_t5" },
+            { title: "爱奇艺尖叫之夜 2024",        heat: "热度 8321", dur: "01:30:00", type: "mmm_t6" },
+            { title: "脱口秀大会 第5季",           heat: "热度 7988", dur: "58:12", type: "mmm_t6" },
+            { title: "一人之下 第5季",             heat: "热度 7560", dur: "24:00", type: "mmm_t1" },
+            { title: "罗小黑战记 大电影",          heat: "热度 7320", dur: "01:38:00", type: "mmm_t2" },
+            { title: "半是蜜糖半是伤 · 重播",      heat: "热度 6998", dur: "45:12", type: "mmm_t3" },
+            { title: "优酷VIP年度片单 2024",       heat: "热度 6777", dur: "05:20", type: "mmm_t4" },
+        ];
+        const mm_playIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20" transform="translate(0,0)"/></svg>';
+        const mm_videoGrid = document.getElementById("mm_video_grid");
+        mm_videoData.forEach(v => {
+            mm_videoGrid.insertAdjacentHTML("beforeend",
+                `<div class="mm_video-card" onclick="alert('即将播放：${v.title}')">
+                    <div class="mm_video-thumb ${v.type}">▶
+                        <div class="mm_video-duration">${v.dur}</div>
+                        <div class="mm_video-play">${mm_playIcon}</div>
+                    </div>
+                    <div class="mm_video-info">
+                        <div class="mm_video-title">${v.title}</div>
+                        <div class="mm_video-meta"><span>${v.heat}</span><span>👁 ${Math.floor(Math.random()*900+100)}万</span></div>
+                    </div>
+                </div>`
+            );
+        });
+    </script>
+</body>
+</html>
