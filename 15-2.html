@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-26，功能名称：JavaScript 程序结构 - 条件语句与循环结构演示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-2 · JS 条件与循环</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            min-height: 100vh;
+            padding: 30px 20px 80px;
+            color: #1f2937;
+        }
+        .mm_container { max-width: 1000px; margin: 0 auto; }
+        .mm_back { display: inline-block; color: #fff; text-decoration: none; opacity: .85; font-size: .95rem; margin-bottom: 14px; }
+        .mm_back:hover { opacity: 1; text-decoration: underline; }
+
+        header.mm_header { text-align: center; color: #fff; padding: 10px 0 26px; }
+        header.mm_header h1 { font-size: 2.2rem; margin-bottom: 10px; letter-spacing: 2px; }
+        header.mm_header p { opacity: .88; font-size: .95rem; }
+
+        .mm_section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 26px 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        }
+        .mm_section h2 {
+            font-size: 1.2rem;
+            color: #4338ca;
+            margin-bottom: 14px;
+            padding-left: 12px;
+            border-left: 4px solid #6366f1;
+        }
+        .mm_subtitle {
+            color: #6b7280; font-size: .88rem; line-height: 1.8; margin-bottom: 14px;
+        }
+
+        .mm_block {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+        .mm_block-title {
+            font-size: .9rem;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        .mm_code {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: .82rem;
+            white-space: pre;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin-bottom: 12px;
+        }
+        .mm_code .mm_k { color: #c084fc; }
+        .mm_code .mm_s { color: #fbbf24; }
+        .mm_code .mm_c { color: #6b7280; }
+        .mm_code .mm_t { color: #22d3ee; }
+
+        .mm_btn {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .85rem;
+            font-family: inherit;
+            margin-right: 8px;
+            margin-bottom: 6px;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .mm_btn:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(99,102,241,.4); }
+
+        .mm_output {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: .82rem;
+            color: #374151;
+            min-height: 36px;
+            white-space: pre-wrap;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .mm_output strong { color: #dc2626; }
+        .mm_output.mmm_rainbow { line-height: 1.9; }
+
+        @media (max-width: 600px) {
+            header.mm_header h1 { font-size: 1.6rem; }
+            .mm_section { padding: 20px 16px; }
+            .mm_code { font-size: .75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mm_container">
+        <a href="index.html" class="mm_back">← 返回首页</a>
+
+        <header class="mm_header">
+            <h1>JavaScript 程序结构</h1>
+            <p>15-2 · 条件语句 if / switch · 循环 for / while / do-while / for...of</p>
+        </header>
+
+        <!-- ========== 一、条件语句 ========== -->
+        <section class="mm_section">
+            <h2>① 条件语句</h2>
+            <p class="mm_subtitle">条件语句根据条件真假，决定执行哪段代码。点击按钮看看效果。</p>
+
+            <!-- if / else if / else -->
+            <div class="mm_block">
+                <div class="mm_block-title">if / else if / else — 根据分数判断等级</div>
+                <div class="mm_code">
+<span class="mm_k">function</span> mm_judgeLevel(score) {
+    <span class="mm_k">if</span> (score >= 90) <span class="mm_k">return</span> <span class="mm_s">"A 优秀"</span>;
+    <span class="mm_k">else if</span> (score >= 80) <span class="mm_k">return</span> <span class="mm_s">"B 良好"</span>;
+    <span class="mm_k">else if</span> (score >= 60) <span class="mm_k">return</span> <span class="mm_s">"C 及格"</span>;
+    <span class="mm_k">else</span> <span class="mm_k">return</span> <span class="mm_s">"D 不及格"</span>;
+}</div>
+                <button class="mm_btn" onclick="mm_ifDemo()">随机生成分数 & 判断等级</button>
+                <div class="mm_output" id="mm_out_if">点击上方按钮运行 →</div>
+            </div>
+
+            <!-- switch -->
+            <div class="mm_block">
+                <div class="mm_block-title">switch — 根据星期几做不同的事</div>
+                <div class="mm_code">
+<span class="mm_k">let</span> mm_day = <span class="mm_t">new Date()</span>.getDay(); <span class="mm_c">// 0=周日,1=周一...</span>
+<span class="mm_k">switch</span> (mm_day) {
+    <span class="mm_k">case</span> 1: <span class="mm_k">return</span> <span class="mm_s">"周一：开班会"</span>;
+    <span class="mm_k">case</span> 3: <span class="mm_k">return</span> <span class="mm_s">"周三：上机实验"</span>;
+    <span class="mm_k">case</span> 5: <span class="mm_k">return</span> <span class="mm_s">"周五：提交作业"</span>;
+    <span class="mm_k">default</span>: <span class="mm_k">return</span> <span class="mm_s">"今天休息"</span>;
+}</div>
+                <button class="mm_btn" onclick="mm_switchDemo()">运行 switch</button>
+                <div class="mm_output" id="mm_out_switch">点击运行 →</div>
+            </div>
+
+            <!-- 三元运算符 -->
+            <div class="mm_block">
+                <div class="mm_block-title">三元运算符 condition ? a : b — 简写 if/else</div>
+                <div class="mm_code">
+<span class="mm_k">let</span> mm_age = 20;
+<span class="mm_k">let</span> mm_status = mm_age >= 18 ? <span class="mm_s">"成年人"</span> : <span class="mm_s">"未成年人"</span>;</div>
+                <button class="mm_btn" onclick="mm_ternaryDemo()">运行三元运算</button>
+                <div class="mm_output" id="mm_out_ternary">点击运行 →</div>
+            </div>
+        </section>
+
+        <!-- ========== 二、循环结构 ========== -->
+        <section class="mm_section">
+            <h2>② 循环结构</h2>
+            <p class="mm_subtitle">循环让一段代码重复执行。每种循环有不同的适用场景。</p>
+
+            <!-- for -->
+            <div class="mm_block">
+                <div class="mm_block-title">for 循环 — 已知循环次数时使用（打印 1~10）</div>
+                <div class="mm_code">
+<span class="mm_k">for</span> (<span class="mm_k">let</span> mm_i = 1; mm_i <= 10; mm_i++) {
+    <span class="mm_k">console</span>.log(mm_i);
+}</div>
+                <button class="mm_btn" onclick="mm_forDemo()">运行 for</button>
+                <div class="mm_output mmm_rainbow" id="mm_out_for">点击运行 →</div>
+            </div>
+
+            <!-- while -->
+            <div class="mm_block">
+                <div class="mm_block-title">while — 条件为真就继续（从 30 开始，每次 -3，直到 ≤ 0）</div>
+                <div class="mm_code">
+<span class="mm_k">let</span> mm_n = 30;
+<span class="mm_k">while</span> (mm_n > 0) {
+    mm_n = mm_n - 3;   <span class="mm_c">// 或 mm_n -= 3;</span>
+}</div>
+                <button class="mm_btn" onclick="mm_whileDemo()">运行 while</button>
+                <div class="mm_output" id="mm_out_while">点击运行 →</div>
+            </div>
+
+            <!-- do...while -->
+            <div class="mm_block">
+                <div class="mm_block-title">do...while — 至少执行一次再判断条件</div>
+                <div class="mm_code">
+<span class="mm_k">let</span> mm_count = 0;
+<span class="mm_k">do</span> {
+    mm_count++;
+    <span class="mm_k">console</span>.log(<span class="mm_s">"第 "</span> + mm_count + <span class="mm_s">" 次"</span>);
+} <span class="mm_k">while</span> (mm_count < 5);</div>
+                <button class="mm_btn" onclick="mm_dowhileDemo()">运行 do...while</button>
+                <div class="mm_output" id="mm_out_dowhile">点击运行 →</div>
+            </div>
+
+            <!-- for...of -->
+            <div class="mm_block">
+                <div class="mm_block-title">for...of — 遍历数组（ES6 推荐）</div>
+                <div class="mm_code">
+<span class="mm_k">let</span> mm_fruits = [<span class="mm_s">"苹果"</span>, <span class="mm_s">"香蕉"</span>, <span class="mm_s">"橙子"</span>, <span class="mm_s">"西瓜"</span>];
+<span class="mm_k">for</span> (<span class="mm_k">let</span> mm_fruit <span class="mm_k">of</span> mm_fruits) {
+    <span class="mm_k">console</span>.log(mm_fruit);
+}</div>
+                <button class="mm_btn" onclick="mm_forofDemo()">运行 for...of</button>
+                <div class="mm_output" id="mm_out_forof">点击运行 →</div>
+            </div>
+
+            <!-- break / continue -->
+            <div class="mm_block">
+                <div class="mm_block-title">break 跳出循环 · continue 跳过本次（打印 1~20，跳过 7 和 13，到 15 停止）</div>
+                <div class="mm_code">
+<span class="mm_k">for</span> (<span class="mm_k">let</span> mm_i = 1; mm_i <= 20; mm_i++) {
+    <span class="mm_k">if</span> (mm_i === 15) <span class="mm_k">break</span>;     <span class="mm_c">// 到 15 跳出</span>
+    <span class="mm_k">if</span> (mm_i === 7 || mm_i === 13) <span class="mm_k">continue</span>; <span class="mm_c">// 跳过 7 和 13</span>
+    <span class="mm_k">console</span>.log(mm_i);
+}</div>
+                <button class="mm_btn" onclick="mm_breakDemo()">运行 break/continue</button>
+                <div class="mm_output" id="mm_out_break">点击运行 →</div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // ===== ① 条件语句 =====
+        function mm_judgeLevel(score) {
+            if (score >= 90) return "A 优秀";
+            else if (score >= 80) return "B 良好";
+            else if (score >= 60) return "C 及格";
+            else return "D 不及格";
+        }
+        function mm_ifDemo() {
+            let mm_score = Math.floor(Math.random() * 100) + 1;
+            let mm_level = mm_judgeLevel(mm_score);
+            document.getElementById("mm_out_if").innerHTML =
+                '随机分数：<strong>' + mm_score + '</strong><br>' +
+                '等级判断结果：<strong>' + mm_level + '</strong>';
+        }
+
+        function mm_switchDemo() {
+            let mm_day = new Date().getDay();
+            let mm_dayNames = ["周日","周一","周二","周三","周四","周五","周六"];
+            let mm_plan;
+            switch (mm_day) {
+                case 1: mm_plan = "周一：开班会 📋"; break;
+                case 3: mm_plan = "周三：上机实验 💻"; break;
+                case 5: mm_plan = "周五：提交作业 ✅"; break;
+                case 0: mm_plan = "周日：休息一下 ☕"; break;
+                case 6: mm_plan = "周六：出去玩 🎮"; break;
+                default: mm_plan = "今天正常上课 📖";
+            }
+            document.getElementById("mm_out_switch").innerHTML =
+                '今天是 <strong>' + mm_dayNames[mm_day] + '</strong><br>安排：<strong>' + mm_plan + '</strong>';
+        }
+
+        function mm_ternaryDemo() {
+            let mm_age = Math.floor(Math.random() * 50) + 10;
+            let mm_status = mm_age >= 18 ? "成年人 👤" : "未成年人 👶";
+            document.getElementById("mm_out_ternary").innerHTML =
+                '年龄：<strong>' + mm_age + '</strong> → ' +
+                '判断：<strong>' + mm_status + '</strong><br>' +
+                '代码：age >= 18 ? "成年人" : "未成年人"';
+        }
+
+        // ===== ② 循环结构 =====
+        function mm_forDemo() {
+            let mm_res = "";
+            for (let mm_i = 1; mm_i <= 10; mm_i++) {
+                mm_res += mm_i + " ";
+            }
+            document.getElementById("mm_out_for").innerHTML =
+                'for (let i=1; i<=10; i++) 结果：<br><strong>' + mm_res.trim() + '</strong>';
+        }
+
+        function mm_whileDemo() {
+            let mm_n = 30;
+            let mm_steps = "";
+            while (mm_n > 0) {
+                mm_n = mm_n - 3;
+                mm_steps += mm_n + " ";
+            }
+            document.getElementById("mm_out_while").innerHTML =
+                '从 30 开始，每次 -3，直到 ≤ 0：<br><strong>' + mm_steps.trim() + '</strong>';
+        }
+
+        function mm_dowhileDemo() {
+            let mm_count = 0;
+            let mm_log = "";
+            do {
+                mm_count++;
+                mm_log += "第 " + mm_count + " 次 ✓  ";
+            } while (mm_count < 5);
+            document.getElementById("mm_out_dowhile").innerHTML =
+                'do...while 至少执行一次：<br><strong>' + mm_log + '</strong>';
+        }
+
+        function mm_forofDemo() {
+            let mm_fruits = ["🍎 苹果", "🍌 香蕉", "🍊 橙子", "🍉 西瓜", "🍇 葡萄", "🍓 草莓"];
+            let mm_log = "";
+            for (let mm_fruit of mm_fruits) {
+                mm_log += mm_fruit + "　";
+            }
+            document.getElementById("mm_out_forof").innerHTML =
+                'for...of 遍历数组：<br><strong>' + mm_log + '</strong>';
+        }
+
+        function mm_breakDemo() {
+            let mm_log = "";
+            for (let mm_i = 1; mm_i <= 20; mm_i++) {
+                if (mm_i === 15) break;
+                if (mm_i === 7 || mm_i === 13) continue;
+                mm_log += mm_i + " ";
+            }
+            document.getElementById("mm_out_break").innerHTML =
+                '结果（跳过 7、13，到 15 停止）：<br><strong>' + mm_log.trim() + '</strong><br>' +
+                '说明：break = 直接跳出循环；continue = 跳过本次继续下一次';
+        }
+    </script>
+</body>
+</html>
