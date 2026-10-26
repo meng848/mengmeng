@@ -429,6 +429,20 @@
         }
         .mm_video-meta i { font-size: .85rem; }
 
+        /* ========== 页脚 ========== */
+        footer.mm_footer {
+            background: #fff;
+            border-top: 1px solid var(--mm-border);
+            padding: 30px 20px;
+            margin-top: 40px;
+            text-align: center;
+            color: var(--mm-text-light);
+            font-size: .82rem;
+            line-height: 2;
+        }
+        footer.mm_footer a { color: var(--mm-text-sub); margin: 0 8px; }
+        footer.mm_footer a:hover { color: var(--mm-red); }
+
         /* ========== 底部导航（移动端） ========== */
         nav.mm_tabbar {
             display: none;
@@ -521,6 +535,7 @@
 
     <!-- ============ 主内容 ============ -->
     <main class="mm_main">
+        <a href="index.html" style="display:inline-block;margin-bottom:14px;color:var(--mm-text-sub);font-size:.88rem;">← 返回首页</a>
 
         <!-- Banner 轮播 -->
         <section class="mm_banner" id="mm_banner">
@@ -558,7 +573,7 @@
         <!-- 快捷分类 -->
         <section class="mm_quick">
             <div class="mm_quick-item"><i class="iconfont icon-paizhao"></i><span>电影</span></div>
-            <div class="mm_quick-item"><i class="iconfont icon-xiangji"></i><span>电视剧</span></div>
+            <div class="mm_quick-item"><i class="iconfont icon-wancheng"></i><span>电视剧</span></div>
             <div class="mm_quick-item"><i class="iconfont icon-yuedu"></i><span>综艺</span></div>
             <div class="mm_quick-item"><i class="iconfont icon-a-236_xitong"></i><span>动漫</span></div>
             <div class="mm_quick-item"><i class="iconfont icon-shouye1"></i><span>纪录片</span></div>
@@ -611,12 +626,27 @@
         <section>
             <div class="mm_section-header">
                 <h2>✨ 猜你喜欢</h2>
-                <a href="#" onclick="return false">换一换 ↻</a>
+                <a href="javascript:void(0)" onclick="mm_shuffleVideos()">换一换 ↻</a>
             </div>
             <div class="mm_video-grid" id="mm_video_grid"></div>
         </section>
 
     </main>
+
+    <!-- ============ 页脚 ============ -->
+    <footer class="mm_footer">
+        <div>
+            <a href="#" onclick="return false">关于优酷</a>|
+            <a href="#" onclick="return false">联系我们</a>|
+            <a href="#" onclick="return false">加入我们</a>|
+            <a href="#" onclick="return false">合作伙伴</a>|
+            <a href="#" onclick="return false">友情链接</a>|
+            <a href="#" onclick="return false">隐私政策</a>|
+            <a href="#" onclick="return false">服务条款</a>
+        </div>
+        <div style="margin-top:8px;">© 2026 YOUKU 优酷 · 孟梦 课堂练习作品 · 仅供学习演示</div>
+        <div>京ICP备00000000号-1 | 京公网安备 00000000000000号</div>
+    </footer>
 
     <!-- ========== 移动端底部导航（iconfont 字体图标） ========== -->
     <nav class="mm_tabbar">
@@ -713,6 +743,31 @@
                 </div>`
             );
         });
+
+        // ===== 换一换：打乱视频顺序重新渲染 =====
+        let mm_videoBackup = [...mm_videoData];
+        function mm_shuffleVideos() {
+            // Fisher–Yates 洗牌
+            for (let mm_i = mm_videoData.length - 1; mm_i > 0; mm_i--) {
+                let mm_j = Math.floor(Math.random() * (mm_i + 1));
+                [mm_videoData[mm_i], mm_videoData[mm_j]] = [mm_videoData[mm_j], mm_videoData[mm_i]];
+            }
+            mm_videoGrid.innerHTML = "";
+            mm_videoData.forEach(v => {
+                mm_videoGrid.insertAdjacentHTML("beforeend",
+                    `<div class="mm_video-card" onclick="alert('即将播放：${v.title}')">
+                        <div class="mm_video-thumb ${v.type}">▶
+                            <div class="mm_video-duration">${v.dur}</div>
+                            <div class="mm_video-play">${mm_playIcon}</div>
+                        </div>
+                        <div class="mm_video-info">
+                            <div class="mm_video-title">${v.title}</div>
+                            <div class="mm_video-meta"><span>${v.heat}</span><span>👁 ${Math.floor(Math.random()*900+100)}万</span></div>
+                        </div>
+                    </div>`
+                );
+            });
+        }
     </script>
 </body>
 </html>
