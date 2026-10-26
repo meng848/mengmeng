@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-26，功能名称：优酷风格实验报告 - iconfont 字体图标与 SVG 自适应宽度下导航 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>meng2 · 优酷下导航实验</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+            padding: 30px 20px 60px;
+            color: #1f2937;
+        }
+        .mm_wrap { max-width: 1100px; margin: 0 auto; }
+        .mm_back {
+            display: inline-block;
+            color: #ef4444;
+            text-decoration: none;
+            font-size: .95rem;
+            margin-bottom: 16px;
+        }
+        .mm_back:hover { text-decoration: underline; }
+
+        /* ===== 实验报告标题栏 ===== */
+        .mm_report-header {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.06);
+            border-left: 5px solid #FF1E32;
+        }
+        .mm_report-header h1 {
+            font-size: 1.6rem;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        .mm_report-header h1 span { color: #FF1E32; }
+        .mm_report-info {
+            color: #6b7280;
+            font-size: .9rem;
+            line-height: 2;
+        }
+        .mm_report-info code {
+            background: #fef3c7;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            color: #b45309;
+        }
+
+        /* ===== 实验任务区 ===== */
+        .mm_section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 26px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.06);
+        }
+        .mm_section h2 {
+            font-size: 1.2rem;
+            color: #374151;
+            margin-bottom: 14px;
+            padding-left: 12px;
+            border-left: 4px solid #FF1E32;
+        }
+        .mm_section ul { list-style: none; line-height: 2; color: #4b5563; font-size: .92rem; }
+        .mm_section ul li::before { content: "✅ "; margin-right: 4px; }
+
+        /* ===== 预览容器 ===== */
+        .mm_preview-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .mm_preview-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .mm_preview-title small {
+            display: block;
+            font-weight: normal;
+            color: #9ca3af;
+            font-size: .82rem;
+            margin-top: 3px;
+        }
+
+        /* ===== 手机外壳 ===== */
+        .mm_phone {
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.2);
+            overflow: hidden;
+            border: 8px solid #1f2937;
+            position: relative;
+        }
+        .mm_phone-notch {
+            height: 22px;
+            background: #1f2937;
+        }
+
+        /* ===== 优酷手机页面 ===== */
+        .mm_youku-page {
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            background: #f9fafb;
+        }
+
+        /* 顶部红色导航 */
+        .mm_yk-top {
+            background: #FF1E32;
+            color: #fff;
+            padding: 14px 16px 12px;
+        }
+        .mm_yk-logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+        .mm_yk-logo i {
+            font-size: 1.1rem;
+            margin-right: 4px;
+        }
+        .mm_yk-search {
+            margin-top: 10px;
+            background: rgba(255,255,255,.22);
+            border-radius: 18px;
+            padding: 7px 14px;
+            font-size: .82rem;
+            color: rgba(255,255,255,.9);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mm_yk-search i { font-size: .95rem; }
+
+        /* Banner */
+        .mm_yk-banner {
+            height: 120px;
+            margin: 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #FF1E32, #7f1d1d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* 分类频道 */
+        .mm_yk-channels {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            padding: 0 12px;
+            text-align: center;
+            font-size: .72rem;
+            color: #374151;
+        }
+        .mm_yk-channels div i {
+            display: block;
+            font-size: 1.4rem;
+            color: #FF1E32;
+            margin-bottom: 3px;
+        }
+
+        /* 视频列表 */
+        .mm_yk-videos {
+            flex: 1;
+            padding: 14px 12px 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .mm_yk-video-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        }
+        .mm_yk-video-thumb {
+            height: 80px;
+            background: linear-gradient(135deg, #fca5a5, #fecaca);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 2rem;
+        }
+        .mm_yk-video-thumb:nth-child(2n) { background: linear-gradient(135deg, #fda4af, #fb7185); }
+        .mm_yk-video-thumb:nth-child(3n) { background: linear-gradient(135deg, #f59e0b, #f97316); }
+        .mm_yk-video-title {
+            padding: 6px 8px;
+            font-size: .75rem;
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        /* ===== iconfont 字体图标下导航 ===== */
+        .mm_yk-tabbar {
+            display: flex;
+            width: 100%;
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 8px 0 10px;
+        }
+        .mm_yk-tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: .72rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: color .2s;
+        }
+        .mm_yk-tab-item i {
+            font-size: 1.4rem;
+            font-style: normal;
+        }
+        .mm_yk-tab-item.mmm_active { color: #FF1E32; }
+
+        /* ===== SVG symbol 下导航（同一套优酷页面不同实现） ===== */
+        .mm_yk-tabbar-svg .mm_yk-tab-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* ===== 代码说明区 ===== */
+        .mm_code-block {
+            background: #1f2937;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-top: 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: .82rem;
+            color: #d1d5db;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.6;
+        }
+        .mm_code-block .mm_keyword { color: #c084fc; }
+        .mm_code-block .mm_string { color: #fbbf24; }
+        .mm_code-block .mm_comment { color: #6b7280; }
+        .mm_code-block .mm_tag { color: #22d3ee; }
+
+        /* ===== 实验考核表 ===== */
+        table.mm_score {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: .9rem;
+        }
+        table.mm_score th, table.mm_score td {
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        table.mm_score th { background: #fef2f2; color: #991b1b; }
+
+        @media (max-width: 768px) {
+            .mm_preview-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mm_wrap">
+        <a href="index.html" class="mm_back">← 返回首页</a>
+
+        <!-- ============ 一、实验报告头部 ============ -->
+        <section class="mm_report-header">
+            <h1>前端图像解决方案实验 <span>· 优酷下导航</span></h1>
+            <div class="mm_report-info">
+                姓名：<strong>孟梦</strong> &nbsp;|&nbsp; 三级项目选题：<strong>优酷 Youku</strong><br>
+                实验方案：① iconfont 字体图标实现下导航 &nbsp; ② SVG symbol 实现同款下导航<br>
+                核心技术：<code>iconfont.css</code> / <code>svg + symbol + use</code> / 纯 CSS Flex 自适应宽度
+            </div>
+        </section>
+
+        <!-- ============ 二、实验目的与任务 ============ -->
+        <section class="mm_section">
+            <h2>🎯 实验目的 & 任务</h2>
+            <ul>
+                <li>掌握前端图像解决方案：字体图标 + SVG 矢量图</li>
+                <li>使用 iconfont.com 下载字体图标文件并本地引用</li>
+                <li>完成优酷移动端自适应宽度下导航（4 项：首页 / 发现 / 消息 / 我的）</li>
+                <li>同一导航分别用 <strong>字体图标</strong> 和 <strong>SVG symbol</strong> 两种技术实现</li>
+                <li>用 CSS 修饰图标大小与颜色（激活态变红）</li>
+            </ul>
+        </section>
+
+        <!-- ============ 三、两种方案的优酷手机预览 ============ -->
+        <section class="mm_section">
+            <h2>📱 实验效果对比（左侧 = 字体图标 / 右侧 = SVG）</h2>
+            <div class="mm_preview-row">
+
+                <!-- 方案一：iconfont 字体图标 -->
+                <div>
+                    <div class="mm_preview-title">
+                        方案 A · iconfont 字体图标
+                        <small>通过 &lt;i class="iconfont icon-xxx"&gt; 渲染</small>
+                    </div>
+                    <div class="mm_phone">
+                        <div class="mm_phone-notch"></div>
+                        <div class="mm_youku-page">
+                            <div class="mm_yk-top">
+                                <div class="mm_yk-logo"><i class="iconfont icon-shouye1"></i> YOUKU</div>
+                                <div class="mm_yk-search"><i class="iconfont icon-xinxi"></i> 搜索：庆余年、繁花、狂飙…</div>
+                            </div>
+                            <div class="mm_yk-banner">🔥 热播推荐</div>
+                            <div class="mm_yk-channels">
+                                <div><i class="iconfont icon-shouye1"></i>首页</div>
+                                <div><i class="iconfont icon-gengduo"></i>电视剧</div>
+                                <div><i class="iconfont icon-paizhao"></i>电影</div>
+                                <div><i class="iconfont icon-yuedu"></i>综艺</div>
+                                <div><i class="iconfont icon-shoucang"></i>动漫</div>
+                            </div>
+                            <div class="mm_yk-videos">
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">庆余年 第二季</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">繁花 · 王家卫</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">狂飙 · 扫黑风暴</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">三体 · 科幻巨制</div>
+                                </div>
+                            </div>
+
+                            <!-- ===== iconfont 字体图标下导航 ===== -->
+                            <nav class="mm_yk-tabbar" id="mm_tabbar_font">
+                                <div class="mm_yk-tab-item mmm_active" data-tab="home" onclick="mm_switchTab(this,'font')">
+                                    <i class="iconfont icon-shouye1"></i><span>首页</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="find" onclick="mm_switchTab(this,'font')">
+                                    <i class="iconfont icon-gengduo"></i><span>发现</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="msg" onclick="mm_switchTab(this,'font')">
+                                    <i class="iconfont icon-xiaoxi"></i><span>消息</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="me" onclick="mm_switchTab(this,'font')">
+                                    <i class="iconfont icon-shoucang"></i><span>我的</span>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 方案二：SVG symbol -->
+                <div>
+                    <div class="mm_preview-title">
+                        方案 B · SVG symbol
+                        <small>通过 &lt;svg&gt;&lt;use xlink:href="#icon-xxx"&gt; 渲染</small>
+                    </div>
+                    <div class="mm_phone">
+                        <div class="mm_phone-notch"></div>
+                        <div class="mm_youku-page">
+                            <div class="mm_yk-top">
+                                <div class="mm_yk-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5L4 6l8-4 8 4-8 3.5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> YOUKU</div>
+                                <div class="mm_yk-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 搜索：庆余年、繁花、狂飙…</div>
+                            </div>
+                            <div class="mm_yk-banner">🔥 热播推荐</div>
+                            <div class="mm_yk-channels">
+                                <div><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>首页</div>
+                                <div><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>电视剧</div>
+                                <div><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="6" width="18" height="12" rx="2"/><polygon points="10,9 16,12 10,15"/></svg>电影</div>
+                                <div><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>综艺</div>
+                                <div><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>动漫</div>
+                            </div>
+                            <div class="mm_yk-videos">
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">庆余年 第二季</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">繁花 · 王家卫</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">狂飙 · 扫黑风暴</div>
+                                </div>
+                                <div class="mm_yk-video-card">
+                                    <div class="mm_yk-video-thumb">▶</div>
+                                    <div class="mm_yk-video-title">三体 · 科幻巨制</div>
+                                </div>
+                            </div>
+
+                            <!-- ===== SVG symbol 下导航 ===== -->
+                            <nav class="mm_yk-tabbar mm_yk-tabbar-svg" id="mm_tabbar_svg">
+                                <div class="mm_yk-tab-item mmm_active" data-tab="home" onclick="mm_switchTab(this,'svg')">
+                                    <svg><use xlink:href="#mm_ico_home"></use></svg><span>首页</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="find" onclick="mm_switchTab(this,'svg')">
+                                    <svg><use xlink:href="#mm_ico_find"></use></svg><span>发现</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="msg" onclick="mm_switchTab(this,'svg')">
+                                    <svg><use xlink:href="#mm_ico_msg"></use></svg><span>消息</span>
+                                </div>
+                                <div class="mm_yk-tab-item" data-tab="me" onclick="mm_switchTab(this,'svg')">
+                                    <svg><use xlink:href="#mm_ico_me"></use></svg><span>我的</span>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ 四、核心代码 ============ -->
+        <section class="mm_section">
+            <h2>💻 核心代码片段</h2>
+
+            <p style="margin-top:10px;font-size:.88rem;color:#4b5563;">① 字体图标方案（HTML）</p>
+            <div class="mm_code-block"><span class="mm_comment"><!-- 引入本地 iconfont 字体 --></span>
+<span class="mm_tag">&lt;link</span> <span class="mm_keyword">rel</span>=<span class="mm_string">"stylesheet"</span> <span class="mm_keyword">href</span>=<span class="mm_string">"font/font_5244875_7pxofbmupmt/iconfont.css"</span><span class="mm_tag">&gt;</span>
+
+<span class="mm_comment"><!-- 下导航 --></span>
+<span class="mm_tag">&lt;nav</span> <span class="mm_keyword">class</span>=<span class="mm_string">"mm_yk-tabbar"</span><span class="mm_tag">&gt;</span>
+  <span class="mm_tag">&lt;div</span> <span class="mm_keyword">class</span>=<span class="mm_string">"mm_yk-tab-item mmm_active"</span><span class="mm_tag">&gt;</span>
+    <span class="mm_tag">&lt;i</span> <span class="mm_keyword">class</span>=<span class="mm_string">"iconfont icon-shouye1"</span><span class="mm_tag">&gt;</span><span class="mm_tag">&lt;/i&gt;</span><span class="mm_tag">&lt;span&gt;</span>首页<span class="mm_tag">&lt;/span&gt;</span>
+  <span class="mm_tag">&lt;/div&gt;</span>
+  <span class="mm_comment"><!-- 发现、消息、我的 同理 --></span>
+<span class="mm_tag">&lt;/nav&gt;</span></div>
+
+            <p style="margin-top:14px;font-size:.88rem;color:#4b5563;">② SVG symbol 方案（HTML）</p>
+            <div class="mm_code-block"><span class="mm_comment"><!-- 顶部定义 symbol 精灵图 --></span>
+<span class="mm_tag">&lt;svg</span> <span class="mm_keyword">style</span>=<span class="mm_string">"display:none"</span><span class="mm_tag">&gt;</span>
+  <span class="mm_tag">&lt;symbol</span> <span class="mm_keyword">id</span>=<span class="mm_string">"mm_ico_home"</span> <span class="mm_keyword">viewBox</span>=<span class="mm_string">"0 0 24 24"</span><span class="mm_tag">&gt;&lt;path</span> <span class="mm_keyword">d</span>=<span class="mm_string">"..."</span><span class="mm_tag">/&gt;&lt;/symbol&gt;</span>
+  <span class="mm_comment"><!-- 其余 3 个 symbol --></span>
+<span class="mm_tag">&lt;/svg&gt;</span>
+
+<span class="mm_comment"><!-- 下导航使用 --></span>
+<span class="mm_tag">&lt;div</span> <span class="mm_keyword">class</span>=<span class="mm_string">"mm_yk-tab-item"</span><span class="mm_tag">&gt;</span>
+  <span class="mm_tag">&lt;svg</span> <span class="mm_keyword">fill</span>=<span class="mm_string">"currentColor"</span><span class="mm_tag">&gt;&lt;use</span> <span class="mm_keyword">xlink:href</span>=<span class="mm_string">"#mm_ico_home"</span><span class="mm_tag">/&gt;&lt;/svg&gt;</span>
+  <span class="mm_tag">&lt;span&gt;</span>首页<span class="mm_tag">&lt;/span&gt;</span>
+<span class="mm_tag">&lt;/div&gt;</span></div>
+
+            <p style="margin-top:14px;font-size:.88rem;color:#4b5563;">③ CSS 核心</p>
+            <div class="mm_code-block">.mm_yk-tabbar <span class="mm_comment">/* 自适应宽度：Flex 等分 */</span>
+  <span class="mm_keyword">display</span>: flex;
+  <span class="mm_keyword">width</span>: 100%;
+
+.mm_yk-tab-item { flex: 1; ... }  <span class="mm_comment">/* 每项等分 */</span>
+
+.mm_yk-tab-item.mmm_active { <span class="mm_keyword">color</span>: #FF1E32; }  <span class="mm_comment">/* 优酷红激活态 */</span></div>
+        </section>
+
+        <!-- ============ 五、实验考核 ============ -->
+        <section class="mm_section">
+            <h2>📊 实验考核自评</h2>
+            <table class="mm_score">
+                <thead><tr><th>评分项</th><th>分值</th><th>完成情况</th></tr></thead>
+                <tbody>
+                    <tr><td>HTML</td><td>1 分</td><td>✅ 字体图标 + SVG 两种方式均实现</td></tr>
+                    <tr><td>CSS</td><td>1 分</td><td>✅ 颜色 / 大小 / Flex 自适应宽度</td></tr>
+                    <tr><td>字体图标</td><td>1 分</td><td>✅ iconfont 本地文件，4 个导航图标</td></tr>
+                    <tr><td>整体效果</td><td>1 分</td><td>✅ 优酷红主题 + 完整手机页面</td></tr>
+                    <tr><td>实验报告</td><td>1 分</td><td>✅ 本页面即为完整实验报告</td></tr>
+                </tbody>
+            </table>
+            <p style="margin-top:14px;font-size:.88rem;color:#4b5563;">
+                实验小结：两种方案对比——<strong>字体图标</strong>体积小、适合单色图标、可直接用 CSS 控制颜色大小；<strong>SVG symbol</strong> 不依赖字体文件、矢量清晰、可做更复杂多色图标。
+            </p>
+        </section>
+
+    </div>
+
+    <!-- ===== SVG symbol 精灵图（隐藏在 body 底部） ===== -->
+    <svg style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+        <defs>
+            <!-- 首页 -->
+            <symbol id="mm_ico_home" viewBox="0 0 24 24">
+                <path d="M12 2L2 11h3v10h5v-6h4v6h5V11h3z" fill="currentColor"/>
+            </symbol>
+            <!-- 发现（4个方块） -->
+            <symbol id="mm_ico_find" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor"/>
+                <rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor"/>
+                <rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor"/>
+                <rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor"/>
+            </symbol>
+            <!-- 消息 -->
+            <symbol id="mm_ico_msg" viewBox="0 0 24 24">
+                <path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z" fill="currentColor"/>
+            </symbol>
+            <!-- 我的 -->
+            <symbol id="mm_ico_me" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" fill="currentColor"/>
+                <path d="M4 22c0-4 4-6 8-6s8 2 8 6" fill="currentColor"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <script>
+        // ===== 下导航切换（字体图标 + SVG 同逻辑） =====
+        function mm_switchTab(el, mm_type) {
+            let mm_parent = el.parentElement;
+            let mm_siblings = mm_parent.querySelectorAll(".mm_yk-tab-item");
+            for (let mm_i = 0; mm_i < mm_siblings.length; mm_i++) {
+                mm_siblings[mm_i].classList.remove("mmm_active");
+            }
+            el.classList.add("mmm_active");
+        }
+    </script>
+</body>
+</html>
