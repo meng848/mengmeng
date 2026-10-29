@@ -443,6 +443,68 @@
         footer.mm_footer a { color: var(--mm-text-sub); margin: 0 8px; }
         footer.mm_footer a:hover { color: var(--mm-red); }
 
+        /* ========== 下导航展示区（醒目突出） ========== */
+        section.mmm_tab-showcase {
+            background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 50%, #fef2f2 100%);
+            border: 2px dashed var(--mm-red);
+            border-radius: 18px;
+            padding: 36px 24px 32px;
+            margin: 40px auto 0;
+            max-width: 520px;
+            text-align: center;
+            position: relative;
+        }
+        section.mmm_tab-showcase::before {
+            content: "📱 下导航 · 重点展示区";
+            position: absolute;
+            top: -14px; left: 50%; transform: translateX(-50%);
+            background: var(--mm-red); color: #fff;
+            padding: 4px 18px; border-radius: 20px;
+            font-size: .85rem; font-weight: bold; letter-spacing: 1px;
+            box-shadow: 0 4px 14px rgba(255,30,50,.35);
+        }
+        .mmm_tab-phone {
+            background: #fff;
+            border-radius: 28px;
+            border: 3px solid #1f2937;
+            padding: 18px 0 0;
+            max-width: 320px;
+            margin: 14px auto 0;
+            box-shadow: 0 18px 40px rgba(0,0,0,.18), inset 0 0 0 1px #e5e7eb;
+            position: relative;
+        }
+        .mmm_tab-phone::before {
+            content: "";
+            display: block;
+            width: 80px; height: 6px;
+            background: #1f2937; border-radius: 3px;
+            margin: 0 auto 10px;
+        }
+        .mmm_tab-phone-title {
+            font-size: .78rem; color: var(--mm-text-light);
+            text-align: center; padding: 4px 0 8px;
+        }
+        .mmm_tab-demo {
+            display: flex;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 6px;
+        }
+        .mmm_tab-demo .mm_tab-item { padding: 10px 0; flex: 1; }
+        .mmm_tab-demo .mm_tab-item i { font-size: 1.5rem; }
+        .mmm_tab-demo .mm_tab-item span { font-size: .7rem; margin-top: 2px; display: block; }
+
+        .mmm_tab-note {
+            margin-top: 16px;
+            font-size: .78rem;
+            color: var(--mm-text-sub);
+            line-height: 1.8;
+        }
+        .mmm_tab-note code {
+            background: #fff; padding: 1px 8px; border-radius: 4px;
+            color: var(--mm-red); font-size: .75rem;
+            border: 1px solid #fecaca;
+        }
+
         /* ========== 底部导航（移动端） ========== */
         nav.mm_tabbar {
             display: none;
@@ -632,6 +694,32 @@
         </section>
 
     </main>
+
+    <!-- ============ 下导航展示区（醒目突出） ============ -->
+    <section class="mmm_tab-showcase">
+        <div class="mmm_tab-phone">
+            <div class="mmm_tab-phone-title">Youku · 首页</div>
+            <div class="mmm_tab-demo">
+                <div class="mm_tab-item mmm_active" onclick="mm_switchTabMobile(this)">
+                    <i class="iconfont icon-shouye1"></i><span>首页</span>
+                </div>
+                <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                    <i class="iconfont icon-gengduo"></i><span>发现</span>
+                </div>
+                <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                    <i class="iconfont icon-xiaoxi"></i><span>消息</span>
+                </div>
+                <div class="mm_tab-item" onclick="mm_switchTabMobile(this)">
+                    <i class="iconfont icon-a-236_xihuan"></i><span>我的</span>
+                </div>
+            </div>
+        </div>
+        <div class="mmm_tab-note">
+            ✅ 技术方案：<code>iconfont</code> 字体图标 + <code>flex</code> 自适应等分<br>
+            ✅ 交互：点击切换激活态（优酷红 #FF1E32）<br>
+            ✅ 布局：<code>flex: 1</code> 四等分，横竖屏自动适配
+        </div>
+    </section>
 
     <!-- ============ 页脚 ============ -->
     <footer class="mm_footer">
