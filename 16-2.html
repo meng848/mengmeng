@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-29，功能名称：JavaScript 对象与字符串方法形象化演示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-2 · JS 对象 & 字符串</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            min-height: 100vh;
+            padding: 28px 20px 60px;
+            color: #1f2937;
+        }
+        .mm_container { max-width: 1100px; margin: 0 auto; }
+        .mm_back { color: #fff; opacity: .9; text-decoration: none; font-size: .9rem; }
+
+        header.mm_header { text-align: center; color: #fff; padding: 8px 0 22px; }
+        header.mm_header h1 { font-size: 2.1rem; margin-bottom: 6px; letter-spacing: 2px; }
+        header.mm_header p { opacity: .9; font-size: .92rem; }
+
+        /* ============ Tab 切换 ============ */
+        .mm_tabs {
+            display: flex; gap: 0; margin-bottom: 18px; justify-content: center;
+        }
+        .mm_tab {
+            padding: 12px 34px; cursor: pointer; font-size: 1rem; font-weight: bold;
+            background: rgba(255,255,255,.2); color: #fff;
+            border: 2px solid rgba(255,255,255,.3);
+            transition: all .25s; font-family: inherit;
+        }
+        .mm_tab:first-child { border-radius: 10px 0 0 10px; }
+        .mm_tab:last-child  { border-radius: 0 10px 10px 0; }
+        .mm_tab.mmm_active {
+            background: #fff; color: #8b5cf6;
+            border-color: #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
+        }
+
+        /* ============ 原始数据展示 ============ */
+        .mm_source {
+            background: #fff; border-radius: 14px; padding: 20px 22px;
+            margin-bottom: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.15);
+        }
+        .mm_source h3 { font-size: .95rem; color: #8b5cf6; margin-bottom: 12px; }
+        .mm_source-block {
+            background: #faf5ff; border: 2px dashed #c4b5fd; border-radius: 10px;
+            padding: 14px 16px; font-family: Consolas, Monaco, monospace;
+            font-size: .82rem; color: #374151; white-space: pre-wrap;
+            min-height: 50px;
+        }
+        .mm_obj-k { color: #db2777; font-weight: bold; }
+        .mm_obj-v { color: #0891b2; }
+
+        /* 对象 key-value 可视化 */
+        .mm_obj-vis { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .mm_kv {
+            background: linear-gradient(135deg, #fce7f3, #f3e8ff);
+            border: 1px solid #e9d5ff;
+            border-radius: 8px; padding: 6px 12px; font-size: .78rem;
+            font-family: Consolas, Monaco, monospace;
+            transition: all .3s;
+        }
+        .mm_kv .k { color: #db2777; font-weight: bold; }
+        .mm_kv .v { color: #6d28d9; }
+        .mm_kv.added { animation: mm_pop .4s ease; background: linear-gradient(135deg,#bbf7d0,#86efac); border-color: #4ade80; }
+        .mm_kv.changed { animation: mm_shake .4s ease; background: linear-gradient(135deg,#fbcfe8,#f9a8d4); border-color: #f472b6; }
+        @keyframes mm_pop { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
+        @keyframes mm_shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+        /* 字符串可视化 */
+        .mm_str-vis {
+            display: flex; flex-wrap: wrap; gap: 3px; margin-top: 10px;
+            background: #1f2937; padding: 14px; border-radius: 10px;
+        }
+        .mm_ch {
+            width: 32px; height: 36px; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg,#f0abfc,#e879f9);
+            border-radius: 6px; font-weight: bold; font-size: 1rem; color: #fff;
+            font-family: Consolas, Monaco, monospace;
+            box-shadow: 0 2px 6px rgba(0,0,0,.2);
+            position: relative;
+            transition: all .2s;
+        }
+        .mm_ch:hover { transform: translateY(-2px); }
+        .mm_ch .idx {
+            position: absolute; top: -14px; font-size: .6rem;
+            background: #fff; color: #8b5cf6; border-radius: 4px; padding: 0 4px;
+            font-weight: normal;
+        }
+        .mm_ch.highlight { background: linear-gradient(135deg,#fbbf24,#f59e0b); }
+
+        /* ============ 方法卡片 ============ */
+        .mm_cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+        .mm_method {
+            background: #fff; border-radius: 12px; padding: 16px 18px;
+            box-shadow: 0 6px 22px rgba(0,0,0,.1); border-top: 4px solid var(--mm-accent);
+            transition: transform .2s;
+        }
+        .mm_method:hover { transform: translateY(-2px); }
+        .mm_mtitle { display: flex; align-items: center; gap: 8px; font-weight: bold; margin-bottom: 4px; }
+        .mm_mtitle code {
+            background: var(--mm-accent); color: #fff; padding: 2px 10px; border-radius: 6px;
+            font-size: .85rem; font-family: Consolas, Monaco, monospace;
+        }
+        .mm_mdesc { color: #6b7280; font-size: .82rem; margin-bottom: 10px; line-height: 1.7; }
+        .mm_code {
+            background: #1f2937; color: #d1d5db; padding: 10px 12px;
+            border-radius: 7px; font-family: Consolas, Monaco, monospace;
+            font-size: .73rem; line-height: 1.6; white-space: pre-wrap; margin-bottom: 10px;
+            max-height: 72px; overflow-y: auto;
+        }
+        .mm_code .k{color:#c084fc} .mm_code .s{color:#fbbf24} .mm_code .c{color:#6b7280} .mm_code .f{color:#22d3ee}
+        .mm_actions { display: flex; gap: 8px; margin-bottom: 8px; }
+        .mm_btn {
+            padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+            background: var(--mm-accent); color: #fff; font-size: .78rem; font-family: inherit;
+            transition: transform .15s;
+        }
+        .mm_btn:hover { transform: translateY(-1px); }
+        .mm_btn.mmm_reset { background: #9ca3af; }
+        .mm_result {
+            background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 7px;
+            padding: 8px 12px; font-family: Consolas, Monaco, monospace;
+            font-size: .78rem; min-height: 30px; white-space: pre-wrap; color: #374151;
+        }
+        .mm_result strong { color: var(--mm-accent); }
+
+        .mm_seriestag { display:inline-block; font-size:.65rem; padding:1px 8px; border-radius:4px; color:#fff; margin-left:6px; }
+
+        /* 类别颜色 */
+        .mm_method[data-cat="obj-prop"]   { --mm-accent: #ec4899; }
+        .mm_method[data-cat="obj-meta"]   { --mm-accent: #f59e0b; }
+        .mm_method[data-cat="str-get"]    { --mm-accent: #06b6d4; }
+        .mm_method[data-cat="str-change"] { --mm-accent: #22c55e; }
+        .mm_method[data-cat="str-check"]  { --mm-accent: #a855f7; }
+
+        .mm_method[data-cat="obj-prop"]   .mm_seriestag{ background:#ec4899; }
+        .mm_method[data-cat="obj-meta"]   .mm_seriestag{ background:#f59e0b; }
+        .mm_method[data-cat="str-get"]    .mm_seriestag{ background:#06b6d4; }
+        .mm_method[data-cat="str-change"] .mm_seriestag{ background:#22c55e; }
+        .mm_method[data-cat="str-check"]  .mm_seriestag{ background:#a855f7; }
+
+        .mm_hide { display: none !important; }
+
+        @media (max-width: 640px) {
+            header.mm_header h1 { font-size: 1.5rem; }
+            .mm_tab { padding: 10px 20px; font-size: .9rem; }
+            .mm_ch { width: 26px; height: 30px; font-size: .85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mm_container">
+        <a href="index.html" class="mm_back">← 返回首页</a>
+
+        <header class="mm_header">
+            <h1>JavaScript 对象 &amp; 字符串</h1>
+            <p>16-2 · 点按钮看看效果 🎁</p>
+        </header>
+
+        <!-- ============ Tab 切换 ============ -->
+        <div class="mm_tabs">
+            <button class="mm_tab mmm_active" onclick="mm_switch('obj', this)">🎁 对象 Object</button>
+            <button class="mm_tab" onclick="mm_switch('str', this)">📝 字符串 String</button>
+        </div>
+
+        <!-- ============ 对象 ============ -->
+        <section id="mm_panel_obj">
+            <div class="mm_source">
+                <h3>📦 当前对象 person</h3>
+                <div class="mm_source-block" id="mm_objCode"></div>
+                <div class="mm_obj-vis" id="mm_objVis"></div>
+            </div>
+            <div class="mm_cards" id="mm_cards_obj"></div>
+        </section>
+
+        <!-- ============ 字符串 ============ -->
+        <section id="mm_panel_str" class="mm_hide">
+            <div class="mm_source">
+                <h3>📝 当前字符串 msg</h3>
+                <div class="mm_source-block" id="mm_strCode"></div>
+                <div class="mm_str-vis" id="mm_strVis"></div>
+            </div>
+            <div class="mm_cards" id="mm_cards_str"></div>
+        </section>
+
+    </div>
+
+    <script>
+        // ============ Tab 切换 ============
+        function mm_switch(which, btn) {
+            document.querySelectorAll(".mm_tab").forEach(t => t.classList.remove("mmm_active"));
+            btn.classList.add("mmm_active");
+            document.getElementById("mm_panel_obj").classList.toggle("mm_hide", which !== "obj");
+            document.getElementById("mm_panel_str").classList.toggle("mm_hide", which !== "str");
+        }
+
+        // ============================ 对象部分 ============================
+        let mm_person = { name: "孟梦", age: 20, school: "高级网页设计", isStudent: true, score: 95 };
+
+        function mm_renderObj(cls) {
+            cls = cls || {};
+            let mm_c = document.getElementById("mm_objCode");
+            let mm_v = document.getElementById("mm_objVis");
+            mm_c.innerHTML =
+                '{<br>' +
+                '  <span class="mm_obj-k">name</span>: <span class="mm_obj-v">"' + mm_person.name + '"</span>,<br>' +
+                '  <span class="mm_obj-k">age</span>: <span class="mm_obj-v">' + mm_person.age + '</span>,<br>' +
+                '  <span class="mm_obj-k">school</span>: <span class="mm_obj-v">"' + mm_person.school + '"</span>,<br>' +
+                '  <span class="mm_obj-k">isStudent</span>: <span class="mm_obj-v">' + mm_person.isStudent + '</span>,<br>' +
+                '  <span class="mm_obj-k">score</span>: <span class="mm_obj-v">' + mm_person.score + '</span><br>' +
+                '}';
+            mm_v.innerHTML = "";
+            Object.keys(mm_person).forEach(k => {
+                let mm_d = document.createElement("div");
+                mm_d.className = "mm_kv " + (cls[k] || "");
+                mm_d.innerHTML = '<span class="k">' + k + '</span> = <span class="v">' + JSON.stringify(mm_person[k]) + '</span>';
+                mm_v.appendChild(mm_d);
+            });
+        }
+        mm_renderObj();
+
+        const mm_objMethods = [
+            {
+                cat:"obj-prop", title:"读取属性", name:"obj.key / obj[key]",
+                desc:"两种方式读取属性值。用变量名当 key 时必须用方括号。",
+                code:'person.name\nperson["age"]',
+                run:function(){ return {h:'person.name = <strong>'+mm_person.name+'</strong><br>person["age"] = <strong>'+mm_person.age+'</strong>', note:'两种写法等价'} }
+            },
+            {
+                cat:"obj-prop", title:"添加新属性", name:"obj.newKey = val",
+                desc:"直接赋值就能加新属性，JS 对象是动态的。",
+                code:'person.city = "郑州";',
+                run:function(){ mm_person.city = "郑州"; mm_renderObj({city:"added"}); return {h:'新增 city = <strong>"郑州"</strong>', note:'对象多了一个属性'} }
+            },
+            {
+                cat:"obj-prop", title:"修改属性值", name:"obj.key = 新值",
+                desc:"直接给已有属性重新赋值即可修改。",
+                code:'person.score = 99;',
+                run:function(){ mm_person.score = 99; mm_renderObj({score:"changed"}); return {h:'score 改成了 <strong>99</strong>', note:'粉色高亮表示修改过'} }
+            },
+            {
+                cat:"obj-prop", title:"删除属性", name:"delete obj.key",
+                desc:"用 delete 关键字删除某个属性。",
+                code:'delete person.isStudent;',
+                run:function(){ delete mm_person.isStudent; mm_renderObj(); return {h:'已删除 isStudent', note:'属性被移除'} }
+            },
+            {
+                cat:"obj-meta", title:"Object.keys()", name:"Object.keys(obj)",
+                desc:"返回**所有 key 组成的数组**。",
+                code:'Object.keys(person)',
+                run:function(){ return {h:'keys：<strong>'+JSON.stringify(Object.keys(mm_person))+'</strong>', note:'返回数组'} }
+            },
+            {
+                cat:"obj-meta", title:"Object.values()", name:"Object.values(obj)",
+                desc:"返回**所有 value 组成的数组**。",
+                code:'Object.values(person)',
+                run:function(){ return {h:'values：<strong>'+JSON.stringify(Object.values(mm_person))+'</strong>', note:'顺序和 keys 对应'} }
+            },
+            {
+                cat:"obj-meta", title:"Object.entries()", name:"Object.entries(obj)",
+                desc:"返回 [key, value] 对组成的二维数组。",
+                code:'Object.entries(person)',
+                run:function(){ return {h:'entries：<strong>'+JSON.stringify(Object.entries(mm_person))+'</strong>', note:'每个元素是一个 [k,v] 数组'} }
+            },
+            {
+                cat:"obj-meta", title:"Object.assign()", name:"Object.assign(目标, 源)",
+                desc:"把源对象的属性复制到目标对象，常用于克隆或合并。",
+                code:'let copy = Object.assign({}, person);',
+                run:function(){ let r = Object.assign({}, mm_person); return {h:'克隆出新对象：<strong>'+JSON.stringify(r)+'</strong>', note:'原对象不变'} }
+            },
+            {
+                cat:"obj-meta", title:"对象展开运算符", name:"{...obj}",
+                desc:"ES6 新语法，比 assign 更简洁地克隆 / 合并对象。",
+                code:'let copy = { ...person, score: 100 };',
+                run:function(){ let r = { ...mm_person, score: 100 }; return {h:'展开+覆盖：<strong>'+JSON.stringify(r)+'</strong>', note:'克隆同时可以覆盖属性'} }
+            },
+            {
+                cat:"obj-meta", title:"JSON.stringify()", name:"JSON.stringify(obj)",
+                desc:"把对象序列化成 JSON 字符串，用于存储或网络传输。",
+                code:'let s = JSON.stringify(person);',
+                run:function(){ return {h:'JSON 字符串：<strong>'+JSON.stringify(mm_person)+'</strong>', note:'反过来 JSON.parse() 能转回对象'} }
+            }
+        ];
+
+        // ============================ 字符串部分 ============================
+        let mm_msg = "Hello 高级网页设计 World";
+
+        function mm_renderStr() {
+            let mm_c = document.getElementById("mm_strCode");
+            let mm_v = document.getElementById("mm_strVis");
+            mm_c.innerHTML = '<span class="mm_obj-k">msg</span> = <span class="mm_obj-v">"' + mm_msg + '"</span>  <span style="color:#6b7280;font-size:.75rem;">length = ' + mm_msg.length + '</span>';
+            mm_v.innerHTML = "";
+            for (let i = 0; i < mm_msg.length; i++) {
+                let mm_d = document.createElement("div");
+                mm_d.className = "mm_ch";
+                mm_d.innerHTML = '<span class="idx">' + i + '</span>' + (mm_msg[i] === " " ? "&nbsp;" : mm_msg[i]);
+                mm_d.title = 'msg[' + i + '] = "' + mm_msg[i] + '"';
+                mm_v.appendChild(mm_d);
+            }
+        }
+        mm_renderStr();
+
+        const mm_strMethods = [
+            { cat:"str-get", name:"charAt(i)",  title:"取指定位置字符", desc:"返回索引 i 处的字符，i 从 0 开始。", code:'msg.charAt(6)',
+              run:function(){ return {h:'charAt(6) = <strong>"'+mm_msg.charAt(6)+'"</strong>', note:'索引 6 的字符'} } },
+            { cat:"str-get", name:"slice(start,end)", title:"截取子串", desc:"返回 [start, end) 区间的新字符串。end 可负，-1 表示最后一个。", code:'msg.slice(6, 13)',
+              run:function(){ return {h:'slice(6,13) = <strong>"'+mm_msg.slice(6,13)+'"</strong>', note:'取到第 6~12 位'} } },
+            { cat:"str-get", name:"substring()", title:"截取子串(别名)", desc:"和 slice 类似，但负数会被当成 0。推荐用 slice。", code:'msg.substring(0, 5)',
+              run:function(){ return {h:'substring(0,5) = <strong>"'+mm_msg.substring(0,5)+'"</strong>', note:'前 5 个字符'} } },
+            { cat:"str-change", name:"toUpperCase() / toLowerCase()", title:"大小写转换", desc:"返回全大写 / 全小写的新字符串，原字符串不变。", code:'msg.toUpperCase()',
+              run:function(){ return {h:'toUpperCase = <strong>'+mm_msg.toUpperCase()+'</strong><br>toLowerCase = <strong>'+mm_msg.toLowerCase()+'</strong>', note:'原字符串不变'} } },
+            { cat:"str-change", name:"replace(旧, 新)", title:"替换内容", desc:"把匹配到的内容替换成新内容。默认只替第一个，加 /g 正则可替全部。", code:'msg.replace("World", "JS!")',
+              run:function(){ return {h:'replace("World","JS!") = <strong>'+mm_msg.replace("World", "JS!")+'</strong>', note:'只替换第一个匹配'} } },
+            { cat:"str-change", name:"trim()", title:"去除首尾空格", desc:"去掉字符串开头和结尾的空白字符。", code:'"  hi  ".trim()',
+              run:function(){ return {h:'"  hi  ".trim() = <strong>"'+("  hi  ".trim())+'"</strong>', note:'中间空格保留'} } },
+            { cat:"str-change", name:"split(分隔符)", title:"分割成数组", desc:"按分隔符把字符串切成数组。是数组 join 的逆操作。", code:'msg.split(" ")',
+              run:function(){ return {h:'split(" ") = <strong>'+JSON.stringify(mm_msg.split(" "))+'</strong>', note:'按空格切开'} } },
+            { cat:"str-check", name:"indexOf()", title:"查找位置", desc:"返回子串第一次出现的索引，找不到返回 -1。", code:'msg.indexOf("网页")',
+              run:function(){ let r = mm_msg.indexOf("网页"); return {h:'indexOf("网页") = <strong>'+r+'</strong>', note: r===-1?"没找到":"找到了"} } },
+            { cat:"str-check", name:"includes()", title:"是否包含", desc:"判断是否包含某子串，返回 true/false。比 indexOf 直观。", code:'msg.includes("JS")',
+              run:function(){ return {h:'includes("高级") = <strong>'+mm_msg.includes("高级")+'</strong><br>includes("JS") = <strong>'+mm_msg.includes("JS")+'</strong>', note:'一个 true 一个 false'} } },
+            { cat:"str-check", name:"startsWith() / endsWith()", title:"开头/结尾判断", desc:"判断字符串是否以某子串开头或结尾，返回布尔值。", code:'msg.startsWith("Hello")',
+              run:function(){ return {h:'startsWith("Hello") = <strong>'+mm_msg.startsWith("Hello")+'</strong><br>endsWith("World") = <strong>'+mm_msg.endsWith("World")+'</strong>', note:'两个都对'} } }
+        ];
+
+        // ============================ 渲染方法卡片 ============================
+        function mm_renderCards(id, methods) {
+            let mm_wrap = document.getElementById(id);
+            mm_wrap.innerHTML = "";
+            let mm_catName = {
+                "obj-prop":"属性操作", "obj-meta":"元方法",
+                "str-get":"读取截取", "str-change":"修改变换", "str-check":"检查判断"
+            };
+            methods.forEach((m, idx) => {
+                let mm_div = document.createElement("div");
+                mm_div.className = "mm_method";
+                mm_div.setAttribute("data-cat", m.cat);
+                let mm_idx = id === "mm_cards_obj" ? "o" + idx : "s" + idx;
+                mm_div.innerHTML =
+                    '<div class="mm_mtitle"><code>' + m.name + '</code><span class="mm_seriestag">' + (mm_catName[m.cat]||"") + '</span></div>' +
+                    '<div class="mm_mdesc">' + m.desc + '</div>' +
+                    '<div class="mm_code"><span class="c">// ' + m.title + '</span>\n' + m.code + '</div>' +
+                    '<div class="mm_actions">' +
+                        '<button class="mm_btn" onclick="mm_run(\''+mm_idx+'\')">▶ 运行</button>' +
+                        '<button class="mm_btn mmm_reset" onclick="mm_reset(\''+mm_idx.charAt(0)+'\')">↺ 还原</button>' +
+                    '</div>' +
+                    '<div class="mm_result" id="mm_res_'+mm_idx+'">点击 ▶ 运行 →</div>';
+                mm_wrap.appendChild(mm_div);
+            });
+        }
+        mm_renderCards("mm_cards_obj", mm_objMethods);
+        mm_renderCards("mm_cards_str", mm_strMethods);
+
+        // ============================ 运行 ============================
+        function mm_run(key) {
+            let mm_type = key.charAt(0);
+            let mm_idx = parseInt(key.slice(1));
+            let m = mm_type === "o" ? mm_objMethods[mm_idx] : mm_strMethods[mm_idx];
+            let r = m.run();
+            document.getElementById("mm_res_" + key).innerHTML =
+                '<div>' + r.h + '</div><div style="color:#6b7280;font-size:.7rem;margin-top:4px;">💡 ' + r.note + '</div>';
+        }
+        function mm_reset(which) {
+            if (which === "o") { mm_person = { name:"孟梦", age:20, school:"高级网页设计", isStudent:true, score:95 }; mm_renderObj(); }
+            else { mm_msg = "Hello 高级网页设计 World"; mm_renderStr(); }
+            document.querySelectorAll(".mm_result").forEach(el => { if (which==="o" && el.id.startsWith("mm_res_o") || which==="s" && el.id.startsWith("mm_res_s")) el.textContent = "已还原，点击 ▶ 运行 →"; });
+        }
+
+        window.mm_run = mm_run;
+        window.mm_reset = mm_reset;
+        window.mm_switch = mm_switch;
+    </script>
+</body>
+</html>
