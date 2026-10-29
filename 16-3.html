@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-10-29，功能名称：京东风格商品分类导航列表（仿图还原） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-3 · 分类导航</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: #f4f4f6;
+            min-height: 100vh;
+            padding: 30px 20px 60px;
+            color: #1f2937;
+        }
+        .mm_container { max-width: 900px; margin: 0 auto; }
+        .mm_back { color: #374151; text-decoration: none; font-size: .9rem; display: inline-block; margin-bottom: 14px; }
+        .mm_back:hover { color: #e1251b; }
+
+        /* ============ 分类卡片 ============ */
+        .mm_card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 22px rgba(0,0,0,.06);
+            overflow: hidden;
+        }
+
+        .mm_head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 22px; border-bottom: 1px solid #f0f0f0;
+        }
+        .mm_head h1 {
+            font-size: 1.25rem; font-weight: bold; color: #1f2937;
+        }
+        .mm_head .mm_menu-btn {
+            width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+            background: #fafafa; border-radius: 8px; cursor: pointer;
+            color: #374151; font-size: 1.2rem; transition: background .2s;
+        }
+        .mm_head .mm_menu-btn:hover { background: #f0f0f0; color: #e1251b; }
+
+        /* ============ 分类列表 ============ */
+        .mm_list { list-style: none; }
+        .mm_list-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 22px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer; transition: background .15s;
+        }
+        .mm_list-item:last-child { border-bottom: none; }
+        .mm_list-item:hover { background: #fafafa; }
+
+        /* 左侧图标区 */
+        .mm_icon-wrap {
+            width: 48px; height: 48px; flex-shrink: 0;
+            background: #fff;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #f0f0f0;
+            transition: all .2s;
+        }
+        .mm_list-item:hover .mm_icon-wrap { border-color: #e1251b; background: #fff5f4; }
+        .mm_icon-wrap i {
+            font-size: 1.4rem; font-style: normal; color: #374151;
+        }
+        .mm_icon-wrap.mmm_menu i { font-size: 1.15rem; color: #6b7280; }
+
+        /* 分类名区 */
+        .mm_cat-text {
+            flex: 1; min-width: 0;
+        }
+        .mm_cat-text a {
+            color: #374151; text-decoration: none; font-size: .92rem;
+            transition: color .15s;
+        }
+        .mm_cat-text a:hover { color: #e1251b; }
+        .mm_cat-text .mm_sep {
+            color: #d1d5db; margin: 0 10px; font-size: .78rem;
+        }
+
+        /* 右侧箭头 */
+        .mm_arrow {
+            color: #d1d5db; font-size: .95rem; transition: transform .15s;
+        }
+        .mm_list-item:hover .mm_arrow { color: #e1251b; transform: translateX(2px); }
+
+        /* ============ 标签 ============ */
+        .mm_tags {
+            padding: 16px 22px; border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .mm_tag {
+            padding: 5px 14px; background: #fff; border: 1px solid #e5e7eb;
+            border-radius: 20px; font-size: .78rem; color: #6b7280;
+            cursor: pointer; transition: all .15s;
+        }
+        .mm_tag:hover { color: #e1251b; border-color: #e1251b; }
+
+        @media (max-width: 500px) {
+            .mm_head h1 { font-size: 1.1rem; }
+            .mm_list-item { padding: 14px 16px; gap: 12px; }
+            .mm_icon-wrap { width: 42px; height: 42px; }
+            .mm_cat-text a { font-size: .85rem; }
+            .mm_cat-text .mm_sep { margin: 0 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mm_container">
+        <a href="index.html" class="mm_back">← 返回首页</a>
+
+        <!-- ============ 分类卡片 ============ -->
+        <div class="mm_card">
+
+            <!-- 标题 -->
+            <div class="mm_head">
+                <h1>分类</h1>
+                <div class="mm_menu-btn" title="更多分类">
+                    <i class="iconfont icon-gengduo"></i>
+                </div>
+            </div>
+
+            <!-- 分类列表 -->
+            <ul class="mm_list" id="mm_list">
+                <!-- 由 JS 动态生成 -->
+            </ul>
+
+            <!-- 热门标签 -->
+            <div class="mm_tags">
+                <span class="mm_tag">iPhone</span>
+                <span class="mm_tag">羽绒服</span>
+                <span class="mm_tag">电饭煲</span>
+                <span class="mm_tag">运动鞋</span>
+                <span class="mm_tag">面膜</span>
+                <span class="mm_tag">零食</span>
+                <span class="mm_tag">牛奶</span>
+                <span class="mm_tag">取暖器</span>
+                <span class="mm_tag">洗衣机</span>
+                <span class="mm_tag">沙发</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 分类数据（iconfont 图标名 + 分类名数组） =====
+        const mm_categories = [
+            { icon: "gengduo", cls: "mmm_menu", cats: ["冰洗", "空调", "电视", "厨卫大电"] },
+            { icon: "paizhao", cls: "", cats: ["电脑", "办公", "文具用品"] },
+            { icon: "xinxi",  cls: "", cats: ["手机", "运营商", "数码"] },
+            { icon: "gengduo", cls: "mmm_menu", cats: ["生活电器", "厨房小电", "个护健康"] },
+            { icon: "wancheng", cls: "", cats: ["食品", "酒类", "生鲜", "特产"] },
+            { icon: "shouye1", cls: "", cats: ["美妆", "个护清洁", "宠物"] },
+            { icon: "gengduo", cls: "mmm_menu", cats: ["元器件", "劳保物资", "五金机电"] },
+            { icon: "gengduo", cls: "mmm_menu", cats: ["家装", "建材", "家具"] },
+            { icon: "gengduo", cls: "mmm_menu", cats: ["家居日用", "厨具"] },
+            { icon: "jifen",   cls: "", cats: ["男鞋", "运动", "户外"] },
+            { icon: "shouye",  cls: "", cats: ["男装", "女装", "童装", "内衣"] }
+        ];
+
+        // ===== 渲染列表 =====
+        function mm_render() {
+            let mm_ul = document.getElementById("mm_list");
+            mm_ul.innerHTML = "";
+            mm_categories.forEach(item => {
+                let mm_catsHtml = item.cats.map((c, i) =>
+                    '<a href="javascript:void(0)" onclick="alert(\'进入：' + c + '\')">' + c + '</a>'
+                ).join('<span class="mm_sep">|</span>');
+
+                let mm_li = document.createElement("li");
+                mm_li.className = "mm_list-item";
+                mm_li.innerHTML =
+                    '<div class="mm_icon-wrap ' + item.cls + '">' +
+                        '<i class="iconfont icon-' + item.icon + '"></i>' +
+                    '</div>' +
+                    '<div class="mm_cat-text">' + mm_catsHtml + '</div>' +
+                    '<div class="mm_arrow">›</div>';
+                mm_ul.appendChild(mm_li);
+            });
+        }
+        mm_render();
+    </script>
+</body>
+</html>
