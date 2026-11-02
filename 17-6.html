@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：Promise 与 async 异步流程演示 - 用 setTimeout 模拟包饺子从买原料到吃饺子的完整流程，并行和面与和馅 -->
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：Promise 与 async 异步流程演示 - 用 setTimeout 模拟包饺子（线上线下竞速买原料、并和面和馅、包煮吃饺子）的完整流程 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>17-6 · Promise 与 async 包饺子流程</title>
     <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
@@ -85,9 +85,7 @@
             font-size: .82rem; color: #57534e; margin-bottom: 8px;
         }
         .mm_total__top b { font-family: Consolas, monospace; color: #0f766e; font-size: .92rem; }
-        .mm_total__bar {
-            height: 10px; background: #f0eeec; border-radius: 999px; overflow: hidden;
-        }
+        .mm_total__bar { height: 10px; background: #f0eeec; border-radius: 999px; overflow: hidden; }
         .mm_total__bar span {
             display: block; width: 0; height: 100%; border-radius: 999px;
             background: linear-gradient(90deg, #f59e0b, #10b981);
@@ -114,6 +112,7 @@
             animation: mm_pulse 1.2s infinite;
         }
         .mm_step.mmm_done .mm_step__dot { color: #fff; background: #10b981; border-color: #10b981; }
+        .mm_step.mmm_skip .mm_step__dot { color: #fff; background: #94a3b8; border-color: #94a3b8; }
         @keyframes mm_pulse {
             0%   { box-shadow: 0 0 0 0 rgba(217,119,6,.45); }
             70%  { box-shadow: 0 0 0 12px rgba(217,119,6,0); }
@@ -126,6 +125,7 @@
         }
         .mm_step.mmm_running .mm_step__body { background: #fffbeb; border-color: #fde68a; }
         .mm_step.mmm_done .mm_step__body { background: #f0fdf4; border-color: #bbf7d0; }
+        .mm_step.mmm_skip .mm_step__body { background: #f8fafc; border-color: #e2e8f0; opacity: .9; }
         .mm_step__top {
             display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
             font-size: .9rem; margin-bottom: 3px;
@@ -141,6 +141,7 @@
         }
         .mm_step.mmm_running .mm_step__state { color: #b45309; background: #fef3c7; }
         .mm_step.mmm_done .mm_step__state { color: #047857; background: #dcfce7; }
+        .mm_step.mmm_skip .mm_step__state { color: #64748b; background: #f1f5f9; }
         .mm_step__hint { font-size: .76rem; color: #a8a29e; font-family: Consolas, monospace; }
         .mm_step__bar {
             height: 6px; margin-top: 9px; background: #e7e5e4; border-radius: 999px; overflow: hidden;
@@ -150,27 +151,28 @@
             background: #d97706; transition: width .1s linear;
         }
         .mm_step.mmm_done .mm_step__bar span { background: #10b981; }
+        .mm_step.mmm_skip .mm_step__bar span { background: #94a3b8; }
         .mm_step__left {
             display: block; margin-top: 6px;
             font-size: .75rem; color: #78716c; font-family: Consolas, monospace;
         }
 
-        /* ============ 并行区 ============ */
-        .mm_parallel {
+        /* ============ 并行 / 竞速区 ============ */
+        .mm_group {
             position: relative; margin: 4px 0 16px; padding: 14px 14px 2px;
             background: #f0fdfa; border: 1px dashed #99f6e4; border-radius: 14px;
         }
-        .mm_parallel__tag {
+        .mm_group.mmm_race { background: #fff7ed; border-color: #fed7aa; }
+        .mm_group__tag {
             display: inline-flex; align-items: center; gap: 6px;
             margin-bottom: 10px; padding: 3px 12px;
             font-size: .76rem; font-weight: bold; color: #0f766e;
             background: #ccfbf1; border-radius: 999px;
         }
-        .mm_parallel__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .mm_parallel .mm_step { margin-bottom: 12px; }
-        .mm_parallel .mm_timeline { padding-left: 0; }
-        .mm_parallel .mm_timeline::before { display: none; }
-        .mm_parallel .mm_step__dot { display: none; }
+        .mm_group.mmm_race .mm_group__tag { color: #b45309; background: #ffedd5; }
+        .mm_group__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mm_group .mm_step { margin-bottom: 12px; }
+        .mm_group .mm_step__dot { display: none; }
 
         /* ============ 日志 ============ */
         .mm_log {
@@ -220,7 +222,7 @@
         .mm_foot { margin-top: 8px; text-align: center; font-size: .8rem; color: #a8a29e; }
 
         @media (max-width: 700px) {
-            .mm_parallel__grid { grid-template-columns: 1fr; }
+            .mm_group__grid { grid-template-columns: 1fr; }
             .mm_speed { margin-left: 0; }
             .mm_hero { padding: 22px; }
             body { padding: 16px 12px 60px; }
@@ -238,7 +240,8 @@
         <h1><i class="iconfont icon-xiaoxi"></i>Promise + async/await 包饺子</h1>
         <p>
             每个步骤都是一个 <code>Promise</code>（内部用 <code>setTimeout</code> 模拟耗时）：
-            买原料 → 取原料 → <b>和面 ‖ 和馅（同时进行）</b> → 包饺子 → 吃饺子，用 <code>async/await</code> 串起整条流程。
+            <b>买原料（线上 ‖ 线下，谁先完成就用谁）</b> → 取原料 → <b>和面 ‖ 和馅</b> → 包饺子 → 煮饺子 → 吃饺子，
+            分别用 <code>Promise.race</code>、<code>Promise.all</code> 与 <code>async/await</code> 串起整条流程。
         </p>
     </header>
 
@@ -247,7 +250,7 @@
         <div class="mm_card__head">
             <i class="iconfont icon-yuedu"></i>
             <h2>一、流程演示</h2>
-            <span class="mm_sub">真实时长约 19 秒</span>
+            <span class="mm_sub">真实时长约 23 秒</span>
         </div>
 
         <div class="mm_toolbar">
@@ -264,28 +267,47 @@
         <div class="mm_total">
             <div class="mm_total__top">
                 <span>总进度</span>
-                <span>已用时 <b id="mm_elapsedText">0.0s</b> / 预计 <b id="mm_totalText">19.0s</b></span>
+                <span>已用时 <b id="mm_elapsedText">0.0s</b> / 预计 <b id="mm_totalText">23.0s</b></span>
             </div>
             <div class="mm_total__bar"><span id="mm_totalBar"></span></div>
         </div>
 
         <div class="mm_timeline">
-            <!-- 买原料 -->
-            <div class="mm_step" id="mm_stepBuy">
-                <span class="mm_step__dot"><i class="iconfont icon-xiaoxi"></i></span>
-                <div class="mm_step__body">
-                    <div class="mm_step__top">
-                        <b>1. 买原料</b>
-                        <span class="mm_ms">6s</span>
-                        <em class="mm_step__state" id="mm_stateBuy">等待</em>
+            <!-- 1 买原料：线上 ‖ 线下 竞速 -->
+            <div class="mm_group mmm_race">
+                <div class="mm_group__tag">
+                    <i class="iconfont icon-huhuan"></i>Promise.race —— 线上、线下同时下单，谁先完成就用谁
+                </div>
+                <div class="mm_group__grid">
+                    <div class="mm_step" id="mm_stepBuyOnline">
+                        <div class="mm_step__body">
+                            <div class="mm_step__top">
+                                <b>1A. 线上买原料</b>
+                                <span class="mm_ms">6s</span>
+                                <em class="mm_step__state" id="mm_stateBuyOnline">等待</em>
+                            </div>
+                            <p class="mm_step__hint">setTimeout(resolve, 6000) · APP 下单</p>
+                            <div class="mm_step__bar"><span id="mm_barBuyOnline"></span></div>
+                            <span class="mm_step__left" id="mm_leftBuyOnline">—</span>
+                        </div>
                     </div>
-                    <p class="mm_step__hint">setTimeout(resolve, 6000) · 面粉、猪肉、白菜</p>
-                    <div class="mm_step__bar"><span id="mm_barBuy"></span></div>
-                    <span class="mm_step__left" id="mm_leftBuy">—</span>
+
+                    <div class="mm_step" id="mm_stepBuyOffline">
+                        <div class="mm_step__body">
+                            <div class="mm_step__top">
+                                <b>1B. 线下买原料</b>
+                                <span class="mm_ms">9s</span>
+                                <em class="mm_step__state" id="mm_stateBuyOffline">等待</em>
+                            </div>
+                            <p class="mm_step__hint">setTimeout(resolve, 9000) · 去菜市场</p>
+                            <div class="mm_step__bar"><span id="mm_barBuyOffline"></span></div>
+                            <span class="mm_step__left" id="mm_leftBuyOffline">—</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 取原料 -->
+            <!-- 2 取原料 -->
             <div class="mm_step" id="mm_stepPick">
                 <span class="mm_step__dot"><i class="iconfont icon-tianjia"></i></span>
                 <div class="mm_step__body">
@@ -294,18 +316,18 @@
                         <span class="mm_ms">3s</span>
                         <em class="mm_step__state" id="mm_statePick">等待</em>
                     </div>
-                    <p class="mm_step__hint">setTimeout(resolve, 3000) · 把原料拿回家洗干净</p>
+                    <p class="mm_step__hint">setTimeout(resolve, 3000) · 把原料拿回家洗净</p>
                     <div class="mm_step__bar"><span id="mm_barPick"></span></div>
                     <span class="mm_step__left" id="mm_leftPick">—</span>
                 </div>
             </div>
 
-            <!-- 并行：和面 + 和馅 -->
-            <div class="mm_parallel">
-                <div class="mm_parallel__tag">
+            <!-- 3、4 并行：和面 + 和馅 -->
+            <div class="mm_group">
+                <div class="mm_group__tag">
                     <i class="iconfont icon-huhuan"></i>Promise.all —— 这两个步骤同时开始，都完成才继续
                 </div>
-                <div class="mm_parallel__grid">
+                <div class="mm_group__grid">
                     <div class="mm_step" id="mm_stepDough">
                         <div class="mm_step__body">
                             <div class="mm_step__top">
@@ -334,7 +356,7 @@
                 </div>
             </div>
 
-            <!-- 包饺子 -->
+            <!-- 5 包饺子 -->
             <div class="mm_step" id="mm_stepWrap">
                 <span class="mm_step__dot"><i class="iconfont icon-wancheng"></i></span>
                 <div class="mm_step__body">
@@ -349,12 +371,27 @@
                 </div>
             </div>
 
-            <!-- 吃饺子 -->
+            <!-- 6 煮饺子 -->
+            <div class="mm_step" id="mm_stepBoil">
+                <span class="mm_step__dot"><i class="iconfont icon-huhuan"></i></span>
+                <div class="mm_step__body">
+                    <div class="mm_step__top">
+                        <b>6. 煮饺子</b>
+                        <span class="mm_ms">4s</span>
+                        <em class="mm_step__state" id="mm_stateBoil">等待</em>
+                    </div>
+                    <p class="mm_step__hint">setTimeout(resolve, 4000) · 水开下锅，点三次凉水</p>
+                    <div class="mm_step__bar"><span id="mm_barBoil"></span></div>
+                    <span class="mm_step__left" id="mm_leftBoil">—</span>
+                </div>
+            </div>
+
+            <!-- 7 吃饺子 -->
             <div class="mm_step" id="mm_stepEat">
                 <span class="mm_step__dot"><i class="iconfont icon-jifen"></i></span>
                 <div class="mm_step__body">
                     <div class="mm_step__top">
-                        <b>6. 吃饺子</b>
+                        <b>7. 吃饺子</b>
                         <span class="mm_ms">2s</span>
                         <em class="mm_step__state" id="mm_stateEat">等待</em>
                     </div>
@@ -374,7 +411,7 @@
             <span class="mm_sub">时间以开始时刻为 0</span>
         </div>
         <div class="mm_log" id="mm_logBox">
-            <div class="mm_log__empty">点击「开始包饺子」，这里会实时输出每个 Promise 的开始与完成时间。</div>
+            <div class="mm_log__empty">点击「开始包饺子」，这里会实时输出每个 Promise 的开始、完成与竞速结果。</div>
         </div>
     </section>
 
@@ -383,7 +420,7 @@
         <div class="mm_card__head">
             <i class="iconfont icon-paizhao"></i>
             <h2>三、核心代码</h2>
-            <span class="mm_sub">Promise → Promise.all → async/await</span>
+            <span class="mm_sub">Promise → race → all → async/await</span>
         </div>
 
         <p class="mm_code__title">① 用 Promise 包住 setTimeout，把「等待」变成可 await 的任务</p>
@@ -391,21 +428,32 @@
 <span class="mm_k">function</span> <span class="mm_f">cookStep</span>(name, ms) {
   <span class="mm_k">return new</span> <span class="mm_f">Promise</span>(<span class="mm_k">function</span> (resolve) {
     <span class="mm_f">setTimeout</span>(<span class="mm_k">function</span> () {
-      <span class="mm_f">resolve</span>(name);          <span class="mm_c">// 把 Promise 变成 fulfilled</span>
+      <span class="mm_f">resolve</span>(name);          <span class="mm_c">// Promise 变成 fulfilled</span>
     }, ms);
   });
 }</pre>
 
-        <p class="mm_code__title">② 并行：和面、和馅同时开始，两个都完成才往下走</p>
-<pre class="mm_code"><span class="mm_c">// Promise.all 接收数组，全部成功才成功；耗时取两者中较长的</span>
-<span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">all</span>([
+        <p class="mm_code__title">② 竞速：线上、线下同时买，谁先完成就用谁（另一个不会自动取消）</p>
+<pre class="mm_code"><span class="mm_k">const</span> winner = <span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">race</span>([
+  <span class="mm_f">cookStep</span>(<span class="mm_s">"线上买原料"</span>, 6000),
+  <span class="mm_f">cookStep</span>(<span class="mm_s">"线下买原料"</span>, 9000)
+]);
+<span class="mm_c">// 6000ms 的线上先完成 → winner = "线上买原料"，线下仍在后台跑</span></pre>
+
+        <p class="mm_code__title">③ 并行：和面、和馅同时开始，两个都完成才往下走</p>
+<pre class="mm_code"><span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">all</span>([
   <span class="mm_f">cookStep</span>(<span class="mm_s">"和面"</span>, 5000),
   <span class="mm_f">cookStep</span>(<span class="mm_s">"和馅"</span>, 4000)
-]);</pre>
+]);
+<span class="mm_c">// all 要两个都成功；耗时取较长者 5s，而不是 9s</span></pre>
 
-        <p class="mm_code__title">③ async/await 写主流程，读起来像同步代码</p>
+        <p class="mm_code__title">④ async/await 写主流程，读起来像同步代码</p>
 <pre class="mm_code"><span class="mm_k">async function</span> <span class="mm_f">makeDumplings</span>() {
-  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"买原料"</span>, 6000);
+  <span class="mm_c">// 买原料：线上线下抢单，任一完成即可</span>
+  <span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">race</span>([
+    <span class="mm_f">cookStep</span>(<span class="mm_s">"线上买原料"</span>, 6000),
+    <span class="mm_f">cookStep</span>(<span class="mm_s">"线下买原料"</span>, 9000)
+  ]);
   <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"取原料"</span>, 3000);
 
   <span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">all</span>([
@@ -414,8 +462,8 @@
   ]);
 
   <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"包饺子"</span>, 3000);
+  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"煮饺子"</span>, 4000);
   <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"吃饺子"</span>, 2000);
-  <span class="mm_f">console</span>.<span class="mm_f">log</span>(<span class="mm_s">"全部完成！"</span>);
 }
 <span class="mm_f">makeDumplings</span>();</pre>
     </section>
@@ -427,12 +475,13 @@
             <h2>四、为什么这样做</h2>
         </div>
         <ul class="mm_tips">
-            <li><b>Promise 三种状态：</b>pending（进行中）、fulfilled（成功）、rejected（失败）；状态一旦改变就固定，<code>resolve()</code> 让它变成成功。</li>
-            <li><b>await 会暂停 async 函数：</b>等 Promise 完成后才继续执行下一行，但不会阻塞页面渲染，其它代码照常运行。</li>
-            <li><b>串行 vs 并行：</b>和面、和馅互不依赖，用 <code>Promise.all</code> 同时做只需 <b>5 秒</b>；若写成两个连续的 <code>await</code> 就要 <b>9 秒</b>，整锅饺子从 19 秒拖到 23 秒。</li>
-            <li><b>async 函数本身返回 Promise：</b>调用 <code>makeDumplings()</code> 后可以用 <code>.then()</code> 接着处理，也可以用<code>try…catch</code> 捕获内部 <code>await</code> 的异常。</li>
-            <li><b>Promise.allSettled / all / race：</b>全部成功才成功是 <code>all</code>；忽略失败逐个收集结果用 <code>allSettled</code>；谁先完成就用谁的结果是 <code>race</code>。</li>
-            <li><b>顺序不能省：</b>包饺子必须等面和馅都完成，所以并行块用 <code>await</code> 收尾；同理吃饺子要等包完。</li>
+            <li><b>Promise 三种状态：</b>pending（进行中）、fulfilled（成功）、rejected（失败）；<code>resolve()</code> 让它变成成功，状态一旦改变就固定。</li>
+            <li><b>Promise.race 只取第一个：</b>线上 6s、线下 9s，6 秒时线上完成，整个 race 立刻 fulfilled，后续流程马上继续，不用等 9 秒。</li>
+            <li><b>落败的任务不会自动停止：</b><code>race</code> 只是不再等它，线下购买仍在后台执行（本页日志会在 9 秒时记录"已完成但未采用"）。</li>
+            <li><b>Promise.all 要全部成功：</b>和面、和馅互不依赖，同时做只需 5 秒；若写成两个连续 <code>await</code> 就要 9 秒，整锅饺子从 23 秒拖到 27 秒。</li>
+            <li><b>await 会暂停 async 函数但不阻塞页面：</b>等待期间渲染、动画、点击照常响应，只有当前函数停在这一行。</li>
+            <li><b>async 函数返回 Promise：</b>可继续 <code>.then()</code>，也可在函数内用 <code>try…catch</code> 捕获 <code>await</code> 的异常；<code>finally</code> 适合收尾清理。</li>
+            <li><b>何时用哪个：</b>串行依赖用 <code>await</code>；必须全都完成用 <code>all</code>；只要最快的一个用 <code>race</code>；不关心成败、逐个收集结果用 <code>allSettled</code>。</li>
         </ul>
     </section>
 
@@ -441,19 +490,21 @@
 
 <script>
     // ============================================================
-    // 基础配置：每个步骤的 keys 与耗时（毫秒）
+    // 基础配置：每个步骤的 key / 名称 / 模拟耗时（毫秒）
     // ============================================================
     var mm_stepDefs = [
-        { key: "Buy",     name: "买原料", ms: 6000, running: "setTimeout(6000) 进行中" },
-        { key: "Pick",    name: "取原料", ms: 3000, running: "setTimeout(3000) 进行中" },
-        { key: "Dough",   name: "和面",   ms: 5000, running: "setTimeout(5000) 进行中" },
-        { key: "Filling", name: "和馅",   ms: 4000, running: "setTimeout(4000) 进行中" },
-        { key: "Wrap",    name: "包饺子", ms: 3000, running: "setTimeout(3000) 进行中" },
-        { key: "Eat",     name: "吃饺子", ms: 2000, running: "setTimeout(2000) 进行中" }
+        { key: "BuyOnline",  name: "线上买原料", ms: 6000 },
+        { key: "BuyOffline", name: "线下买原料", ms: 9000 },
+        { key: "Pick",       name: "取原料",     ms: 3000 },
+        { key: "Dough",      name: "和面",       ms: 5000 },
+        { key: "Filling",    name: "和馅",       ms: 4000 },
+        { key: "Wrap",       name: "包饺子",     ms: 3000 },
+        { key: "Boil",       name: "煮饺子",     ms: 4000 },
+        { key: "Eat",        name: "吃饺子",     ms: 2000 }
     ];
 
-    // 顺序执行部分：买 6s + 取 3s + 并行 max(5,4)=5s + 包 3s + 吃 2s = 19s
-    var mm_serialBaseMs = 6000 + 3000 + Math.max(5000, 4000) + 3000 + 2000;
+    // 本次流程总时长：race 取 min(6000, 9000) + 3000 + max(5000, 4000) + 3000 + 4000 + 2000 = 23000
+    var mm_serialBaseMs = 6000 + 3000 + Math.max(5000, 4000) + 3000 + 4000 + 2000;
 
     var mm_speed = 1;          // 演示倍速，仅影响模拟时长
     var mm_running = false;    // 防止重复点击
@@ -461,6 +512,7 @@
     var mm_elapsedTimer = null;
     var mm_totalMs = mm_serialBaseMs;
     var mm_timers = {};        // 每个步骤的 { tick, timeout }
+    var mm_buyWinner = null;   // race 的胜者 key
 
     // ============================================================
     // DOM 缓存
@@ -472,15 +524,15 @@
     var mm_elapsedText = document.getElementById("mm_elapsedText");
     var mm_totalText   = document.getElementById("mm_totalText");
 
-    var mm_ui = {};   // key -> { step, state, bar, left }
+    var mm_ui = {};   // key -> { step, state, bar, left, name, msBase }
     mm_stepDefs.forEach(function (def) {
         mm_ui[def.key] = {
-            step:  document.getElementById("mm_step" + def.key),
-            state: document.getElementById("mm_state" + def.key),
-            bar:   document.getElementById("mm_bar" + def.key),
-            left:  document.getElementById("mm_left" + def.key),
-            msBase: def.ms,
-            name: def.name
+            step:   document.getElementById("mm_step" + def.key),
+            state:  document.getElementById("mm_state" + def.key),
+            bar:    document.getElementById("mm_bar" + def.key),
+            left:   document.getElementById("mm_left" + def.key),
+            name:   def.name,
+            msBase: def.ms
         };
     });
 
@@ -513,14 +565,19 @@
         mm_logBox.scrollTop = mm_logBox.scrollHeight;
     }
 
-    // 设置步骤状态：wait / running / done
+    // 设置步骤状态：running / done / skip
     function mm_setState(key, status, text) {
         var ui = mm_ui[key];
-        ui.step.classList.remove("mmm_running", "mmm_done");
+        ui.step.classList.remove("mmm_running", "mmm_done", "mmm_skip");
         if (status === "running") { ui.step.classList.add("mmm_running"); }
         if (status === "done")    { ui.step.classList.add("mmm_done"); }
+        if (status === "skip")    { ui.step.classList.add("mmm_skip"); }
         ui.state.textContent = text;
-        if (status === "done") { ui.state.className = "mm_step__state"; }
+        ui.state.className = "mm_step__state";
+    }
+
+    function mm_isBuyStep(key) {
+        return key === "BuyOnline" || key === "BuyOffline";
     }
 
     // ============================================================
@@ -539,7 +596,7 @@
         return new Promise(function (resolve) {
             var start = performance.now();
 
-            // 只用于界面刷新的辅助定时器，不参与逻辑
+            // 辅助定时器：只负责刷新进度条，不参与逻辑
             var tick = setInterval(function () {
                 var pass = performance.now() - start;
                 var pct = Math.min(pass / ms, 1);
@@ -551,10 +608,19 @@
             var timeout = setTimeout(function () {
                 clearInterval(tick);
                 ui.bar.style.width = "100%";
-                ui.left.textContent = "已完成 · 用时 " + mm_fmt(ms);
-                mm_setState(key, "done", "已完成");
-                mm_log(def.name + " 完成", "done");
-                resolve(def.name);
+
+                // 买原料的两个分支：race 已选出胜者，后完成的记为“未采用”
+                if (mm_buyWinner && mm_isBuyStep(key) && mm_buyWinner !== key) {
+                    ui.left.textContent = "完成但未采用 · " + mm_fmt(ms);
+                    mm_setState(key, "skip", "未采用");
+                    mm_log(def.name + " 也完成了，但 Promise.race 已采用先完成的「"
+                        + mm_ui[mm_buyWinner].name + "」", "tip");
+                } else {
+                    ui.left.textContent = "已完成 · 用时 " + mm_fmt(ms);
+                    mm_setState(key, "done", "已完成");
+                    mm_log(def.name + " 完成", "done");
+                }
+                resolve(key);
             }, ms);
 
             mm_timers[key] = { tick: tick, timeout: timeout };
@@ -580,17 +646,24 @@
             mm_totalBar.style.width = Math.min(pass / mm_totalMs, 1) * 100 + "%";
         }, 60);
 
-        mm_log("开始：买原料 → 取原料 →（和面 ‖ 和馅）→ 包饺子 → 吃饺子", "tip");
+        mm_log("开始：买原料（线上 ‖ 线下）→ 取原料 →（和面 ‖ 和馅）→ 包饺子 → 煮饺子 → 吃饺子", "tip");
 
         try {
-            // 1. 先买原料（6s）
-            await mm_promiseStep("Buy");
-            // 2. 取原料（3s）
+            // 1. 买原料：线上线下同时下单，谁先完成就走谁（Promise.race）
+            mm_log("线上、线下同时开始购买，Promise.race 只等最快的那个", "tip");
+            var winnerKey = await Promise.race([
+                mm_promiseStep("BuyOnline"),
+                mm_promiseStep("BuyOffline")
+            ]);
+            mm_buyWinner = winnerKey;
+            mm_log("竞速结束：采用「" + mm_ui[winnerKey].name + "」，另一个分支仍在后台，不再等待", "tip");
+
+            // 2. 取原料
             await mm_promiseStep("Pick");
 
             mm_log("原料到手，和面与和馅同时开始（Promise.all 并行）", "tip");
 
-            // 3. 并行：和面（5s）与和馅（4s），两者都完成才继续
+            // 3. 并行：和面与和馅，两者都完成才继续
             await Promise.all([
                 mm_promiseStep("Dough"),
                 mm_promiseStep("Filling")
@@ -598,9 +671,11 @@
 
             mm_log("面与馅都准备好了，开始包饺子", "tip");
 
-            // 4. 包饺子（3s）
+            // 4. 包饺子
             await mm_promiseStep("Wrap");
-            // 5. 吃饺子（2s）
+            // 5. 煮饺子
+            await mm_promiseStep("Boil");
+            // 6. 吃饺子
             await mm_promiseStep("Eat");
 
             mm_totalBar.style.width = "100%";
@@ -630,6 +705,7 @@
         if (mm_elapsedTimer !== null) { clearInterval(mm_elapsedTimer); mm_elapsedTimer = null; }
 
         mm_running = false;
+        mm_buyWinner = null;
         mm_startBtn.disabled = false;
         mm_runStartAt = 0;
         mm_totalBar.style.width = "0%";
@@ -638,7 +714,7 @@
 
         mm_stepDefs.forEach(function (def) {
             var ui = mm_ui[def.key];
-            ui.step.classList.remove("mmm_running", "mmm_done");
+            ui.step.classList.remove("mmm_running", "mmm_done", "mmm_skip");
             ui.state.textContent = "等待";
             ui.state.className = "mm_step__state";
             ui.bar.style.width = "0%";
@@ -648,7 +724,7 @@
         mm_logBox.innerHTML = "";
         var empty = document.createElement("div");
         empty.className = "mm_log__empty";
-        empty.textContent = "点击「开始包饺子」，这里会实时输出每个 Promise 的开始与完成时间。";
+        empty.textContent = "点击「开始包饺子」，这里会实时输出每个 Promise 的开始、完成与竞速结果。";
         mm_logBox.appendChild(empty);
     }
 
@@ -660,7 +736,6 @@
     });
 
     mm_resetBtn.addEventListener("click", function () {
-        // 若正在运行，先让流程停下：清掉所有定时器的同时把标志复位
         var wasRunning = mm_running;
         mm_resetAll();
         if (wasRunning) {
@@ -677,10 +752,12 @@
             });
             btn.classList.add("mmm_on");
             mm_totalText.textContent = mm_fmt(Math.round(mm_serialBaseMs / mm_speed));
+
             mm_logBox.innerHTML = "";
             var empty = document.createElement("div");
             empty.className = "mm_log__empty";
-            empty.textContent = "已切换为 " + mm_speed + " 倍速，预计总时长 " + mm_fmt(Math.round(mm_serialBaseMs / mm_speed)) + "。";
+            empty.textContent = "已切换为 " + mm_speed + " 倍速，预计总时长 "
+                + mm_fmt(Math.round(mm_serialBaseMs / mm_speed)) + "。";
             mm_logBox.appendChild(empty);
         });
     });
