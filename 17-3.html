@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：商品列表页 - fetch 请求 dummyjson 商品接口并渲染卡片列表，可点击进入详情 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-3 · 商品列表</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 26px 18px 70px;
+        }
+        .mm_wrap { max-width: 1120px; margin: 0 auto; }
+
+        /* ============ 返回 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #6b7280; text-decoration: none; font-size: .88rem;
+            margin-bottom: 14px; transition: color .2s;
+        }
+        .mm_back:hover { color: #4f46e5; }
+
+        /* ============ 头部 ============ */
+        .mm_hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 45%, #8b5cf6 100%);
+            border-radius: 18px;
+            padding: 26px 28px;
+            color: #fff;
+            margin-bottom: 18px;
+            box-shadow: 0 14px 34px rgba(79, 70, 229, .22);
+        }
+        .mm_hero h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        .mm_hero p { font-size: .88rem; line-height: 1.75; color: rgba(255,255,255,.85); }
+        .mm_hero .mm_api {
+            display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-top: 12px; background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.28); border-radius: 9px;
+            padding: 7px 12px; font-family: Consolas, monospace; font-size: .78rem;
+        }
+        .mm_hero .mm_api b { background: #fff; color: #4f46e5; padding: 1px 7px; border-radius: 5px; font-size: .7rem; }
+        .mm_hero .mm_api a { color: #fff; text-decoration: underline; word-break: break-all; }
+
+        /* ============ 工具栏 ============ */
+        .mm_toolbar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            background: #fff; border: 1px solid #e8ebf4; border-radius: 14px;
+            padding: 12px 14px; margin-bottom: 16px;
+        }
+        .mm_toolbar .mm_label { font-size: .78rem; color: #9ca3af; }
+        .mm_select, .mm_btn {
+            font-family: inherit; font-size: .82rem; border-radius: 9px;
+            border: 1px solid #e2e6f0; background: #fff; color: #374151;
+            padding: 7px 11px; cursor: pointer; outline: none;
+            transition: all .18s;
+        }
+        .mm_select:hover, .mm_btn:hover { border-color: #a5b4fc; color: #4f46e5; }
+        .mm_btn { display: inline-flex; align-items: center; gap: 6px; }
+        .mm_btn.mmm_primary {
+            background: #4f46e5; border-color: #4f46e5; color: #fff;
+            box-shadow: 0 6px 16px rgba(79, 70, 229, .26);
+        }
+        .mm_btn.mmm_primary:hover { background: #4338ca; color: #fff; }
+        .mm_btn:disabled { opacity: .55; cursor: not-allowed; }
+        .mm_toolbar .mm_stat {
+            margin-left: auto; font-size: .76rem; color: #9ca3af;
+            font-family: Consolas, monospace;
+        }
+
+        /* ============ 网格 ============ */
+        .mm_grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+            gap: 16px;
+        }
+
+        /* 商品卡片 */
+        .mm_card {
+            background: #fff; border: 1px solid #e8ebf4; border-radius: 14px;
+            overflow: hidden; cursor: pointer; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column;
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .mm_card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(31, 41, 55, .12);
+            border-color: #c7d2fe;
+        }
+        .mm_thumb {
+            position: relative; background: #f8fafc; padding-top: 74%; overflow: hidden;
+        }
+        .mm_thumb img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; transition: transform .3s;
+        }
+        .mm_card:hover .mm_thumb img { transform: scale(1.06); }
+        .mm_off {
+            position: absolute; top: 10px; left: 10px;
+            background: #ef4444; color: #fff; font-size: .7rem; font-weight: bold;
+            padding: 3px 8px; border-radius: 6px; font-family: Consolas, monospace;
+        }
+        .mm_cat {
+            position: absolute; bottom: 8px; left: 10px;
+            background: rgba(17, 24, 39, .72); color: #fff; font-size: .68rem;
+            padding: 2px 8px; border-radius: 5px; backdrop-filter: blur(4px);
+        }
+
+        .mm_card-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+        .mm_title {
+            font-size: .9rem; font-weight: bold; color: #111827; line-height: 1.45;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; min-height: 2.6em;
+        }
+        .mm_brand { font-size: .74rem; color: #9ca3af; }
+        .mm_price-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .mm_price {
+            font-size: 1.06rem; font-weight: bold; color: #ef4444;
+            font-family: Consolas, monospace;
+        }
+        .mm_old {
+            font-size: .74rem; color: #b6bcc8; text-decoration: line-through;
+            font-family: Consolas, monospace;
+        }
+        .mm_meta-row {
+            display: flex; align-items: center; gap: 10px; font-size: .74rem;
+            color: #6b7280; flex-wrap: wrap;
+        }
+        .mm_star { color: #f59e0b; font-family: Consolas, monospace; }
+        .mm_stock { color: #059669; }
+        .mm_stock.mmm_low { color: #f97316; }
+        .mm_more {
+            margin-top: auto; padding-top: 8px; border-top: 1px dashed #eef1f7;
+            font-size: .76rem; color: #4f46e5; display: flex; align-items: center;
+            justify-content: space-between;
+        }
+
+        /* 骨架屏 */
+        .mm_skeleton {
+            background: #fff; border: 1px solid #e8ebf4; border-radius: 14px;
+            overflow: hidden;
+        }
+        .mm_sk-img { padding-top: 74%; position: relative; }
+        .mm_sk-img::after, .mm_sk-line::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg, #eef1f7 25%, #f7f9fd 37%, #eef1f7 63%);
+            background-size: 400% 100%;
+            animation: mm_shimmer 1.4s ease infinite;
+        }
+        .mm_sk-body { padding: 14px; display: grid; gap: 10px; }
+        .mm_sk-line { position: relative; height: 12px; border-radius: 6px; background: #eef1f7; overflow: hidden; }
+        @keyframes mm_shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+        /* 错误 / 空 */
+        .mm_state {
+            grid-column: 1 / -1; background: #fff; border: 1px dashed #fecaca;
+            border-radius: 14px; padding: 42px 20px; text-align: center;
+            color: #b91c1c; display: grid; gap: 10px; justify-items: center;
+        }
+        .mm_state i { font-size: 1.8rem; font-style: normal; }
+        .mm_state p { font-size: .86rem; line-height: 1.7; }
+
+        /* ============ 原始 JSON ============ */
+        .mm_json-card {
+            margin-top: 18px; background: #fff; border: 1px solid #e8ebf4;
+            border-radius: 14px; overflow: hidden;
+        }
+        .mm_json-head {
+            display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+            border-bottom: 1px solid #eef1f7; font-size: .86rem;
+        }
+        .mm_json-head i { color: #4f46e5; font-style: normal; }
+        .mm_json-head .mm_hint { margin-left: auto; font-size: .74rem; color: #9ca3af; }
+        .mm_json {
+            display: none; max-height: 320px; overflow: auto;
+            background: #0f172a; color: #e2e8f0; padding: 14px;
+            font-family: Consolas, monospace; font-size: .76rem; line-height: 1.7;
+            white-space: pre-wrap; word-break: break-all;
+        }
+        .mm_json.mmm_show { display: block; }
+        .mm_json .mm_k { color: #93c5fd; }
+        .mm_json .mm_s { color: #86efac; }
+
+        .mm_footer {
+            text-align: center; color: #b6bcc8; font-size: .76rem;
+            border-top: 1px dashed #e2e6f0; margin-top: 24px; padding-top: 16px;
+        }
+
+        @media (max-width: 560px) {
+            .mm_hero h1 { font-size: 1.2rem; }
+            .mm_grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .mm_title { font-size: .82rem; }
+            .mm_thumb { padding-top: 82%; }
+            .mm_toolbar .mm_stat { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back"><i class="iconfont icon-shouye1"></i> 返回首页</a>
+
+    <!-- ================= 头部 ================= -->
+    <header class="mm_hero">
+        <h1>🛍️ 商品列表</h1>
+        <p>用原生 <code>fetch()</code> 请求 dummyjson 商品接口，渲染 8 个商品卡片；点击任意卡片会带上 id 跳转到详情页 <code>17-3-detail.html</code>。</p>
+        <div class="mm_api">
+            <b>GET</b>
+            <a href="https://dummyjson.com/products?limit=8" target="_blank" rel="noopener">https://dummyjson.com/products?limit=8</a>
+            <span>· 支持跨域</span>
+        </div>
+    </header>
+
+    <!-- ================= 工具栏 ================= -->
+    <div class="mm_toolbar">
+        <span class="mm_label">每页</span>
+        <select class="mm_select" id="mm_limit" onchange="mm_loadList()">
+            <option value="8" selected>8 条（默认）</option>
+            <option value="12">12 条</option>
+            <option value="16">16 条</option>
+        </select>
+        <span class="mm_label">排序</span>
+        <select class="mm_select" id="mm_sort" onchange="mm_applySort()">
+            <option value="default">默认顺序</option>
+            <option value="price-asc">价格 低 → 高</option>
+            <option value="price-desc">价格 高 → 低</option>
+            <option value="rating-desc">评分 高 → 低</option>
+        </select>
+        <button class="mm_btn mmm_primary" id="mm_btnReload" onclick="mm_loadList()">
+            <i class="iconfont icon-huhuan"></i> 重新请求
+        </button>
+        <span class="mm_stat" id="mm_stat">等待请求…</span>
+    </div>
+
+    <!-- ================= 列表 ================= -->
+    <section class="mm_grid" id="mm_grid" aria-label="商品列表"></section>
+
+    <!-- ================= 原始 JSON ================= -->
+    <div class="mm_json-card">
+        <div class="mm_json-head">
+            <i class="iconfont icon-baocun"></i>
+            <span>接口返回的原始 JSON</span>
+            <button class="mm_btn" onclick="mm_toggleJson()" id="mm_btnJson">展开</button>
+            <span class="mm_hint" id="mm_jsonHint">共 0 条</span>
+        </div>
+        <pre class="mm_json" id="mm_json"></pre>
+    </div>
+
+    <footer class="mm_footer">
+        《高级网页设计》 · 17-3 商品列表 · 作图：孟梦 · 2026-11-02
+    </footer>
+</div>
+
+<script>
+    /* ============ 接口 ============ */
+    const mm_apiBase = "https://dummyjson.com";
+    const mm_grid = document.getElementById("mm_grid");
+    const mm_stat = document.getElementById("mm_stat");
+    const mm_json = document.getElementById("mm_json");
+    const mm_jsonHint = document.getElementById("mm_jsonHint");
+    const mm_btnJson = document.getElementById("mm_btnJson");
+    const mm_btnReload = document.getElementById("mm_btnReload");
+
+    let mm_products = [];   // 接口原始数据
+    let mm_rawText = "";    // 原始 JSON 文本
+
+    /* ============ 骨架屏 ============ */
+    function mm_renderSkeleton(mm_n) {
+        let mm_html = "";
+        for (let mm_i = 0; mm_i < mm_n; mm_i++) {
+            mm_html +=
+                '<div class="mm_skeleton">' +
+                    '<div class="mm_sk-img"></div>' +
+                    '<div class="mm_sk-body">' +
+                        '<div class="mm_sk-line" style="width:88%"></div>' +
+                        '<div class="mm_sk-line" style="width:60%"></div>' +
+                        '<div class="mm_sk-line" style="width:42%"></div>' +
+                    '</div>' +
+                '</div>';
+        }
+        mm_grid.innerHTML = mm_html;
+    }
+
+    /* ============ 请求列表 ============ */
+    function mm_loadList() {
+        const mm_limit = document.getElementById("mm_limit").value;
+        const mm_url = mm_apiBase + "/products?limit=" + mm_limit;
+
+        mm_btnReload.disabled = true;
+        mm_stat.textContent = "请求中…";
+        mm_renderSkeleton(Number(mm_limit));
+
+        const mm_t0 = performance.now();
+
+        fetch(mm_url)
+            .then(function (mm_res) {
+                if (!mm_res.ok) throw new Error("HTTP " + mm_res.status);
+                return mm_res.json();
+            })
+            .then(function (mm_data) {
+                /* 接口返回 { products: [...], total, skip, limit } */
+                if (!mm_data || !Array.isArray(mm_data.products)) {
+                    throw new Error("返回数据格式不对，缺少 products 数组");
+                }
+                mm_products = mm_data.products;
+                mm_rawText = JSON.stringify(mm_data, null, 2);
+
+                const mm_cost = Math.round(performance.now() - mm_t0);
+                mm_stat.textContent = "共 " + mm_data.total + " 条 · 当前 " +
+                    mm_products.length + " 条 · 耗时 " + mm_cost + " ms";
+
+                document.getElementById("mm_sort").value = "default";
+                mm_renderList(mm_products);
+                mm_renderJson();
+            })
+            .catch(function (mm_e) {
+                mm_stat.textContent = "请求失败";
+                mm_grid.innerHTML =
+                    '<div class="mm_state">' +
+                        '<i class="iconfont icon-guanbi-1"></i>' +
+                        '<p>获取商品列表失败：' + mm_e.message +
+                        '<br>请检查网络后重试。</p>' +
+                        '<button class="mm_btn mmm_primary" onclick="mm_loadList()">重试</button>' +
+                    '</div>';
+            })
+            .finally(function () {
+                mm_btnReload.disabled = false;
+            });
+    }
+
+    /* ============ 渲染卡片 ============ */
+    function mm_renderList(mm_list) {
+        if (!mm_list || mm_list.length === 0) {
+            mm_grid.innerHTML = '<div class="mm_state"><p>暂无商品数据</p></div>';
+            return;
+        }
+        mm_grid.innerHTML = mm_list.map(function (mm_p) {
+            const mm_oldPrice = (mm_p.price / (1 - mm_p.discountPercentage / 100)).toFixed(2);
+            const mm_lowStock = mm_p.stock < 10;
+
+            return '<a class="mm_card" href="17-3-detail.html?id=' + mm_p.id + '">' +
+                '<div class="mm_thumb">' +
+                    '<img src="' + mm_p.thumbnail + '" alt="' + mm_p.title + '" loading="lazy">' +
+                    '<span class="mm_off">-' + Math.round(mm_p.discountPercentage) + '%</span>' +
+                    '<span class="mm_cat">' + mm_p.category + '</span>' +
+                '</div>' +
+                '<div class="mm_card-body">' +
+                    '<div class="mm_title">' + mm_p.title + '</div>' +
+                    '<div class="mm_brand">' + (mm_p.brand || "无品牌") + ' · SKU ' + (mm_p.sku || "—") + '</div>' +
+                    '<div class="mm_price-row">' +
+                        '<span class="mm_price">$' + mm_p.price.toFixed(2) + '</span>' +
+                        '<span class="mm_old">$' + mm_oldPrice + '</span>' +
+                    '</div>' +
+                    '<div class="mm_meta-row">' +
+                        '<span class="mm_star">★ ' + mm_p.rating.toFixed(2) + '</span>' +
+                        '<span class="mm_stock' + (mm_lowStock ? " mmm_low" : "") + '">库存 ' + mm_p.stock + '</span>' +
+                    '</div>' +
+                    '<div class="mm_more"><span>查看详情</span><span>→</span></div>' +
+                '</div>' +
+            '</a>';
+        }).join("");
+    }
+
+    /* ============ 排序 ============ */
+    function mm_applySort() {
+        const mm_type = document.getElementById("mm_sort").value;
+        let mm_list = mm_products.slice();
+
+        if (mm_type === "price-asc") {
+            mm_list.sort(function (a, b) { return a.price - b.price; });
+        } else if (mm_type === "price-desc") {
+            mm_list.sort(function (a, b) { return b.price - a.price; });
+        } else if (mm_type === "rating-desc") {
+            mm_list.sort(function (a, b) { return b.rating - a.rating; });
+        }
+        mm_renderList(mm_list);
+    }
+
+    /* ============ 原始 JSON ============ */
+    function mm_renderJson() {
+        mm_jsonHint.textContent = "共 " + mm_products.length + " 条";
+        mm_json.innerHTML = mm_highlight(mm_rawText);
+    }
+
+    function mm_highlight(mm_text) {
+        const mm_esc = mm_text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        return mm_esc.replace(/"([^"]*)"(\s*:)?/g, function (mm_m, mm_str, mm_colon) {
+            return mm_colon
+                ? '<span class="mm_k">"' + mm_str + '"</span>' + mm_colon
+                : '<span class="mm_s">"' + mm_str + '"</span>';
+        });
+    }
+
+    function mm_toggleJson() {
+        const mm_show = mm_json.classList.toggle("mmm_show");
+        mm_btnJson.textContent = mm_show ? "收起" : "展开";
+    }
+
+    /* ============ 初始化 ============ */
+    mm_loadList();
+
+    window.mm_loadList = mm_loadList;
+    window.mm_applySort = mm_applySort;
+    window.mm_toggleJson = mm_toggleJson;
+</script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：fetch 请求 dog.ceo 随机狗图接口并展示（加载状态、原始 JSON、品种解析、历史记录、自动连播） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-2 · fetch 获取随机狗图</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(160deg, #fff8f0 0%, #fff2e4 45%, #ffe9f3 100%);
+            color: #3b3028;
+            min-height: 100vh;
+            padding: 26px 18px 70px;
+        }
+        .mm_wrap { max-width: 980px; margin: 0 auto; }
+
+        /* ============ 返回 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #9a7b61; text-decoration: none; font-size: .88rem;
+            margin-bottom: 16px; transition: color .2s;
+        }
+        .mm_back:hover { color: #f97316; }
+
+        /* ============ 头部 ============ */
+        .mm_hero {
+            background: #fff;
+            border: 1px solid #ffe0c2;
+            border-radius: 18px;
+            padding: 24px 26px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(249, 115, 22, .08);
+        }
+        .mm_hero h1 { font-size: 1.5rem; color: #3b3028; margin-bottom: 8px; }
+        .mm_hero h1 span { color: #f97316; }
+        .mm_hero p { color: #8a7668; font-size: .9rem; line-height: 1.75; }
+        .mm_api {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            margin-top: 14px; padding: 10px 12px;
+            background: #fffaf5; border: 1px dashed #ffd4ac; border-radius: 10px;
+            font-family: Consolas, monospace; font-size: .8rem; color: #b45309;
+        }
+        .mm_api .mm_verb {
+            background: #f97316; color: #fff; padding: 2px 8px; border-radius: 5px;
+            font-weight: bold; font-size: .72rem;
+        }
+        .mm_api a { color: #ea580c; word-break: break-all; }
+
+        /* ============ 主体两栏 ============ */
+        .mm_main { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; align-items: start; }
+
+        /* ---- 图片卡片 ---- */
+        .mm_photo {
+            background: #fff; border: 1px solid #ffe0c2; border-radius: 18px;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(249, 115, 22, .08);
+        }
+        .mm_photo-stage {
+            position: relative; background: #fff4e8;
+            height: 380px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .mm_photo-stage img {
+            width: 100%; height: 100%; object-fit: cover;
+            opacity: 0; transition: opacity .35s ease;
+        }
+        .mm_photo-stage img.mmm_show { opacity: 1; }
+
+        /* 加载骨架 */
+        .mm_loading {
+            position: absolute; inset: 0;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px; background: linear-gradient(90deg, #fff4e8 25%, #ffe9d5 37%, #fff4e8 63%);
+            background-size: 400% 100%;
+            animation: mm_shimmer 1.4s ease infinite;
+            color: #b45309; font-size: .82rem;
+        }
+        .mm_loading.mmm_show { display: flex; }
+        @keyframes mm_shimmer {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0 50%; }
+        }
+        .mm_spinner {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 3px solid #fdd9b5; border-top-color: #f97316;
+            animation: mm_spin .8s linear infinite;
+        }
+        @keyframes mm_spin { to { transform: rotate(360deg); } }
+
+        /* 错误层 */
+        .mm_error {
+            position: absolute; inset: 0;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            gap: 10px; background: #fff6f6; color: #b91c1c; text-align: center; padding: 20px;
+        }
+        .mm_error.mmm_show { display: flex; }
+        .mm_error i { font-size: 1.8rem; font-style: normal; }
+        .mm_error p { font-size: .85rem; line-height: 1.7; }
+
+        .mm_photo-meta {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 14px 16px; border-top: 1px solid #f4ece4;
+        }
+        .mm_breed {
+            font-size: 1rem; font-weight: bold; color: #3b3028;
+        }
+        .mm_breed-en {
+            font-family: Consolas, monospace; font-size: .76rem; color: #a89180;
+            background: #fff8f0; border: 1px solid #ffe6cd; border-radius: 6px;
+            padding: 2px 8px;
+        }
+        .mm_meta-right { margin-left: auto; display: flex; gap: 8px; }
+        .mm_link {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: .78rem; color: #ea580c; text-decoration: none;
+            border: 1px solid #ffd4ac; border-radius: 8px; padding: 5px 10px;
+            transition: all .18s;
+        }
+        .mm_link:hover { background: #fff1e4; border-color: #f97316; }
+
+        /* ---- 控制条 ---- */
+        .mm_bar {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            padding: 14px 16px; border-top: 1px solid #f4ece4; background: #fffaf5;
+        }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            border: 1px solid #ffd4ac; background: #fff; color: #8a5a2b;
+            padding: 9px 15px; border-radius: 10px; font-size: .85rem;
+            cursor: pointer; font-family: inherit; transition: all .18s;
+        }
+        .mm_btn:hover { border-color: #f97316; color: #ea580c; background: #fff5eb; }
+        .mm_btn:disabled { opacity: .55; cursor: not-allowed; }
+        .mm_btn.mmm_primary {
+            background: linear-gradient(135deg, #fb923c, #f97316);
+            color: #fff; border-color: transparent;
+            box-shadow: 0 6px 16px rgba(249, 115, 22, .28);
+        }
+        .mm_btn.mmm_primary:hover { color: #fff; filter: brightness(1.05); }
+        .mm_btn.mmm_on { background: #fff1e4; border-color: #f97316; color: #ea580c; }
+
+        /* ============ 右侧信息栏 ============ */
+        .mm_side { display: grid; gap: 16px; }
+        .mm_card {
+            background: #fff; border: 1px solid #ffe0c2; border-radius: 18px;
+            padding: 16px; box-shadow: 0 10px 30px rgba(249, 115, 22, .07);
+        }
+        .mm_card-head {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        }
+        .mm_card-head i { color: #f97316; font-style: normal; font-size: 1rem; }
+        .mm_card-head h2 { font-size: .95rem; color: #3b3028; }
+        .mm_card-head .mm_hint { margin-left: auto; font-size: .74rem; color: #b9a99a; }
+
+        .mm_status {
+            display: flex; align-items: center; gap: 8px;
+            font-family: Consolas, monospace; font-size: .76rem;
+            padding: 9px 11px; border-radius: 9px; margin-bottom: 10px;
+            background: #fffaf5; border: 1px solid #ffe6cd; color: #a89180;
+        }
+        .mm_status.mmm_ok { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+        .mm_status.mmm_err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+        .mm_status .mm_dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; flex-shrink: 0;
+        }
+        .mm_status.mmm_ok .mm_dot { background: #22c55e; }
+        .mm_status.mmm_err .mm_dot { background: #ef4444; }
+
+        /* 代码块 */
+        .mm_code {
+            background: #2b2320; border-radius: 10px; padding: 12px;
+            font-family: Consolas, monospace; font-size: .76rem; line-height: 1.7;
+            color: #e7d9cc; white-space: pre-wrap; word-break: break-all;
+            max-height: 190px; overflow: auto;
+        }
+        .mm_code .mm_k { color: #93c5fd; }
+        .mm_code .mm_s { color: #86efac; }
+
+        .mm_row {
+            display: flex; justify-content: space-between; gap: 10px;
+            font-size: .78rem; color: #8a7668; padding: 6px 0;
+            border-bottom: 1px dashed #f4ece4;
+        }
+        .mm_row:last-child { border-bottom: none; }
+        .mm_row b { color: #3b3028; font-family: Consolas, monospace; font-weight: normal; }
+
+        /* ============ 历史画廊 ============ */
+        .mm_gallery {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+            gap: 8px; margin-top: 4px;
+        }
+        .mm_thumb {
+            position: relative; padding-top: 100%; border-radius: 9px; overflow: hidden;
+            border: 2px solid transparent; cursor: pointer; background: #fff4e8;
+            transition: border-color .18s, transform .18s;
+        }
+        .mm_thumb img {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+        }
+        .mm_thumb:hover { transform: translateY(-2px); border-color: #fdba74; }
+        .mm_thumb.mmm_active { border-color: #f97316; }
+        .mm_empty { color: #b9a99a; font-size: .8rem; padding: 14px 0; text-align: center; }
+
+        /* ============ 页脚 ============ */
+        .mm_footer {
+            text-align: center; color: #b9a99a; font-size: .76rem;
+            border-top: 1px dashed #ffe0c2; margin-top: 24px; padding-top: 16px;
+        }
+
+        @media (max-width: 860px) {
+            .mm_main { grid-template-columns: 1fr; }
+            .mm_photo-stage { height: 300px; }
+        }
+        @media (max-width: 520px) {
+            .mm_hero h1 { font-size: 1.2rem; }
+            .mm_photo-stage { height: 240px; }
+            .mm_btn { padding: 8px 12px; font-size: .8rem; }
+            .mm_breed { font-size: .9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back"><i class="iconfont icon-shouye1"></i> 返回首页</a>
+
+    <!-- ================= 头部 ================= -->
+    <header class="mm_hero">
+        <h1>🐶 <span>fetch</span> 获取随机狗图</h1>
+        <p>用原生 <code>fetch()</code> 请求 dog.ceo 的随机图片接口，把返回的 JSON 里的图片地址渲染到页面；同时展示加载状态、错误处理、原始 JSON 文本、品种解析和历史记录。</p>
+        <div class="mm_api">
+            <span class="mm_verb">GET</span>
+            <a href="https://dog.ceo/api/breeds/image/random" target="_blank" rel="noopener">https://dog.ceo/api/breeds/image/random</a>
+            <span>· 支持跨域（CORS）· 返回 JSON</span>
+        </div>
+    </header>
+
+    <!-- ================= 主体 ================= -->
+    <div class="mm_main">
+
+        <!-- 左：图片 -->
+        <section class="mm_photo">
+            <div class="mm_photo-stage">
+                <img id="mm_dogImg" alt="随机狗狗图片">
+                <div class="mm_loading mmm_show" id="mm_loading">
+                    <div class="mm_spinner"></div>
+                    <div>正在向 dog.ceo 请求数据…</div>
+                </div>
+                <div class="mm_error" id="mm_error">
+                    <i class="iconfont icon-guanbi-1"></i>
+                    <p id="mm_errorText">请求失败</p>
+                    <button class="mm_btn" onclick="mm_fetchDog()">重试一次</button>
+                </div>
+            </div>
+
+            <div class="mm_photo-meta">
+                <div>
+                    <div class="mm_breed" id="mm_breed">等待获取…</div>
+                    <div class="mm_breed-en" id="mm_breedEn" style="display:none;"></div>
+                </div>
+                <div class="mm_meta-right">
+                    <a class="mm_link" id="mm_openLink" href="#" target="_blank" rel="noopener">
+                        <i class="iconfont icon-baocun"></i> 打开原图
+                    </a>
+                </div>
+            </div>
+
+            <div class="mm_bar">
+                <button class="mm_btn mmm_primary" id="mm_btnFetch" onclick="mm_fetchDog()">
+                    <i class="iconfont icon-huhuan"></i> 换一张
+                </button>
+                <button class="mm_btn" id="mm_btnAuto" onclick="mm_toggleAuto()">
+                    <i class="iconfont icon-yuedu"></i> 自动连播
+                </button>
+                <button class="mm_btn" onclick="mm_clearHistory()">
+                    <i class="iconfont icon-shanchu"></i> 清空记录
+                </button>
+            </div>
+        </section>
+
+        <!-- 右：信息 -->
+        <aside class="mm_side">
+
+            <div class="mm_card">
+                <div class="mm_card-head">
+                    <i class="iconfont icon-xinxi"></i>
+                    <h2>请求状态</h2>
+                </div>
+                <div class="mm_status" id="mm_status">
+                    <span class="mm_dot"></span>
+                    <span id="mm_statusText">准备就绪</span>
+                </div>
+                <div class="mm_row"><span>请求次数</span><b id="mm_count">0</b></div>
+                <div class="mm_row"><span>上次成功时间</span><b id="mm_time">—</b></div>
+                <div class="mm_row"><span>HTTP 状态</span><b id="mm_http">—</b></div>
+                <div class="mm_row"><span>响应耗时</span><b id="mm_cost">—</b></div>
+            </div>
+
+            <div class="mm_card">
+                <div class="mm_card-head">
+                    <i class="iconfont icon-baocun"></i>
+                    <h2>接口返回的 JSON</h2>
+                    <span class="mm_hint">原始数据</span>
+                </div>
+                <div class="mm_code" id="mm_raw">// 点击「换一张」后显示接口返回内容</div>
+            </div>
+
+            <div class="mm_card">
+                <div class="mm_card-head">
+                    <i class="iconfont icon-paizhao"></i>
+                    <h2>历史记录</h2>
+                    <span class="mm_hint" id="mm_galCount">0 / 12</span>
+                </div>
+                <div class="mm_gallery" id="mm_gallery">
+                    <div class="mm_empty">还没有记录，先点「换一张」吧</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="mm_footer">
+        《高级网页设计》 · 17-2 fetch 接口数据展示 · 作图：孟梦 · 2026-11-02
+    </footer>
+</div>
+
+<script>
+    /* ============ 常量 ============ */
+    const mm_apiUrl = "https://dog.ceo/api/breeds/image/random";
+    const mm_maxHistory = 12;
+
+    /* 常见品种英文 → 中文映射（接口未覆盖的显示英文原名） */
+    const mm_breedCN = {
+        "hound-afghan": "阿富汗猎犬", "hound-basset": "巴吉度猎犬", "hound-blood": "寻血猎犬",
+        "hound-english": "英国猎犬", "hound-ibizan": "伊比萨猎犬", "hound-plott": "普罗特猎犬",
+        "hound-walker": "猎狐犬",
+        "terrier-american": "美国斯塔福梗", "terrier-australian": "澳洲梗",
+        "terrier-bedlington": "贝灵顿梗", "terrier-border": "边境梗", "terrier-cairn": "凯恩梗",
+        "terrier-dandie": "丹迪丁蒙梗", "terrier-fox": "猎狐梗", "terrier-irish": "爱尔兰梗",
+        "terrier-kerryblue": "凯利蓝梗", "terrier-lakeland": "湖畔梗",
+        "terrier-norfolk": "诺福克梗", "terrier-norwich": "诺维奇梗",
+        "terrier-patterdale": "帕特代尔梗", "terrier-russell": "杰克罗素梗",
+        "terrier-scottish": "苏格兰梗", "terrier-sealyham": "西里汉梗",
+        "terrier-silky": "澳洲丝毛梗", "terrier-tibetan": "西藏梗", "terrier-toy": "玩具梗",
+        "terrier-welsh": "威尔士梗", "terrier-westhighland": "西高地白梗",
+        "terrier-wheaten": "软毛麦色梗", "terrier-yorkshire": "约克夏梗",
+        "spaniel-blenheim": "布伦海姆猎鹬犬", "spaniel-brittany": "布列塔尼猎犬",
+        "spaniel-cocker": "可卡犬", "spaniel-irish": "爱尔兰水猎犬", "spaniel-japanese": "日本狆",
+        "spaniel-sussex": "苏塞克斯猎犬", "spaniel-welsh": "威尔士激飞猎犬",
+        "retriever-chesapeake": "切萨皮克湾寻回犬", "retriever-curly": "卷毛寻回犬",
+        "retriever-flatcoated": "平毛寻回犬", "retriever-golden": "金毛寻回犬",
+        "retriever-labrador": "拉布拉多寻回犬",
+        "mastiff-bull": "斗牛獒犬", "mastiff-english": "英国獒犬", "mastiff-tibetan": "藏獒",
+        "poodle-standard": "标准贵宾犬", "poodle-miniature": "迷你贵宾犬",
+        "poodle-toy": "玩具贵宾犬", "poodle-medium": "中型贵宾犬",
+        "bulldog-english": "英国斗牛犬", "bulldog-french": "法国斗牛犬",
+        "husky": "哈士奇", "pug": "巴哥犬", "beagle": "比格犬", "boxer": "拳师犬",
+        "chihuahua": "吉娃娃", "dalmatian": "大麦町犬", "doberman": "杜宾犬",
+        "germanshepherd": "德国牧羊犬", "rottweiler": "罗威纳犬", "samoyed": "萨摩耶",
+        "shiba": "柴犬", "pomeranian": "博美", "great-dane": "大丹犬", "greyhound": "灵缇",
+        "collie-border": "边境牧羊犬", "corgi-cardigan": "威尔士柯基",
+        "pembroke": "彭布罗克柯基", "australian-shepherd": "澳洲牧羊犬",
+        "malamute": "阿拉斯加雪橇犬", "poodle": "贵宾犬"
+    };
+
+    /* ============ 元素 ============ */
+    const mm_img = document.getElementById("mm_dogImg");
+    const mm_loading = document.getElementById("mm_loading");
+    const mm_error = document.getElementById("mm_error");
+    const mm_errorText = document.getElementById("mm_errorText");
+    const mm_breed = document.getElementById("mm_breed");
+    const mm_breedEn = document.getElementById("mm_breedEn");
+    const mm_openLink = document.getElementById("mm_openLink");
+    const mm_status = document.getElementById("mm_status");
+    const mm_statusText = document.getElementById("mm_statusText");
+    const mm_countEl = document.getElementById("mm_count");
+    const mm_timeEl = document.getElementById("mm_time");
+    const mm_httpEl = document.getElementById("mm_http");
+    const mm_costEl = document.getElementById("mm_cost");
+    const mm_raw = document.getElementById("mm_raw");
+    const mm_gallery = document.getElementById("mm_gallery");
+    const mm_galCount = document.getElementById("mm_galCount");
+    const mm_btnFetch = document.getElementById("mm_btnFetch");
+    const mm_btnAuto = document.getElementById("mm_btnAuto");
+
+    let mm_count = 0;
+    let mm_history = [];
+    let mm_timer = null;
+    let mm_isAuto = false;
+    let mm_lastUrl = "";
+
+    /* ============ 状态显示 ============ */
+    function mm_setStatus(mm_type, mm_text) {
+        mm_status.className = "mm_status" + (mm_type ? " mmm_" + mm_type : "");
+        mm_statusText.textContent = mm_text;
+    }
+
+    /* ============ 核心：fetch 请求 ============ */
+    function mm_fetchDog() {
+        mm_count++;
+        mm_countEl.textContent = mm_count;
+        mm_btnFetch.disabled = true;
+        mm_setStatus("", "请求中…");
+        mm_loading.classList.add("mmm_show");
+        mm_error.classList.remove("mmm_show");
+
+        const mm_t0 = performance.now();
+
+        fetch(mm_apiUrl, { cache: "no-store" })
+            .then(function (mm_res) {
+                mm_httpEl.textContent = mm_res.status + " " + (mm_res.ok ? "OK" : "错误");
+                if (!mm_res.ok) {
+                    throw new Error("请求失败，HTTP 状态码 " + mm_res.status);
+                }
+                return mm_res.json();
+            })
+            .then(function (mm_data) {
+                /* 接口正常时 status === "success" */
+                if (mm_data.status !== "success") {
+                    throw new Error("接口返回 status = " + mm_data.status);
+                }
+                mm_showDog(mm_data, mm_t0);
+            })
+            .catch(function (mm_e) {
+                /* 网络错误（断网、被浏览器拦截、接口异常）都在这里 */
+                mm_loading.classList.remove("mmm_show");
+                mm_error.classList.add("mmm_show");
+                mm_errorText.textContent = "获取失败：" + mm_e.message;
+                mm_setStatus("err", "请求失败：" + mm_e.message);
+                mm_costEl.textContent = Math.round(performance.now() - mm_t0) + " ms";
+                mm_btnFetch.disabled = false;
+            });
+    }
+
+    /* ============ 展示图片与信息 ============ */
+    function mm_showDog(mm_data, mm_t0) {
+        const mm_url = mm_data.message;
+        mm_lastUrl = mm_url;
+
+        mm_img.classList.remove("mmm_show");
+        mm_img.onload = function () {
+            mm_loading.classList.remove("mmm_show");
+            mm_img.classList.add("mmm_show");
+        };
+        mm_img.onerror = function () {
+            mm_loading.classList.remove("mmm_show");
+            mm_error.classList.add("mmm_show");
+            mm_errorText.textContent = "图片加载失败，可能是地址失效，请换一张";
+            mm_setStatus("err", "图片加载失败");
+        };
+        mm_img.src = mm_url;
+
+        /* 品种：从 URL 里 breeds/xxx/ 解析 */
+        const mm_breedKey = mm_parseBreed(mm_url);
+        const mm_cn = mm_breedCN[mm_breedKey];
+        mm_breed.textContent = mm_cn ? mm_cn : mm_formatBreed(mm_breedKey);
+        mm_breedEn.textContent = "breeds/" + mm_breedKey;
+        mm_breedEn.style.display = "inline-block";
+
+        mm_openLink.href = mm_url;
+
+        /* 原始 JSON 展示 */
+        mm_raw.innerHTML = mm_highlight(JSON.stringify(mm_data, null, 2));
+
+        /* 状态与统计 */
+        const mm_cost = Math.round(performance.now() - mm_t0);
+        mm_costEl.textContent = mm_cost + " ms";
+        mm_timeEl.textContent = new Date().toLocaleTimeString("zh-CN", { hour12: false });
+        mm_setStatus("ok", "获取成功（耗时 " + mm_cost + " ms）");
+
+        mm_addHistory(mm_url, mm_cn || mm_formatBreed(mm_breedKey));
+        mm_btnFetch.disabled = false;
+    }
+
+    /* 从链接解析品种标识 */
+    function mm_parseBreed(mm_url) {
+        const mm_m = mm_url.match(/breeds\/([^/]+)\//);
+        return mm_m ? mm_m[1] : "unknown";
+    }
+
+    /* 未收录中文名的品种：把 "rajapalayam-indian" 变成 "Rajapalayam Indian" */
+    function mm_formatBreed(mm_key) {
+        return mm_key.split("-").map(function (mm_w) {
+            return mm_w.charAt(0).toUpperCase() + mm_w.slice(1);
+        }).join(" ");
+    }
+
+    /* JSON 简单高亮：键名蓝、字符串绿 */
+    function mm_highlight(mm_text) {
+        const mm_esc = mm_text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        return mm_esc.replace(/"([^"]*)"(\s*:)?/g, function (mm_m, mm_str, mm_colon) {
+            return mm_colon
+                ? '<span class="mm_k">"' + mm_str + '"</span>' + mm_colon
+                : '<span class="mm_s">"' + mm_str + '"</span>';
+        });
+    }
+
+    /* ============ 历史记录 ============ */
+    function mm_addHistory(mm_url, mm_name) {
+        mm_history.unshift({ url: mm_url, name: mm_name });
+        if (mm_history.length > mm_maxHistory) {
+            mm_history = mm_history.slice(0, mm_maxHistory);
+        }
+        mm_renderGallery();
+    }
+
+    function mm_renderGallery() {
+        mm_galCount.textContent = mm_history.length + " / " + mm_maxHistory;
+        if (mm_history.length === 0) {
+            mm_gallery.innerHTML = '<div class="mm_empty">还没有记录，先点「换一张」吧</div>';
+            return;
+        }
+        mm_gallery.innerHTML = mm_history.map(function (mm_h, mm_i) {
+            return '<div class="mm_thumb' + (mm_h.url === mm_lastUrl ? " mmm_active" : "") +
+                '" title="' + mm_h.name + '" onclick="mm_pick(' + mm_i + ')">' +
+                '<img src="' + mm_h.url + '" alt="' + mm_h.name + '" loading="lazy">' +
+                '</div>';
+        }).join("");
+    }
+
+    /* 点缩略图切换大图 */
+    function mm_pick(mm_i) {
+        const mm_h = mm_history[mm_i];
+        if (!mm_h) return;
+        mm_lastUrl = mm_h.url;
+        mm_img.classList.remove("mmm_show");
+        mm_img.onload = function () { mm_img.classList.add("mmm_show"); };
+        mm_img.src = mm_h.url;
+        mm_openLink.href = mm_h.url;
+        mm_breed.textContent = mm_h.name;
+        mm_breedEn.textContent = "breeds/" + mm_parseBreed(mm_h.url);
+        mm_breedEn.style.display = "inline-block";
+        mm_renderGallery();
+    }
+
+    function mm_clearHistory() {
+        mm_history = [];
+        mm_renderGallery();
+    }
+
+    /* ============ 自动连播 ============ */
+    function mm_toggleAuto() {
+        if (mm_isAuto) {
+            clearInterval(mm_timer);
+            mm_timer = null;
+            mm_isAuto = false;
+            mm_btnAuto.classList.remove("mmm_on");
+            mm_btnAuto.innerHTML = '<i class="iconfont icon-yuedu"></i> 自动连播';
+            mm_setStatus("", "已停止自动连播");
+        } else {
+            mm_isAuto = true;
+            mm_btnAuto.classList.add("mmm_on");
+            mm_btnAuto.innerHTML = '<i class="iconfont icon-guanbi-1"></i> 停止连播';
+            mm_timer = setInterval(mm_fetchDog, 4000);
+            mm_setStatus("", "自动连播中，每 4 秒换一张");
+        }
+    }
+
+    /* ============ 初始化：进入页面就请求一次 ============ */
+    mm_fetchDog();
+
+    window.mm_fetchDog = mm_fetchDog;
+    window.mm_toggleAuto = mm_toggleAuto;
+    window.mm_clearHistory = mm_clearHistory;
+    window.mm_pick = mm_pick;
+</script>
+</body>
+</html>

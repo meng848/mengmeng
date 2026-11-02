@@ -159,3 +159,19 @@
 ```
 1、完成17-1.html，展示json。
 ```
+
+## 2026-11-02-15-56
+- **模型**: Trae（自研模型）
+- **提示词**:
+```
+2、完成 17-2.html 获取接口的`https://dog.ceo/api/breeds/image/random`数据并展示。接口可以跨域访问。使用 fetch 和原生代码实现。
+```
+
+## 2026-11-02-16-00
+- **模型**: Trae（自研模型）
+- **提示词**:
+```
+3、完成 17-3.html 和 17-3-detail.html，显示列表和列表详情，数据来源于接口，使用 fetch
+列表：`https://dummyjson.com/products?limit=8`，默认商品列表。
+详情：`https://dummyjson.com/products/1`，根据 ID 获取单个商品。
+```
