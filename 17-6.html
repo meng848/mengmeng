@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：Promise 与 async 异步流程演示 - 用 setTimeout 模拟包饺子从买原料到吃饺子的完整流程，并行和面与和馅 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-6 · Promise 与 async 包饺子流程</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(165deg, #fff7ed 0%, #fefce8 45%, #ecfdf5 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 24px 18px 70px;
+        }
+        .mm_wrap { max-width: 980px; margin: 0 auto; }
+
+        /* ============ 返回 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #78716c; text-decoration: none; font-size: .88rem; margin-bottom: 14px;
+        }
+        .mm_back:hover { color: #b45309; }
+
+        /* ============ 头部 ============ */
+        .mm_hero {
+            background: linear-gradient(135deg, #b45309, #d97706 50%, #0f766e);
+            color: #fff; border-radius: 16px; padding: 26px 28px;
+            margin-bottom: 18px; box-shadow: 0 16px 34px rgba(180, 83, 9, .22);
+        }
+        .mm_hero h1 { font-size: 1.5rem; margin-bottom: 10px; letter-spacing: .02em; }
+        .mm_hero h1 .iconfont { font-size: 1.5rem; margin-right: 8px; vertical-align: -2px; }
+        .mm_hero p { font-size: .88rem; line-height: 1.85; color: rgba(255,255,255,.9); }
+        .mm_hero code {
+            font-family: Consolas, monospace; padding: 1px 6px;
+            background: rgba(255,255,255,.16); border-radius: 4px;
+        }
+
+        /* ============ 卡片 ============ */
+        .mm_card {
+            background: #fff; border-radius: 16px; padding: 20px 22px;
+            margin-bottom: 18px; box-shadow: 0 10px 26px rgba(120, 113, 108, .1);
+        }
+        .mm_card__head {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px dashed #e7e5e4;
+        }
+        .mm_card__head h2 { font-size: 1.06rem; color: #111827; }
+        .mm_card__head .iconfont { color: #d97706; font-size: 1.1rem; }
+        .mm_sub { font-size: .78rem; color: #a8a29e; margin-left: auto; }
+
+        /* ============ 操作栏 ============ */
+        .mm_toolbar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 14px 16px; margin-bottom: 18px;
+            background: #fafaf9; border: 1px solid #f0eeec; border-radius: 12px;
+        }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; font-size: .86rem; font-weight: bold;
+            color: #fff; background: #d97706; border: none; border-radius: 9px; cursor: pointer;
+            transition: transform .15s, background .2s, box-shadow .2s;
+        }
+        .mm_btn:hover { background: #b45309; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(217,119,6,.25); }
+        .mm_btn:active { transform: translateY(0); }
+        .mm_btn.mmm_ghost { color: #b45309; background: #fff7ed; border: 1px solid #fed7aa; }
+        .mm_btn.mmm_ghost:hover { background: #ffedd5; box-shadow: 0 6px 14px rgba(217,119,6,.14); }
+        .mm_btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+        .mm_speed { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+        .mm_speed span { font-size: .78rem; color: #78716c; }
+        .mm_speed button {
+            padding: 5px 12px; font-size: .78rem; font-family: Consolas, monospace;
+            color: #78716c; background: #fff; border: 1px solid #e7e5e4;
+            border-radius: 999px; cursor: pointer; transition: all .18s;
+        }
+        .mm_speed button:hover { color: #b45309; border-color: #fed7aa; }
+        .mm_speed button.mmm_on { color: #fff; background: #0f766e; border-color: #0f766e; font-weight: bold; }
+
+        /* ============ 总进度 ============ */
+        .mm_total { margin-bottom: 22px; }
+        .mm_total__top {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .82rem; color: #57534e; margin-bottom: 8px;
+        }
+        .mm_total__top b { font-family: Consolas, monospace; color: #0f766e; font-size: .92rem; }
+        .mm_total__bar {
+            height: 10px; background: #f0eeec; border-radius: 999px; overflow: hidden;
+        }
+        .mm_total__bar span {
+            display: block; width: 0; height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #f59e0b, #10b981);
+            transition: width .12s linear;
+        }
+
+        /* ============ 流程图 ============ */
+        .mm_timeline { position: relative; padding-left: 34px; }
+        .mm_timeline::before {
+            position: absolute; left: 15px; top: 12px; bottom: 18px; content: "";
+            width: 2px; background: #f0eeec;
+        }
+        .mm_step { position: relative; margin-bottom: 14px; }
+        .mm_step:last-child { margin-bottom: 0; }
+        .mm_step__dot {
+            position: absolute; left: -34px; top: 14px;
+            display: grid; width: 32px; height: 32px; place-items: center;
+            color: #a8a29e; font-size: .95rem;
+            background: #f5f5f4; border: 2px solid #e7e5e4; border-radius: 50%;
+            transition: all .3s;
+        }
+        .mm_step.mmm_running .mm_step__dot {
+            color: #fff; background: #d97706; border-color: #d97706;
+            animation: mm_pulse 1.2s infinite;
+        }
+        .mm_step.mmm_done .mm_step__dot { color: #fff; background: #10b981; border-color: #10b981; }
+        @keyframes mm_pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(217,119,6,.45); }
+            70%  { box-shadow: 0 0 0 12px rgba(217,119,6,0); }
+            100% { box-shadow: 0 0 0 0 rgba(217,119,6,0); }
+        }
+
+        .mm_step__body {
+            padding: 12px 16px; background: #fafaf9;
+            border: 1px solid #f0eeec; border-radius: 12px; transition: all .3s;
+        }
+        .mm_step.mmm_running .mm_step__body { background: #fffbeb; border-color: #fde68a; }
+        .mm_step.mmm_done .mm_step__body { background: #f0fdf4; border-color: #bbf7d0; }
+        .mm_step__top {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            font-size: .9rem; margin-bottom: 3px;
+        }
+        .mm_step__top b { color: #292524; }
+        .mm_step__top .mm_ms {
+            font-family: Consolas, monospace; font-size: .76rem; color: #a8a29e;
+        }
+        .mm_step__state {
+            margin-left: auto; padding: 2px 10px;
+            font-size: .74rem; font-style: normal; color: #a8a29e;
+            background: #f5f5f4; border-radius: 999px;
+        }
+        .mm_step.mmm_running .mm_step__state { color: #b45309; background: #fef3c7; }
+        .mm_step.mmm_done .mm_step__state { color: #047857; background: #dcfce7; }
+        .mm_step__hint { font-size: .76rem; color: #a8a29e; font-family: Consolas, monospace; }
+        .mm_step__bar {
+            height: 6px; margin-top: 9px; background: #e7e5e4; border-radius: 999px; overflow: hidden;
+        }
+        .mm_step__bar span {
+            display: block; width: 0; height: 100%; border-radius: 999px;
+            background: #d97706; transition: width .1s linear;
+        }
+        .mm_step.mmm_done .mm_step__bar span { background: #10b981; }
+        .mm_step__left {
+            display: block; margin-top: 6px;
+            font-size: .75rem; color: #78716c; font-family: Consolas, monospace;
+        }
+
+        /* ============ 并行区 ============ */
+        .mm_parallel {
+            position: relative; margin: 4px 0 16px; padding: 14px 14px 2px;
+            background: #f0fdfa; border: 1px dashed #99f6e4; border-radius: 14px;
+        }
+        .mm_parallel__tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-bottom: 10px; padding: 3px 12px;
+            font-size: .76rem; font-weight: bold; color: #0f766e;
+            background: #ccfbf1; border-radius: 999px;
+        }
+        .mm_parallel__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mm_parallel .mm_step { margin-bottom: 12px; }
+        .mm_parallel .mm_timeline { padding-left: 0; }
+        .mm_parallel .mm_timeline::before { display: none; }
+        .mm_parallel .mm_step__dot { display: none; }
+
+        /* ============ 日志 ============ */
+        .mm_log {
+            padding: 12px 14px; max-height: 210px; min-height: 110px; overflow-y: auto;
+            font-family: Consolas, monospace; font-size: .8rem; line-height: 1.95;
+            color: #44403c; background: #1c1917; border-radius: 10px;
+        }
+        .mm_log__line { display: flex; gap: 10px; }
+        .mm_log__time { flex-shrink: 0; color: #57534e; }
+        .mm_log__text { color: #d6d3d1; }
+        .mm_log__line.mmm_run .mm_log__text { color: #fbbf24; }
+        .mm_log__line.mmm_done .mm_log__text { color: #34d399; }
+        .mm_log__line.mmm_tip .mm_log__text { color: #7dd3fc; }
+        .mm_log__empty { color: #57534e; }
+
+        /* ============ 代码块 ============ */
+        .mm_code {
+            padding: 14px 16px; margin-bottom: 14px; overflow-x: auto;
+            font-family: Consolas, monospace; font-size: .8rem; line-height: 1.85;
+            color: #e2e8f0; background: #0f172a; border-radius: 10px;
+            border-left: 3px solid #d97706; white-space: pre;
+        }
+        .mm_code:last-child { margin-bottom: 0; }
+        .mm_code .mm_c { color: #64748b; }
+        .mm_code .mm_k { color: #93c5fd; }
+        .mm_code .mm_f { color: #fbbf24; }
+        .mm_code .mm_s { color: #86efac; }
+        .mm_code__title { font-size: .82rem; color: #78716c; margin-bottom: 8px; }
+
+        /* ============ 要点 ============ */
+        .mm_tips { list-style: none; }
+        .mm_tips li {
+            position: relative; padding: 9px 0 9px 24px;
+            font-size: .86rem; line-height: 1.85; color: #57534e;
+            border-bottom: 1px dashed #f0eeec;
+        }
+        .mm_tips li:last-child { border-bottom: none; }
+        .mm_tips li::before {
+            position: absolute; left: 4px; top: 9px; content: "•"; color: #d97706; font-weight: bold;
+        }
+        .mm_tips b { color: #1c1917; }
+        .mm_tips code {
+            padding: 1px 5px; font-family: Consolas, monospace; font-size: .8rem;
+            color: #b45309; background: #fff7ed; border-radius: 4px;
+        }
+
+        .mm_foot { margin-top: 8px; text-align: center; font-size: .8rem; color: #a8a29e; }
+
+        @media (max-width: 700px) {
+            .mm_parallel__grid { grid-template-columns: 1fr; }
+            .mm_speed { margin-left: 0; }
+            .mm_hero { padding: 22px; }
+            body { padding: 16px 12px 60px; }
+            .mm_timeline { padding-left: 28px; }
+            .mm_step__dot { left: -28px; width: 26px; height: 26px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <!-- ============ 头部 ============ -->
+    <header class="mm_hero">
+        <h1><i class="iconfont icon-xiaoxi"></i>Promise + async/await 包饺子</h1>
+        <p>
+            每个步骤都是一个 <code>Promise</code>（内部用 <code>setTimeout</code> 模拟耗时）：
+            买原料 → 取原料 → <b>和面 ‖ 和馅（同时进行）</b> → 包饺子 → 吃饺子，用 <code>async/await</code> 串起整条流程。
+        </p>
+    </header>
+
+    <!-- ============ 一、流程演示 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-yuedu"></i>
+            <h2>一、流程演示</h2>
+            <span class="mm_sub">真实时长约 19 秒</span>
+        </div>
+
+        <div class="mm_toolbar">
+            <button class="mm_btn" id="mm_startBtn"><i class="iconfont icon-zhengque"></i>开始包饺子</button>
+            <button class="mm_btn mmm_ghost" id="mm_resetBtn"><i class="iconfont icon-huhuan"></i>重置</button>
+            <div class="mm_speed">
+                <span>演示倍速</span>
+                <button class="mmm_on" data-speed="1">1x</button>
+                <button data-speed="2">2x</button>
+                <button data-speed="4">4x</button>
+            </div>
+        </div>
+
+        <div class="mm_total">
+            <div class="mm_total__top">
+                <span>总进度</span>
+                <span>已用时 <b id="mm_elapsedText">0.0s</b> / 预计 <b id="mm_totalText">19.0s</b></span>
+            </div>
+            <div class="mm_total__bar"><span id="mm_totalBar"></span></div>
+        </div>
+
+        <div class="mm_timeline">
+            <!-- 买原料 -->
+            <div class="mm_step" id="mm_stepBuy">
+                <span class="mm_step__dot"><i class="iconfont icon-xiaoxi"></i></span>
+                <div class="mm_step__body">
+                    <div class="mm_step__top">
+                        <b>1. 买原料</b>
+                        <span class="mm_ms">6s</span>
+                        <em class="mm_step__state" id="mm_stateBuy">等待</em>
+                    </div>
+                    <p class="mm_step__hint">setTimeout(resolve, 6000) · 面粉、猪肉、白菜</p>
+                    <div class="mm_step__bar"><span id="mm_barBuy"></span></div>
+                    <span class="mm_step__left" id="mm_leftBuy">—</span>
+                </div>
+            </div>
+
+            <!-- 取原料 -->
+            <div class="mm_step" id="mm_stepPick">
+                <span class="mm_step__dot"><i class="iconfont icon-tianjia"></i></span>
+                <div class="mm_step__body">
+                    <div class="mm_step__top">
+                        <b>2. 取原料</b>
+                        <span class="mm_ms">3s</span>
+                        <em class="mm_step__state" id="mm_statePick">等待</em>
+                    </div>
+                    <p class="mm_step__hint">setTimeout(resolve, 3000) · 把原料拿回家洗干净</p>
+                    <div class="mm_step__bar"><span id="mm_barPick"></span></div>
+                    <span class="mm_step__left" id="mm_leftPick">—</span>
+                </div>
+            </div>
+
+            <!-- 并行：和面 + 和馅 -->
+            <div class="mm_parallel">
+                <div class="mm_parallel__tag">
+                    <i class="iconfont icon-huhuan"></i>Promise.all —— 这两个步骤同时开始，都完成才继续
+                </div>
+                <div class="mm_parallel__grid">
+                    <div class="mm_step" id="mm_stepDough">
+                        <div class="mm_step__body">
+                            <div class="mm_step__top">
+                                <b>3. 和面</b>
+                                <span class="mm_ms">5s</span>
+                                <em class="mm_step__state" id="mm_stateDough">等待</em>
+                            </div>
+                            <p class="mm_step__hint">setTimeout(resolve, 5000)</p>
+                            <div class="mm_step__bar"><span id="mm_barDough"></span></div>
+                            <span class="mm_step__left" id="mm_leftDough">—</span>
+                        </div>
+                    </div>
+
+                    <div class="mm_step" id="mm_stepFilling">
+                        <div class="mm_step__body">
+                            <div class="mm_step__top">
+                                <b>4. 和馅</b>
+                                <span class="mm_ms">4s</span>
+                                <em class="mm_step__state" id="mm_stateFilling">等待</em>
+                            </div>
+                            <p class="mm_step__hint">setTimeout(resolve, 4000)</p>
+                            <div class="mm_step__bar"><span id="mm_barFilling"></span></div>
+                            <span class="mm_step__left" id="mm_leftFilling">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 包饺子 -->
+            <div class="mm_step" id="mm_stepWrap">
+                <span class="mm_step__dot"><i class="iconfont icon-wancheng"></i></span>
+                <div class="mm_step__body">
+                    <div class="mm_step__top">
+                        <b>5. 包饺子</b>
+                        <span class="mm_ms">3s</span>
+                        <em class="mm_step__state" id="mm_stateWrap">等待</em>
+                    </div>
+                    <p class="mm_step__hint">setTimeout(resolve, 3000) · 面与馅都就绪后才开始</p>
+                    <div class="mm_step__bar"><span id="mm_barWrap"></span></div>
+                    <span class="mm_step__left" id="mm_leftWrap">—</span>
+                </div>
+            </div>
+
+            <!-- 吃饺子 -->
+            <div class="mm_step" id="mm_stepEat">
+                <span class="mm_step__dot"><i class="iconfont icon-jifen"></i></span>
+                <div class="mm_step__body">
+                    <div class="mm_step__top">
+                        <b>6. 吃饺子</b>
+                        <span class="mm_ms">2s</span>
+                        <em class="mm_step__state" id="mm_stateEat">等待</em>
+                    </div>
+                    <p class="mm_step__hint">setTimeout(resolve, 2000) · 热腾腾的饺子出锅</p>
+                    <div class="mm_step__bar"><span id="mm_barEat"></span></div>
+                    <span class="mm_step__left" id="mm_leftEat">—</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 二、运行日志 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-baocun"></i>
+            <h2>二、运行日志</h2>
+            <span class="mm_sub">时间以开始时刻为 0</span>
+        </div>
+        <div class="mm_log" id="mm_logBox">
+            <div class="mm_log__empty">点击「开始包饺子」，这里会实时输出每个 Promise 的开始与完成时间。</div>
+        </div>
+    </section>
+
+    <!-- ============ 三、核心代码 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-paizhao"></i>
+            <h2>三、核心代码</h2>
+            <span class="mm_sub">Promise → Promise.all → async/await</span>
+        </div>
+
+        <p class="mm_code__title">① 用 Promise 包住 setTimeout，把「等待」变成可 await 的任务</p>
+<pre class="mm_code"><span class="mm_c">// 每一个流程 = 一个返回 Promise 的函数</span>
+<span class="mm_k">function</span> <span class="mm_f">cookStep</span>(name, ms) {
+  <span class="mm_k">return new</span> <span class="mm_f">Promise</span>(<span class="mm_k">function</span> (resolve) {
+    <span class="mm_f">setTimeout</span>(<span class="mm_k">function</span> () {
+      <span class="mm_f">resolve</span>(name);          <span class="mm_c">// 把 Promise 变成 fulfilled</span>
+    }, ms);
+  });
+}</pre>
+
+        <p class="mm_code__title">② 并行：和面、和馅同时开始，两个都完成才往下走</p>
+<pre class="mm_code"><span class="mm_c">// Promise.all 接收数组，全部成功才成功；耗时取两者中较长的</span>
+<span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">all</span>([
+  <span class="mm_f">cookStep</span>(<span class="mm_s">"和面"</span>, 5000),
+  <span class="mm_f">cookStep</span>(<span class="mm_s">"和馅"</span>, 4000)
+]);</pre>
+
+        <p class="mm_code__title">③ async/await 写主流程，读起来像同步代码</p>
+<pre class="mm_code"><span class="mm_k">async function</span> <span class="mm_f">makeDumplings</span>() {
+  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"买原料"</span>, 6000);
+  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"取原料"</span>, 3000);
+
+  <span class="mm_k">await</span> <span class="mm_f">Promise</span>.<span class="mm_f">all</span>([
+    <span class="mm_f">cookStep</span>(<span class="mm_s">"和面"</span>, 5000),
+    <span class="mm_f">cookStep</span>(<span class="mm_s">"和馅"</span>, 4000)
+  ]);
+
+  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"包饺子"</span>, 3000);
+  <span class="mm_k">await</span> <span class="mm_f">cookStep</span>(<span class="mm_s">"吃饺子"</span>, 2000);
+  <span class="mm_f">console</span>.<span class="mm_f">log</span>(<span class="mm_s">"全部完成！"</span>);
+}
+<span class="mm_f">makeDumplings</span>();</pre>
+    </section>
+
+    <!-- ============ 四、知识点 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-fankui"></i>
+            <h2>四、为什么这样做</h2>
+        </div>
+        <ul class="mm_tips">
+            <li><b>Promise 三种状态：</b>pending（进行中）、fulfilled（成功）、rejected（失败）；状态一旦改变就固定，<code>resolve()</code> 让它变成成功。</li>
+            <li><b>await 会暂停 async 函数：</b>等 Promise 完成后才继续执行下一行，但不会阻塞页面渲染，其它代码照常运行。</li>
+            <li><b>串行 vs 并行：</b>和面、和馅互不依赖，用 <code>Promise.all</code> 同时做只需 <b>5 秒</b>；若写成两个连续的 <code>await</code> 就要 <b>9 秒</b>，整锅饺子从 19 秒拖到 23 秒。</li>
+            <li><b>async 函数本身返回 Promise：</b>调用 <code>makeDumplings()</code> 后可以用 <code>.then()</code> 接着处理，也可以用<code>try…catch</code> 捕获内部 <code>await</code> 的异常。</li>
+            <li><b>Promise.allSettled / all / race：</b>全部成功才成功是 <code>all</code>；忽略失败逐个收集结果用 <code>allSettled</code>；谁先完成就用谁的结果是 <code>race</code>。</li>
+            <li><b>顺序不能省：</b>包饺子必须等面和馅都完成，所以并行块用 <code>await</code> 收尾；同理吃饺子要等包完。</li>
+        </ul>
+    </section>
+
+    <p class="mm_foot">© 2026 孟梦 · 高级网页设计课堂实践 · 17-6 Promise 与 async</p>
+</div>
+
+<script>
+    // ============================================================
+    // 基础配置：每个步骤的 keys 与耗时（毫秒）
+    // ============================================================
+    var mm_stepDefs = [
+        { key: "Buy",     name: "买原料", ms: 6000, running: "setTimeout(6000) 进行中" },
+        { key: "Pick",    name: "取原料", ms: 3000, running: "setTimeout(3000) 进行中" },
+        { key: "Dough",   name: "和面",   ms: 5000, running: "setTimeout(5000) 进行中" },
+        { key: "Filling", name: "和馅",   ms: 4000, running: "setTimeout(4000) 进行中" },
+        { key: "Wrap",    name: "包饺子", ms: 3000, running: "setTimeout(3000) 进行中" },
+        { key: "Eat",     name: "吃饺子", ms: 2000, running: "setTimeout(2000) 进行中" }
+    ];
+
+    // 顺序执行部分：买 6s + 取 3s + 并行 max(5,4)=5s + 包 3s + 吃 2s = 19s
+    var mm_serialBaseMs = 6000 + 3000 + Math.max(5000, 4000) + 3000 + 2000;
+
+    var mm_speed = 1;          // 演示倍速，仅影响模拟时长
+    var mm_running = false;    // 防止重复点击
+    var mm_runStartAt = 0;     // 本轮开始时刻
+    var mm_elapsedTimer = null;
+    var mm_totalMs = mm_serialBaseMs;
+    var mm_timers = {};        // 每个步骤的 { tick, timeout }
+
+    // ============================================================
+    // DOM 缓存
+    // ============================================================
+    var mm_logBox      = document.getElementById("mm_logBox");
+    var mm_startBtn    = document.getElementById("mm_startBtn");
+    var mm_resetBtn    = document.getElementById("mm_resetBtn");
+    var mm_totalBar    = document.getElementById("mm_totalBar");
+    var mm_elapsedText = document.getElementById("mm_elapsedText");
+    var mm_totalText   = document.getElementById("mm_totalText");
+
+    var mm_ui = {};   // key -> { step, state, bar, left }
+    mm_stepDefs.forEach(function (def) {
+        mm_ui[def.key] = {
+            step:  document.getElementById("mm_step" + def.key),
+            state: document.getElementById("mm_state" + def.key),
+            bar:   document.getElementById("mm_bar" + def.key),
+            left:  document.getElementById("mm_left" + def.key),
+            msBase: def.ms,
+            name: def.name
+        };
+    });
+
+    // ============================================================
+    // 小工具
+    // ============================================================
+    function mm_fmt(ms) {
+        return (ms / 1000).toFixed(1) + "s";
+    }
+
+    function mm_log(text, type) {
+        var empty = mm_logBox.querySelector(".mm_log__empty");
+        if (empty) { empty.remove(); }
+
+        var line = document.createElement("div");
+        line.className = "mm_log__line" + (type ? " mmm_" + type : "");
+
+        var t = document.createElement("span");
+        t.className = "mm_log__time";
+        var rel = mm_runStartAt ? (performance.now() - mm_runStartAt) / 1000 : 0;
+        t.textContent = "+" + rel.toFixed(2) + "s";
+
+        var s = document.createElement("span");
+        s.className = "mm_log__text";
+        s.textContent = text;
+
+        line.appendChild(t);
+        line.appendChild(s);
+        mm_logBox.appendChild(line);
+        mm_logBox.scrollTop = mm_logBox.scrollHeight;
+    }
+
+    // 设置步骤状态：wait / running / done
+    function mm_setState(key, status, text) {
+        var ui = mm_ui[key];
+        ui.step.classList.remove("mmm_running", "mmm_done");
+        if (status === "running") { ui.step.classList.add("mmm_running"); }
+        if (status === "done")    { ui.step.classList.add("mmm_done"); }
+        ui.state.textContent = text;
+        if (status === "done") { ui.state.className = "mm_step__state"; }
+    }
+
+    // ============================================================
+    // 核心：一个步骤 = 一个 Promise（内部用 setTimeout 模拟耗时）
+    // ============================================================
+    function mm_promiseStep(key) {
+        var def = mm_stepDefs.filter(function (d) { return d.key === key; })[0];
+        var ui = mm_ui[key];
+        var ms = Math.max(120, Math.round(def.ms / mm_speed));
+
+        mm_setState(key, "running", "进行中");
+        ui.bar.style.width = "0%";
+        ui.left.textContent = "剩余 " + mm_fmt(ms);
+        mm_log(def.name + " 开始（" + mm_fmt(ms) + "）", "run");
+
+        return new Promise(function (resolve) {
+            var start = performance.now();
+
+            // 只用于界面刷新的辅助定时器，不参与逻辑
+            var tick = setInterval(function () {
+                var pass = performance.now() - start;
+                var pct = Math.min(pass / ms, 1);
+                ui.bar.style.width = (pct * 100).toFixed(1) + "%";
+                ui.left.textContent = "剩余 " + mm_fmt(Math.max(0, ms - pass));
+            }, 60);
+
+            // 真正模拟耗时的定时器：到点 resolve
+            var timeout = setTimeout(function () {
+                clearInterval(tick);
+                ui.bar.style.width = "100%";
+                ui.left.textContent = "已完成 · 用时 " + mm_fmt(ms);
+                mm_setState(key, "done", "已完成");
+                mm_log(def.name + " 完成", "done");
+                resolve(def.name);
+            }, ms);
+
+            mm_timers[key] = { tick: tick, timeout: timeout };
+        });
+    }
+
+    // ============================================================
+    // 主流程：async / await
+    // ============================================================
+    async function mm_makeDumplings() {
+        if (mm_running) { return; }
+        mm_resetAll();
+
+        mm_running = true;
+        mm_startBtn.disabled = true;
+        mm_totalMs = Math.round(mm_serialBaseMs / mm_speed);
+        mm_totalText.textContent = mm_fmt(mm_totalMs);
+
+        mm_runStartAt = performance.now();
+        mm_elapsedTimer = setInterval(function () {
+            var pass = performance.now() - mm_runStartAt;
+            mm_elapsedText.textContent = (pass / 1000).toFixed(1) + "s";
+            mm_totalBar.style.width = Math.min(pass / mm_totalMs, 1) * 100 + "%";
+        }, 60);
+
+        mm_log("开始：买原料 → 取原料 →（和面 ‖ 和馅）→ 包饺子 → 吃饺子", "tip");
+
+        try {
+            // 1. 先买原料（6s）
+            await mm_promiseStep("Buy");
+            // 2. 取原料（3s）
+            await mm_promiseStep("Pick");
+
+            mm_log("原料到手，和面与和馅同时开始（Promise.all 并行）", "tip");
+
+            // 3. 并行：和面（5s）与和馅（4s），两者都完成才继续
+            await Promise.all([
+                mm_promiseStep("Dough"),
+                mm_promiseStep("Filling")
+            ]);
+
+            mm_log("面与馅都准备好了，开始包饺子", "tip");
+
+            // 4. 包饺子（3s）
+            await mm_promiseStep("Wrap");
+            // 5. 吃饺子（2s）
+            await mm_promiseStep("Eat");
+
+            mm_totalBar.style.width = "100%";
+            var total = (performance.now() - mm_runStartAt) / 1000;
+            mm_elapsedText.textContent = total.toFixed(1) + "s";
+            mm_log("全部完成！饺子吃到嘴了，总耗时 " + total.toFixed(1) + " 秒", "done");
+        } catch (mm_err) {
+            // async 函数内的异常可以用 try…catch 统一处理
+            mm_log("流程出错：" + mm_err, "run");
+        } finally {
+            mm_running = false;
+            mm_startBtn.disabled = false;
+            if (mm_elapsedTimer !== null) { clearInterval(mm_elapsedTimer); mm_elapsedTimer = null; }
+        }
+    }
+
+    // ============================================================
+    // 重置
+    // ============================================================
+    function mm_resetAll() {
+        Object.keys(mm_timers).forEach(function (key) {
+            clearInterval(mm_timers[key].tick);
+            clearTimeout(mm_timers[key].timeout);
+        });
+        mm_timers = {};
+
+        if (mm_elapsedTimer !== null) { clearInterval(mm_elapsedTimer); mm_elapsedTimer = null; }
+
+        mm_running = false;
+        mm_startBtn.disabled = false;
+        mm_runStartAt = 0;
+        mm_totalBar.style.width = "0%";
+        mm_elapsedText.textContent = "0.0s";
+        mm_totalText.textContent = mm_fmt(Math.round(mm_serialBaseMs / mm_speed));
+
+        mm_stepDefs.forEach(function (def) {
+            var ui = mm_ui[def.key];
+            ui.step.classList.remove("mmm_running", "mmm_done");
+            ui.state.textContent = "等待";
+            ui.state.className = "mm_step__state";
+            ui.bar.style.width = "0%";
+            ui.left.textContent = "—";
+        });
+
+        mm_logBox.innerHTML = "";
+        var empty = document.createElement("div");
+        empty.className = "mm_log__empty";
+        empty.textContent = "点击「开始包饺子」，这里会实时输出每个 Promise 的开始与完成时间。";
+        mm_logBox.appendChild(empty);
+    }
+
+    // ============================================================
+    // 事件绑定
+    // ============================================================
+    mm_startBtn.addEventListener("click", function () {
+        mm_makeDumplings();
+    });
+
+    mm_resetBtn.addEventListener("click", function () {
+        // 若正在运行，先让流程停下：清掉所有定时器的同时把标志复位
+        var wasRunning = mm_running;
+        mm_resetAll();
+        if (wasRunning) {
+            mm_log("已重置：本轮流程被中断", "tip");
+        }
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll(".mm_speed button"), function (btn) {
+        btn.addEventListener("click", function () {
+            if (mm_running) { return; }
+            mm_speed = Number(btn.getAttribute("data-speed")) || 1;
+            Array.prototype.forEach.call(document.querySelectorAll(".mm_speed button"), function (b) {
+                b.classList.remove("mmm_on");
+            });
+            btn.classList.add("mmm_on");
+            mm_totalText.textContent = mm_fmt(Math.round(mm_serialBaseMs / mm_speed));
+            mm_logBox.innerHTML = "";
+            var empty = document.createElement("div");
+            empty.className = "mm_log__empty";
+            empty.textContent = "已切换为 " + mm_speed + " 倍速，预计总时长 " + mm_fmt(Math.round(mm_serialBaseMs / mm_speed)) + "。";
+            mm_logBox.appendChild(empty);
+        });
+    });
+
+    // 页面卸载兜底清理
+    window.addEventListener("beforeunload", function () {
+        Object.keys(mm_timers).forEach(function (key) {
+            clearInterval(mm_timers[key].tick);
+            clearTimeout(mm_timers[key].timeout);
+        });
+        if (mm_elapsedTimer !== null) { clearInterval(mm_elapsedTimer); }
+    });
+</script>
+</body>
+</html>

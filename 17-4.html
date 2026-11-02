@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：接口测试工具 - 用 fetch 测试 GET/POST/PUT/PATCH/DELETE 远程接口，展示响应数据、响应头与错误提示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-4 · 接口测试工具</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 24px 18px 70px;
+        }
+        .mm_wrap { max-width: 1000px; margin: 0 auto; }
+
+        /* ============ 返回 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #6b7280; text-decoration: none; font-size: .88rem;
+            margin-bottom: 14px;
+        }
+        .mm_back:hover { color: #0f766e; }
+
+        /* ============ 头部 ============ */
+        .mm_hero {
+            background: linear-gradient(135deg, #0f766e, #0369a1 60%, #1d4ed8);
+            color: #fff; border-radius: 16px; padding: 24px 26px;
+            margin-bottom: 16px; box-shadow: 0 14px 30px rgba(3, 105, 161, .2);
+        }
+        .mm_hero h1 { font-size: 1.42rem; margin-bottom: 8px; }
+        .mm_hero p { font-size: .86rem; line-height: 1.75; color: rgba(255,255,255,.86); }
+        .mm_hero code {
+            font-family: Consolas, monospace; background: rgba(255,255,255,.16);
+            padding: 1px 6px; border-radius: 4px;
+        }
+
+        /* ============ 通用卡片 ============ */
+        .mm_card {
+            background: #fff; border: 1px solid #e5e9f2; border-radius: 14px;
+            padding: 16px; margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(31, 41, 55, .05);
+        }
+        .mm_card-head {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+            font-size: .9rem; color: #111827;
+        }
+        .mm_card-head i { color: #0f766e; font-style: normal; }
+        .mm_card-head h2 { font-size: .95rem; font-weight: bold; }
+        .mm_card-head .mm_hint { margin-left: auto; font-size: .74rem; color: #9ca3af; }
+
+        /* ============ 请求行 ============ */
+        .mm_req-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+        .mm_method {
+            font-family: Consolas, monospace; font-weight: bold; font-size: .82rem;
+            border-radius: 9px; border: 1px solid #e2e8f0; padding: 9px 10px;
+            background: #fff; cursor: pointer; outline: none; color: #059669;
+        }
+        .mm_url {
+            flex: 1; min-width: 240px;
+            font-family: Consolas, monospace; font-size: .82rem;
+            border: 1px solid #e2e8f0; border-radius: 9px; padding: 9px 12px;
+            outline: none; color: #1f2937; background: #fff;
+        }
+        .mm_url:focus, .mm_method:focus, .mm_area:focus { border-color: #0f766e; }
+
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit; font-size: .82rem; cursor: pointer;
+            border: 1px solid #e2e8f0; background: #fff; color: #374151;
+            padding: 9px 14px; border-radius: 9px; transition: all .18s;
+        }
+        .mm_btn:hover { border-color: #99f6e4; color: #0f766e; background: #f0fdfa; }
+        .mm_btn.mmm_primary {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: #fff; border-color: transparent;
+            box-shadow: 0 6px 16px rgba(15, 118, 110, .28);
+        }
+        .mm_btn.mmm_primary:hover { filter: brightness(1.07); color: #fff; }
+        .mm_btn.mmm_small { padding: 5px 10px; font-size: .76rem; }
+        .mm_btn:disabled { opacity: .55; cursor: not-allowed; }
+
+        /* 快捷示例 */
+        .mm_quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .mm_quick .mm_tag {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 4px 11px; border-radius: 20px; cursor: pointer;
+            border: 1px solid #e2e8f0; background: #fff; color: #6b7280;
+            transition: all .18s;
+        }
+        .mm_quick .mm_tag:hover { border-color: #99f6e4; color: #0f766e; background: #f0fdfa; }
+
+        /* 两个编辑区 */
+        .mm_editors { display: grid; grid-template-columns: .8fr 1.2fr; gap: 12px; margin-top: 12px; }
+        .mm_editor { display: flex; flex-direction: column; gap: 6px; }
+        .mm_editor .mm_label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: .76rem; color: #9ca3af;
+        }
+        .mm_editor .mm_label b { color: #6b7280; font-weight: normal; font-family: Consolas, monospace; }
+        .mm_area {
+            width: 100%; min-height: 132px; resize: vertical;
+            font-family: Consolas, monospace; font-size: .78rem; line-height: 1.7;
+            border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
+            background: #fbfcfe; color: #1f2937; outline: none;
+        }
+        .mm_area.mmm_disabled { background: #f3f4f6; color: #9ca3af; }
+
+        /* ============ 响应 ============ */
+        .mm_statusbar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 10px 12px; border-radius: 10px;
+            background: #f8fafc; border: 1px solid #e5e9f2;
+            font-family: Consolas, monospace; font-size: .78rem;
+            margin-bottom: 12px;
+        }
+        .mm_code {
+            font-weight: bold; padding: 2px 9px; border-radius: 6px;
+            background: #e5e7eb; color: #374151;
+        }
+        .mm_code.mmm_ok { background: #dcfce7; color: #15803d; }
+        .mm_code.mmm_warn { background: #fef3c7; color: #b45309; }
+        .mm_code.mmm_err { background: #fee2e2; color: #b91c1c; }
+        .mm_statusbar .mm_meta { color: #9ca3af; }
+        .mm_statusbar .mm_meta b { color: #374151; font-weight: normal; }
+
+        /* 错误提示框 */
+        .mm_alert {
+            display: none; gap: 8px; align-items: flex-start;
+            background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+            font-size: .82rem; line-height: 1.7;
+        }
+        .mm_alert.mmm_show { display: flex; }
+        .mm_alert i { font-style: normal; flex-shrink: 0; }
+        .mm_alert .mm_alert-tip { color: #9f1239; font-size: .78rem; }
+
+        /* 标签页 */
+        .mm_tabs { display: flex; gap: 6px; border-bottom: 1px solid #eef1f7; margin-bottom: 10px; }
+        .mm_tab {
+            border: none; background: none; cursor: pointer; font-family: inherit;
+            font-size: .82rem; color: #9ca3af; padding: 8px 12px;
+            border-bottom: 2px solid transparent; transition: all .18s;
+        }
+        .mm_tab:hover { color: #0f766e; }
+        .mm_tab.mmm_active { color: #0f766e; border-bottom-color: #0f766e; font-weight: bold; }
+        .mm_tab .mm_num {
+            font-family: Consolas, monospace; font-size: .7rem; color: #b6bcc8;
+            margin-left: 4px;
+        }
+
+        .mm_panel { display: none; }
+        .mm_panel.mmm_show { display: block; }
+
+        .mm_pre {
+            background: #0f172a; color: #e2e8f0; border-radius: 10px;
+            padding: 14px; font-family: Consolas, monospace;
+            font-size: .78rem; line-height: 1.75; white-space: pre-wrap;
+            word-break: break-word; max-height: 340px; overflow: auto;
+        }
+        .mm_pre .mm_k { color: #93c5fd; }
+        .mm_pre .mm_s { color: #86efac; }
+        .mm_pre .mm_n { color: #fbbf24; }
+        .mm_pre .mm_b { color: #f472b6; }
+        .mm_placeholder { color: #94a3b8; }
+
+        /* 响应头表 */
+        .mm_htable { width: 100%; border-collapse: collapse; font-size: .78rem; }
+        .mm_htable th {
+            text-align: left; color: #9ca3af; font-weight: normal;
+            font-size: .74rem; padding: 6px 8px; border-bottom: 1px solid #eef1f7;
+        }
+        .mm_htable td {
+            font-family: Consolas, monospace; padding: 6px 8px;
+            border-bottom: 1px dashed #f1f4f9; color: #374151; word-break: break-all;
+        }
+        .mm_htable td:first-child { color: #0f766e; width: 34%; }
+        .mm_empty { color: #9ca3af; font-size: .8rem; padding: 12px 0; }
+
+        /* ============ 历史记录 ============ */
+        .mm_history { display: grid; gap: 8px; }
+        .mm_hitem {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            background: #fbfcfe; border: 1px solid #eef1f7; border-radius: 9px;
+            padding: 8px 11px; font-size: .78rem; cursor: pointer;
+            transition: all .18s;
+        }
+        .mm_hitem:hover { border-color: #99f6e4; background: #f0fdfa; }
+        .mm_hitem .mm_hm {
+            font-family: Consolas, monospace; font-weight: bold; font-size: .72rem;
+            padding: 2px 7px; border-radius: 5px; background: #e5e7eb; color: #374151;
+        }
+        .mm_hitem .mm_hu {
+            font-family: Consolas, monospace; color: #4b5563; flex: 1; min-width: 150px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .mm_hitem .mm_ht { color: #9ca3af; font-family: Consolas, monospace; font-size: .72rem; }
+
+        /* ============ 说明 ============ */
+        .mm_note { font-size: .82rem; line-height: 1.9; color: #4b5563; }
+        .mm_note li { margin-left: 18px; }
+        .mm_note code {
+            font-family: Consolas, monospace; background: #f3f4f6;
+            padding: 1px 5px; border-radius: 4px; font-size: .78rem;
+        }
+
+        .mm_footer {
+            text-align: center; color: #b6bcc8; font-size: .76rem;
+            border-top: 1px dashed #e2e8f0; margin-top: 22px; padding-top: 15px;
+        }
+
+        @media (max-width: 780px) {
+            .mm_editors { grid-template-columns: 1fr; }
+            .mm_hero h1 { font-size: 1.15rem; }
+            .mm_url { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back"><i class="iconfont icon-shouye1"></i> 返回首页</a>
+
+    <!-- ================= 头部 ================= -->
+    <header class="mm_hero">
+        <h1>🧪 接口测试工具</h1>
+        <p>用原生 <code>fetch()</code> 对远程接口发起 <b>GET / POST / PUT / PATCH / DELETE</b> 请求，可自定义请求头与请求体，页面会显示 <b>HTTP 状态码、耗时、返回大小、响应 JSON、响应头</b>，出错时给出<b>错误提示与排查建议</b>。</p>
+    </header>
+
+    <!-- ================= 请求区 ================= -->
+    <div class="mm_card">
+        <div class="mm_card-head">
+            <i class="iconfont icon-xinxi"></i>
+            <h2>发起请求</h2>
+            <span class="mm_hint">默认接口：jsonplaceholder.typicode.com</span>
+        </div>
+
+        <div class="mm_req-row">
+            <select class="mm_method" id="mm_method" onchange="mm_setMethod()">
+                <option value="GET" selected>GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+                <option value="HEAD">HEAD</option>
+                <option value="OPTIONS">OPTIONS</option>
+            </select>
+            <input class="mm_url" id="mm_url" type="text" spellcheck="false"
+                   value="https://jsonplaceholder.typicode.com/posts">
+            <button class="mm_btn mmm_primary" id="mm_btnSend" onclick="mm_send()">
+                <i class="iconfont icon-zhengque"></i> 发送请求
+            </button>
+            <button class="mm_btn" onclick="mm_clear()">
+                <i class="iconfont icon-shanchu"></i> 清空
+            </button>
+        </div>
+
+        <!-- 快捷示例 -->
+        <div class="mm_quick">
+            <span class="mm_tag" onclick="mm_quick('get-list')">GET 列表</span>
+            <span class="mm_tag" onclick="mm_quick('get-one')">GET 单条</span>
+            <span class="mm_tag" onclick="mm_quick('post')">POST 新建</span>
+            <span class="mm_tag" onclick="mm_quick('put')">PUT 修改</span>
+            <span class="mm_tag" onclick="mm_quick('patch')">PATCH 局部更新</span>
+            <span class="mm_tag" onclick="mm_quick('delete')">DELETE 删除</span>
+            <span class="mm_tag" onclick="mm_quick('404')">404 错误状态</span>
+            <span class="mm_tag" onclick="mm_quick('network')">网络错误</span>
+        </div>
+
+        <!-- 请求头 / 请求体 -->
+        <div class="mm_editors">
+            <div class="mm_editor">
+                <div class="mm_label">请求头 Headers <b>（JSON 格式）</b></div>
+                <textarea class="mm_area" id="mm_headers" spellcheck="false">{
+  "Content-Type": "application/json"
+}</textarea>
+            </div>
+            <div class="mm_editor">
+                <div class="mm_label">请求体 Body <b>（GET / HEAD 时不需要）</b></div>
+                <textarea class="mm_area" id="mm_body" spellcheck="false">{
+  "title": "孟梦的接口测试",
+  "body": "这条数据由 fetch POST 提交",
+  "userId": 1
+}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 响应区 ================= -->
+    <div class="mm_card">
+        <div class="mm_card-head">
+            <i class="iconfont icon-fankui"></i>
+            <h2>响应结果</h2>
+            <span class="mm_hint" id="mm_reqLine">尚未发送请求</span>
+        </div>
+
+        <div class="mm_statusbar">
+            <span class="mm_code" id="mm_statusCode">—</span>
+            <span id="mm_statusText">等待发送</span>
+            <span class="mm_meta">耗时 <b id="mm_cost">—</b></span>
+            <span class="mm_meta">大小 <b id="mm_size">—</b></span>
+            <span class="mm_meta">数据类型 <b id="mm_ctype">—</b></span>
+        </div>
+
+        <div class="mm_alert" id="mm_alert">
+            <i class="iconfont icon-guanbi-1"></i>
+            <div>
+                <div id="mm_alertText">请求失败</div>
+                <div class="mm_alert-tip" id="mm_alertTip"></div>
+            </div>
+        </div>
+
+        <div class="mm_tabs">
+            <button class="mm_tab mmm_active" data-tab="data" onclick="mm_switchTab('data')">响应数据<span class="mm_num" id="mm_numData">0</span></button>
+            <button class="mm_tab" data-tab="headers" onclick="mm_switchTab('headers')">响应头<span class="mm_num" id="mm_numHeaders">0</span></button>
+            <button class="mm_tab" data-tab="raw" onclick="mm_switchTab('raw')">原始文本</button>
+        </div>
+
+        <div class="mm_panel mmm_show" id="mm_panelData">
+            <pre class="mm_pre" id="mm_outData"><span class="mm_placeholder">// 点击「发送请求」后，这里显示接口返回的数据</span></pre>
+        </div>
+        <div class="mm_panel" id="mm_panelHeaders">
+            <div id="mm_outHeaders"><div class="mm_empty">暂无响应头</div></div>
+        </div>
+        <div class="mm_panel" id="mm_panelRaw">
+            <pre class="mm_pre" id="mm_outRaw"><span class="mm_placeholder">// 未格式化的原始响应文本</span></pre>
+        </div>
+    </div>
+
+    <!-- ================= 历史记录 ================= -->
+    <div class="mm_card">
+        <div class="mm_card-head">
+            <i class="iconfont icon-yuedu"></i>
+            <h2>请求历史</h2>
+            <span class="mm_hint" id="mm_hisCount">0 条</span>
+        </div>
+        <div class="mm_history" id="mm_history">
+            <div class="mm_empty">暂无历史记录</div>
+        </div>
+    </div>
+
+    <!-- ================= 说明 ================= -->
+    <div class="mm_card">
+        <div class="mm_card-head">
+            <i class="iconfont icon-shoucang"></i>
+            <h2>关于这个测试工具</h2>
+        </div>
+        <ul class="mm_note">
+            <li>底层只用 <code>fetch()</code>，没有引入 axios、jQuery 等任何第三方库。</li>
+            <li>示例接口 <code>https://jsonplaceholder.typicode.com/posts</code> 支持 GET / POST / PUT / PATCH / DELETE，但<b>返回结果是模拟的</b>，数据不会真正被保存。</li>
+            <li>4xx / 5xx 属于「服务器已响应」，页面照样展示返回体与响应头；只有断网、域名不存在、跨域被拒时才是网络错误。</li>
+            <li>请求带 15 秒超时（AbortController），超时会给出超时提示。</li>
+            <li>请只对允许跨域的公开测试接口发请求，不要用来攻击他人服务。</li>
+        </ul>
+    </div>
+
+    <footer class="mm_footer">
+        《高级网页设计》 · 17-4 接口测试工具 · 作图：孟梦 · 2026-11-02
+    </footer>
+</div>
+
+<script>
+    /* ============ 元素快捷引用 ============ */
+    const mm_method = document.getElementById("mm_method");
+    const mm_url = document.getElementById("mm_url");
+    const mm_headers = document.getElementById("mm_headers");
+    const mm_body = document.getElementById("mm_body");
+    const mm_btnSend = document.getElementById("mm_btnSend");
+    const mm_statusCode = document.getElementById("mm_statusCode");
+    const mm_statusText = document.getElementById("mm_statusText");
+    const mm_cost = document.getElementById("mm_cost");
+    const mm_size = document.getElementById("mm_size");
+    const mm_ctype = document.getElementById("mm_ctype");
+    const mm_reqLine = document.getElementById("mm_reqLine");
+    const mm_alert = document.getElementById("mm_alert");
+    const mm_alertText = document.getElementById("mm_alertText");
+    const mm_alertTip = document.getElementById("mm_alertTip");
+    const mm_outData = document.getElementById("mm_outData");
+    const mm_outHeaders = document.getElementById("mm_outHeaders");
+    const mm_outRaw = document.getElementById("mm_outRaw");
+    const mm_numData = document.getElementById("mm_numData");
+    const mm_numHeaders = document.getElementById("mm_numHeaders");
+    const mm_historyBox = document.getElementById("mm_history");
+    const mm_hisCount = document.getElementById("mm_hisCount");
+
+    const mm_apiBase = "https://jsonplaceholder.typicode.com";
+    const mm_timeout = 15000;
+    let mm_history = [];
+    let mm_currentTab = "data";
+
+    /* 方法对应颜色 */
+    const mm_methodColor = {
+        GET: "#059669", POST: "#2563eb", PUT: "#d97706",
+        PATCH: "#7c3aed", DELETE: "#dc2626", HEAD: "#6b7280", OPTIONS: "#0891b2"
+    };
+
+    /* ============ 方法切换：GET/HEAD 禁用请求体 ============ */
+    function mm_setMethod() {
+        const mm_m = mm_method.value;
+        mm_method.style.color = mm_methodColor[mm_m] || "#374151";
+        const mm_noBody = (mm_m === "GET" || mm_m === "HEAD");
+        mm_body.disabled = mm_noBody;
+        mm_body.classList.toggle("mmm_disabled", mm_noBody);
+    }
+
+    /* ============ 快捷示例 ============ */
+    function mm_quick(mm_type) {
+        const mm_map = {
+            "get-list": { m: "GET", u: mm_apiBase + "/posts" },
+            "get-one":  { m: "GET", u: mm_apiBase + "/posts/1" },
+            "post":     { m: "POST", u: mm_apiBase + "/posts" },
+            "put":      { m: "PUT", u: mm_apiBase + "/posts/1" },
+            "patch":    { m: "PATCH", u: mm_apiBase + "/posts/1" },
+            "delete":   { m: "DELETE", u: mm_apiBase + "/posts/1" },
+            "404":      { m: "GET", u: mm_apiBase + "/posts/99999" },
+            "network":  { m: "GET", u: "https://this-domain-does-not-exist-xyz.example/api" }
+        };
+        const mm_item = mm_map[mm_type];
+        if (!mm_item) return;
+
+        mm_method.value = mm_item.m;
+        mm_url.value = mm_item.u;
+
+        if (mm_type === "patch") {
+            mm_body.value = '{\n  "title": "只改标题（PATCH）"\n}';
+        } else if (mm_item.m === "POST") {
+            mm_body.value = '{\n  "title": "孟梦的接口测试",\n  "body": "这条数据由 fetch POST 提交",\n  "userId": 1\n}';
+        } else if (mm_item.m === "PUT") {
+            mm_body.value = '{\n  "id": 1,\n  "title": "整体替换（PUT）",\n  "body": "PUT 会替换整条资源",\n  "userId": 1\n}';
+        }
+        mm_setMethod();
+        mm_alert.classList.remove("mmm_show");
+    }
+
+    /* ============ 发送请求 ============ */
+    async function mm_send() {
+        const mm_m = mm_method.value;
+        const mm_u = mm_url.value.trim();
+
+        mm_alert.classList.remove("mmm_show");
+
+        if (!mm_u) {
+            mm_showAlert("请先填写接口地址。", "例如 https://jsonplaceholder.typicode.com/posts");
+            return;
+        }
+        if (!/^http(s)?:\/\//i.test(mm_u)) {
+            mm_showAlert("地址必须以 http:// 或 https:// 开头。", "当前值：" + mm_u);
+            return;
+        }
+
+        /* 解析请求头 JSON */
+        let mm_headerObj = {};
+        const mm_headerText = mm_headers.value.trim();
+        if (mm_headerText) {
+            try {
+                mm_headerObj = JSON.parse(mm_headerText);
+                if (typeof mm_headerObj !== "object" || Array.isArray(mm_headerObj)) {
+                    throw new Error("Headers 必须是一个对象");
+                }
+            } catch (mm_e) {
+                mm_showAlert("请求头 JSON 格式有误：" + mm_e.message, '正确写法：{ "Content-Type": "application/json" }');
+                return;
+            }
+        }
+
+        const mm_opt = { method: mm_m, headers: mm_headerObj };
+        const mm_hasBody = !(mm_m === "GET" || mm_m === "HEAD");
+
+        if (mm_hasBody) {
+            const mm_b = mm_body.value.trim();
+            if (mm_b) {
+                try {
+                    JSON.parse(mm_b);
+                } catch (mm_e) {
+                    mm_showAlert("请求体不是合法的 JSON：" + mm_e.message, "提交前请先用 17-1 页的校验器检查一下。");
+                    return;
+                }
+                mm_opt.body = mm_b;
+            }
+        }
+
+        /* 状态复位 */
+        mm_btnSend.disabled = true;
+        mm_reqLine.textContent = mm_m + " " + mm_u;
+        mm_statusCode.className = "mm_code";
+        mm_statusCode.textContent = "…";
+        mm_statusText.textContent = "请求中";
+        mm_cost.textContent = "—";
+        mm_size.textContent = "—";
+        mm_ctype.textContent = "—";
+        mm_outData.innerHTML = '<span class="mm_placeholder">// 请求中，请稍候…</span>';
+
+        /* 15 秒超时控制 */
+        const mm_ctrl = new AbortController();
+        const mm_timer = setTimeout(function () { mm_ctrl.abort(); }, mm_timeout);
+        mm_opt.signal = mm_ctrl.signal;
+
+        const mm_t0 = performance.now();
+
+        try {
+            const mm_res = await fetch(mm_u, mm_opt);
+            const mm_ms = Math.round(performance.now() - mm_t0);
+            const mm_text = await mm_res.text();
+
+            clearTimeout(mm_timer);
+            mm_btnSend.disabled = false;
+
+            /* 状态码着色 */
+            const mm_type = mm_res.status >= 200 && mm_res.status < 300 ? "ok"
+                : mm_res.status >= 500 ? "err"
+                : mm_res.status >= 300 ? "warn" : "err";
+            mm_statusCode.className = "mm_code mmm_" + mm_type;
+            mm_statusCode.textContent = mm_res.status + " " + mm_res.statusText;
+
+            const mm_bytes = new TextEncoder().encode(mm_text).length;
+            mm_cost.textContent = mm_ms + " ms";
+            mm_size.textContent = mm_bytes + " B";
+            mm_ctype.textContent = mm_res.headers.get("content-type") || "未知";
+
+            /* 响应头表格 */
+            const mm_hRows = [];
+            mm_res.headers.forEach(function (mm_v, mm_k) {
+                mm_hRows.push([mm_k, mm_v]);
+            });
+            mm_numHeaders.textContent = mm_hRows.length;
+            mm_outHeaders.innerHTML = mm_hRows.length
+                ? '<table class="mm_htable"><thead><tr><th>名称</th><th>值</th></tr></thead><tbody>' +
+                  mm_hRows.map(function (mm_r) {
+                      return "<tr><td>" + mm_r[0] + "</td><td>" + mm_r[1] + "</td></tr>";
+                  }).join("") + "</tbody></table>"
+                : '<div class="mm_empty">该响应没有携带任何响应头</div>';
+
+            /* 响应数据：优先按 JSON 美化 */
+            if (mm_text) {
+                try {
+                    const mm_json = JSON.parse(mm_text);
+                    mm_outData.innerHTML = mm_highlight(JSON.stringify(mm_json, null, 2));
+                    mm_numData.textContent = Array.isArray(mm_json)
+                        ? mm_json.length + " 项"
+                        : (typeof mm_json === "object" && mm_json !== null ? Object.keys(mm_json).length + " 键" : "1 值");
+                } catch (mm_e) {
+                    mm_outData.innerHTML = '<span class="mm_placeholder">// 返回的不是 JSON，已原样显示</span>\n' + mm_escape(mm_text);
+                    mm_numData.textContent = "文本";
+                }
+                mm_outRaw.textContent = mm_text;
+            } else {
+                mm_outData.innerHTML = '<span class="mm_placeholder">// 接口返回了空响应体（例如 DELETE 成功）</span>';
+                mm_outRaw.textContent = "";
+                mm_numData.textContent = "0";
+            }
+
+            mm_statusText.textContent = mm_type === "ok" ? "请求成功"
+                : mm_type === "warn" ? "已响应（重定向或参数问题）"
+                : "已响应，但服务器返回错误状态";
+
+            /* 4xx / 5xx 也给出提示（不是网络错误，但业务上是失败） */
+            if (mm_type !== "ok") {
+                mm_showAlert(
+                    "服务器返回 " + mm_res.status + " " + mm_res.statusText + "。",
+                    mm_res.status === 404
+                        ? "资源不存在：检查 URL 里的 id 是否正确。"
+                        : mm_res.status >= 500
+                            ? "服务端异常：稍后重试或换个接口。"
+                            : "请求本身到达了服务器，但被拒绝：检查参数、请求体或权限。"
+                );
+            }
+
+            mm_pushHistory(mm_m, mm_u, mm_res.status + " " + mm_res.statusText, mm_ms, mm_type);
+            mm_switchTab("data");
+
+        } catch (mm_e) {
+            clearTimeout(mm_timer);
+            mm_btnSend.disabled = false;
+
+            const mm_ms = Math.round(performance.now() - mm_t0);
+            mm_cost.textContent = mm_ms + " ms";
+            mm_statusCode.className = "mm_code mmm_err";
+            mm_statusCode.textContent = "ERR";
+            mm_statusText.textContent = "请求失败";
+            mm_numData.textContent = "0";
+            mm_numHeaders.textContent = "0";
+            mm_outData.innerHTML = '<span class="mm_placeholder">// 请求没有拿到响应，详见下方错误提示</span>';
+            mm_outHeaders.innerHTML = '<div class="mm_empty">无响应头</div>';
+            mm_outRaw.textContent = "";
+
+            let mm_msg, mm_tip;
+            if (mm_e.name === "AbortError") {
+                mm_msg = "请求超时（超过 " + (mm_timeout / 1000) + " 秒未响应）。";
+                mm_tip = "接口可能很慢或不可达，可稍后重试。";
+            } else if (mm_e instanceof TypeError) {
+                mm_msg = "网络错误：" + mm_e.message;
+                mm_tip = "常见原因：域名无法解析 / 断网 / 目标服务未开启跨域（CORS）/ 被浏览器或插件拦截。可先用 17-2 页的 dog.ceo 接口验证联网是否正常。";
+            } else {
+                mm_msg = "请求异常：" + mm_e.message;
+                mm_tip = "请检查 URL、请求头与请求体格式。";
+            }
+            mm_showAlert(mm_msg, mm_tip);
+            mm_pushHistory(mm_m, mm_u, "ERR", mm_ms, "err");
+            mm_switchTab("data");
+        }
+    }
+
+    /* ============ 错误提示 ============ */
+    function mm_showAlert(mm_text, mm_tip) {
+        mm_alertText.textContent = mm_text;
+        mm_alertTip.textContent = mm_tip || "";
+        mm_alert.classList.add("mmm_show");
+    }
+
+    /* ============ 标签切换 ============ */
+    function mm_switchTab(mm_name) {
+        mm_currentTab = mm_name;
+        document.querySelectorAll(".mm_tab").forEach(function (mm_el) {
+            mm_el.classList.toggle("mmm_active", mm_el.getAttribute("data-tab") === mm_name);
+        });
+        document.getElementById("mm_panelData").classList.toggle("mmm_show", mm_name === "data");
+        document.getElementById("mm_panelHeaders").classList.toggle("mmm_show", mm_name === "headers");
+        document.getElementById("mm_panelRaw").classList.toggle("mmm_show", mm_name === "raw");
+    }
+
+    /* ============ 清空 ============ */
+    function mm_clear() {
+        mm_alert.classList.remove("mmm_show");
+        mm_statusCode.className = "mm_code";
+        mm_statusCode.textContent = "—";
+        mm_statusText.textContent = "等待发送";
+        mm_cost.textContent = "—";
+        mm_size.textContent = "—";
+        mm_ctype.textContent = "—";
+        mm_reqLine.textContent = "尚未发送请求";
+        mm_numData.textContent = "0";
+        mm_numHeaders.textContent = "0";
+        mm_outData.innerHTML = '<span class="mm_placeholder">// 点击「发送请求」后，这里显示接口返回的数据</span>';
+        mm_outHeaders.innerHTML = '<div class="mm_empty">暂无响应头</div>';
+        mm_outRaw.innerHTML = '<span class="mm_placeholder">// 未格式化的原始响应文本</span>';
+    }
+
+    /* ============ 历史记录 ============ */
+    function mm_pushHistory(mm_m, mm_u, mm_status, mm_ms, mm_type) {
+        mm_history.unshift({
+            method: mm_m, url: mm_u, status: mm_status,
+            ms: mm_ms, type: mm_type, time: new Date().toLocaleTimeString("zh-CN", { hour12: false }),
+            body: mm_body.value, headers: mm_headers.value
+        });
+        if (mm_history.length > 8) mm_history = mm_history.slice(0, 8);
+        mm_renderHistory();
+    }
+
+    function mm_renderHistory() {
+        mm_hisCount.textContent = mm_history.length + " 条";
+        if (mm_history.length === 0) {
+            mm_historyBox.innerHTML = '<div class="mm_empty">暂无历史记录</div>';
+            return;
+        }
+        mm_historyBox.innerHTML = mm_history.map(function (mm_h, mm_i) {
+            const mm_color = mm_methodColor[mm_h.method] || "#374151";
+            const mm_st = mm_h.type === "ok" ? "#15803d"
+                : mm_h.type === "warn" ? "#b45309" : "#b91c1c";
+            return '<div class="mm_hitem" onclick="mm_replay(' + mm_i + ')">' +
+                '<span class="mm_hm" style="color:' + mm_color + '">' + mm_h.method + '</span>' +
+                '<span class="mm_hu" title="' + mm_h.url + '">' + mm_h.url + '</span>' +
+                '<span class="mm_hm" style="color:' + mm_st + '">' + mm_h.status + '</span>' +
+                '<span class="mm_ht">' + mm_h.ms + ' ms · ' + mm_h.time + '</span>' +
+                '</div>';
+        }).join("");
+    }
+
+    function mm_replay(mm_i) {
+        const mm_h = mm_history[mm_i];
+        if (!mm_h) return;
+        mm_method.value = mm_h.method;
+        mm_url.value = mm_h.url;
+        mm_body.value = mm_h.body;
+        mm_headers.value = mm_h.headers;
+        mm_setMethod();
+    }
+
+    /* ============ 工具函数 ============ */
+    function mm_escape(mm_s) {
+        return mm_s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function mm_highlight(mm_text) {
+        const mm_esc = mm_escape(mm_text);
+        return mm_esc.replace(
+            /"([^"]*)"(\s*:)?|-?\d+(?:\.\d+)?|true|false|null/g,
+            function (mm_m, mm_str, mm_colon) {
+                if (mm_m === "true" || mm_m === "false" || mm_m === "null") {
+                    return '<span class="mm_b">' + mm_m + '</span>';
+                }
+                if (mm_str !== undefined && mm_str !== null) {
+                    return mm_colon
+                        ? '<span class="mm_k">"' + mm_str + '"</span>' + mm_colon
+                        : '<span class="mm_s">"' + mm_str + '"</span>';
+                }
+                return '<span class="mm_n">' + mm_m + '</span>';
+            }
+        );
+    }
+
+    /* ============ 初始化 ============ */
+    mm_setMethod();
+
+    window.mm_setMethod = mm_setMethod;
+    window.mm_quick = mm_quick;
+    window.mm_send = mm_send;
+    window.mm_switchTab = mm_switchTab;
+    window.mm_clear = mm_clear;
+    window.mm_replay = mm_replay;
+</script>
+</body>
+</html>

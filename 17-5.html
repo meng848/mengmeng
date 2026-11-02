@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：JavaScript 两种定时器 - 演示 setTimeout 一次性延时与 setInterval 循环执行，配套清除、秒表与事件循环实验 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-5 · JavaScript 两种定时器</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(160deg, #eef2ff 0%, #f7f7ff 45%, #eafaf7 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 24px 18px 70px;
+        }
+        .mm_wrap { max-width: 1000px; margin: 0 auto; }
+
+        /* ============ 返回 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #6b7280; text-decoration: none; font-size: .88rem;
+            margin-bottom: 14px;
+        }
+        .mm_back:hover { color: #4338ca; }
+
+        /* ============ 头部 ============ */
+        .mm_hero {
+            background: linear-gradient(135deg, #4338ca, #6d28d9 55%, #0e7490);
+            color: #fff; border-radius: 16px; padding: 26px 28px;
+            margin-bottom: 18px; box-shadow: 0 16px 34px rgba(67, 56, 202, .22);
+        }
+        .mm_hero h1 { font-size: 1.5rem; margin-bottom: 10px; letter-spacing: .02em; }
+        .mm_hero h1 .iconfont { margin-right: 8px; font-size: 1.5rem; vertical-align: -2px; }
+        .mm_hero p { font-size: .88rem; line-height: 1.85; color: rgba(255,255,255,.88); }
+        .mm_hero code {
+            font-family: Consolas, monospace; background: rgba(255,255,255,.16);
+            padding: 1px 6px; border-radius: 4px;
+        }
+
+        /* ============ 通用卡片 ============ */
+        .mm_card {
+            background: #fff; border-radius: 16px; padding: 20px 22px;
+            margin-bottom: 18px; box-shadow: 0 10px 26px rgba(30, 41, 59, .08);
+        }
+        .mm_card__head {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 12px; margin-bottom: 16px;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .mm_card__head h2 { font-size: 1.06rem; color: #111827; }
+        .mm_card__head .iconfont { color: #4338ca; font-size: 1.1rem; }
+        .mm_sub { font-size: .78rem; color: #94a3b8; margin-left: auto; }
+
+        /* ============ 两种定时器对照 ============ */
+        .mm_grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .mm_timer-box {
+            border-radius: 14px; padding: 18px 20px;
+            border: 1px solid #dbeafe; background: #f8fbff;
+        }
+        .mm_timer-box.mmm_amber { border-color: #fde68a; background: #fffbeb; }
+        .mm_timer-box h3 {
+            font-size: 1.02rem; margin-bottom: 4px; color: #1d4ed8;
+            font-family: Consolas, monospace;
+        }
+        .mm_timer-box.mmm_amber h3 { color: #b45309; }
+        .mm_timer-box .mm_en {
+            font-size: .76rem; color: #94a3b8; margin-bottom: 12px;
+        }
+        .mm_syntax {
+            display: block; padding: 12px 14px; margin-bottom: 12px;
+            font-family: Consolas, monospace; font-size: .8rem; line-height: 1.8;
+            color: #0f172a; background: #eef2ff; border-radius: 10px;
+            border-left: 3px solid #6366f1; overflow-x: auto; white-space: pre;
+        }
+        .mm_timer-box.mmm_amber .mm_syntax {
+            background: #fef3c7; border-left-color: #f59e0b;
+        }
+        .mm_kv { font-size: .83rem; line-height: 2.1; color: #475569; }
+        .mm_kv b { color: #1e293b; font-weight: bold; }
+        .mm_kv .mm_key {
+            display: inline-block; min-width: 76px; color: #7c3aed; font-weight: bold;
+        }
+
+        /* ============ 控件 ============ */
+        .mm_row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .mm_label { font-size: .82rem; color: #64748b; }
+        .mm_input {
+            width: 92px; padding: 8px 10px; font-size: .86rem;
+            font-family: Consolas, monospace; color: #111827;
+            background: #f8fafc; border: 1px solid #d1d5db; border-radius: 9px; outline: none;
+        }
+        .mm_input:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 3px rgba(99,102,241,.14); }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; font-size: .85rem; font-weight: bold;
+            color: #fff; background: #4338ca; border: none; border-radius: 9px;
+            cursor: pointer; transition: transform .15s, background .2s, box-shadow .2s;
+        }
+        .mm_btn:hover { background: #3730a3; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(67,56,202,.25); }
+        .mm_btn:active { transform: translateY(0); }
+        .mm_btn.mmm_ghost {
+            color: #4338ca; background: #eef2ff; border: 1px solid #c7d2fe;
+        }
+        .mm_btn.mmm_ghost:hover { background: #e0e7ff; box-shadow: 0 6px 14px rgba(67,56,202,.14); }
+        .mm_btn.mmm_danger { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; }
+        .mm_btn.mmm_danger:hover { background: #fecaca; box-shadow: 0 6px 14px rgba(185,28,28,.16); }
+        .mm_btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ============ 进度 / 倒计时 ============ */
+        .mm_progress {
+            height: 12px; margin-bottom: 10px;
+            background: #e5e7eb; border-radius: 999px; overflow: hidden;
+        }
+        .mm_progress__bar {
+            width: 0; height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+            transition: width .12s linear;
+        }
+        .mm_state {
+            display: flex; flex-wrap: wrap; gap: 18px;
+            font-size: .84rem; font-family: Consolas, monospace; color: #475569;
+        }
+        .mm_state b { color: #1e293b; }
+        .mm_state b.mmm_run { color: #0e7490; }
+        .mm_state b.mmm_off { color: #94a3b8; }
+
+        /* ============ 秒表 ============ */
+        .mm_sw {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 22px;
+            padding: 18px 20px; border-radius: 14px;
+            background: linear-gradient(135deg, #0f172a, #1e293b 60%, #312e81);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+        }
+        .mm_sw__time {
+            font-family: Consolas, monospace; font-size: 2.4rem; font-weight: bold;
+            letter-spacing: .06em; color: #f8fafc;
+            text-shadow: 0 0 18px rgba(99,102,241,.65);
+            line-height: 1.2;
+        }
+        .mm_sw__time small { font-size: 1rem; color: #a5b4fc; }
+        .mm_sw__meta { font-size: .8rem; color: #94a3b8; line-height: 1.9; font-family: Consolas, monospace; }
+        .mm_sw__meta b { color: #67e8f9; font-size: .92rem; }
+        .mm_btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .mm_sw .mm_btns { margin-top: 0; margin-left: auto; }
+        .mm_sw .mm_btn.mmm_ghost { color: #c7d2fe; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+        .mm_sw .mm_btn.mmm_ghost:hover { background: rgba(255,255,255,.18); }
+
+        /* ============ 日志 ============ */
+        .mm_log {
+            margin-top: 14px; padding: 12px 14px; min-height: 96px; max-height: 190px; overflow-y: auto;
+            font-family: Consolas, monospace; font-size: .8rem; line-height: 1.9;
+            color: #334155; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px;
+        }
+        .mm_log__line { display: flex; gap: 10px; }
+        .mm_log__time { color: #94a3b8; flex-shrink: 0; }
+        .mm_log__line.mmm_ok .mm_log__text { color: #0f766e; }
+        .mm_log__line.mmm_warn .mm_log__text { color: #b45309; }
+        .mm_log__line.mmm_err .mm_log__text { color: #b91c1c; }
+        .mm_log__empty { color: #94a3b8; }
+
+        /* ============ 对照表 ============ */
+        .mm_table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .mm_table th,
+        .mm_table td { padding: 11px 12px; text-align: left; border-bottom: 1px solid #eef2f7; }
+        .mm_table th { color: #4338ca; background: #f5f6ff; font-weight: bold; }
+        .mm_table td:first-child { color: #64748b; width: 132px; }
+        .mm_table tr:last-child td { border-bottom: none; }
+        .mm_table code {
+            padding: 1px 5px; font-family: Consolas, monospace; font-size: .8rem;
+            color: #4338ca; background: #eef2ff; border-radius: 4px;
+        }
+
+        /* ============ 提示 ============ */
+        .mm_tips { list-style: none; }
+        .mm_tips li {
+            position: relative; padding: 9px 0 9px 24px;
+            font-size: .86rem; line-height: 1.8; color: #475569;
+            border-bottom: 1px dashed #eef2f7;
+        }
+        .mm_tips li:last-child { border-bottom: none; }
+        .mm_tips li::before {
+            position: absolute; left: 4px; top: 9px; content: "•";
+            color: #f59e0b; font-weight: bold;
+        }
+        .mm_tips b { color: #1e293b; }
+        .mm_tips code {
+            padding: 1px 5px; font-family: Consolas, monospace; font-size: .8rem;
+            color: #4338ca; background: #eef2ff; border-radius: 4px;
+        }
+
+        .mm_foot {
+            margin-top: 8px; text-align: center; font-size: .8rem; color: #94a3b8;
+        }
+
+        @media (max-width: 760px) {
+            .mm_grid2 { grid-template-columns: 1fr; }
+            .mm_sw { gap: 14px; }
+            .mm_sw__time { font-size: 1.9rem; }
+            .mm_sw .mm_btns { margin-left: 0; }
+            .mm_hero { padding: 22px; }
+            .mm_table td:first-child { width: 92px; }
+            body { padding: 16px 12px 60px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <!-- ============ 头部 ============ -->
+    <header class="mm_hero">
+        <h1><i class="iconfont icon-xinxi"></i>JavaScript 的两种定时器</h1>
+        <p>
+            <code>setTimeout</code> 只执行一次，<code>setInterval</code> 按间隔反复执行；
+            两者都由浏览器计时，配合 <code>clearTimeout</code> / <code>clearInterval</code> 可以随时取消。
+        </p>
+    </header>
+
+    <!-- ============ 一、语法对照 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-yuedu"></i>
+            <h2>一、语法与特点对照</h2>
+            <span class="mm_sub">setTimeout / setInterval</span>
+        </div>
+
+        <div class="mm_grid2">
+            <div class="mm_timer-box">
+                <h3>setTimeout()</h3>
+                <p class="mm_en">一次性延时定时器 · 只执行一次</p>
+<code class="mm_syntax">// 延时 2 秒后执行一次回调
+const id = setTimeout(function () {
+  console.log("时间到！");
+}, 2000);
+
+// 取消尚未执行的延时
+clearTimeout(id);</code>
+                <p class="mm_kv">
+                    <span class="mm_key">执行次数</span><b>1 次</b><br>
+                    <span class="mm_key">返回值</span>数字 id（用于清除）<br>
+                    <span class="mm_key">清除方法</span><code>clearTimeout(id)</code><br>
+                    <span class="mm_key">典型场景</span>延迟提示、防抖、轮播自动切换、动画收尾
+                </p>
+            </div>
+
+            <div class="mm_timer-box mmm_amber">
+                <h3>setInterval()</h3>
+                <p class="mm_en">循环定时器 · 每隔一段时间执行一次</p>
+<code class="mm_syntax">// 每隔 1 秒执行一次回调
+const id = setInterval(function () {
+  console.log("滴答");
+}, 1000);
+
+// 必须手动停止，否则会一直执行
+clearInterval(id);</code>
+                <p class="mm_kv">
+                    <span class="mm_key">执行次数</span><b>无限次（直到被清除）</b><br>
+                    <span class="mm_key">返回值</span>数字 id（用于清除）<br>
+                    <span class="mm_key">清除方法</span><code>clearInterval(id)</code><br>
+                    <span class="mm_key">典型场景</span>时钟、秒表、进度轮询、轮播自动播放
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 二、setTimeout 实验 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-paizhao"></i>
+            <h2>二、实验一：setTimeout 延时执行 + clearTimeout 取消</h2>
+            <span class="mm_sub">一次性</span>
+        </div>
+
+        <div class="mm_row">
+            <span class="mm_label">延时</span>
+            <input class="mm_input" id="mm_delaySec" type="number" value="3" min="0.1" max="30" step="0.1">
+            <span class="mm_label">秒（0.1 ~ 30）</span>
+        </div>
+
+        <div class="mm_progress"><div class="mm_progress__bar" id="mm_delayBar"></div></div>
+
+        <div class="mm_state" style="margin-bottom: 14px;">
+            <span>状态：<b class="mmm_off" id="mm_delayState">未开始</b></span>
+            <span>剩余：<b id="mm_delayLeft">—</b></span>
+            <span>计时器 id：<b id="mm_delayId">null</b></span>
+        </div>
+
+        <div class="mm_btns">
+            <button class="mm_btn" id="mm_delayStart"><i class="iconfont icon-zhengque"></i>开始延时</button>
+            <button class="mm_btn mmm_danger" id="mm_delayCancel"><i class="iconfont icon-guanbi-1"></i>clearTimeout 取消</button>
+            <button class="mm_btn mmm_ghost" id="mm_delayReset"><i class="iconfont icon-huhuan"></i>重置</button>
+        </div>
+
+        <div class="mm_log" id="mm_delayLog">
+            <div class="mm_log__empty">等待操作…点击「开始延时」，进度条走完后回调只执行一次。</div>
+        </div>
+    </section>
+
+    <!-- ============ 三、setInterval 实验 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-jifen"></i>
+            <h2>三、实验二：setInterval 秒表与循环计数</h2>
+            <span class="mm_sub">循环执行</span>
+        </div>
+
+        <div class="mm_sw">
+            <div>
+                <div class="mm_sw__time" id="mm_swTime">00:00<small>.00</small></div>
+                <div class="mm_sw__meta">
+                    间隔 20ms 刷新 · 已执行 <b id="mm_swTicks">0</b> 次 · 定时器 id：<b id="mm_swId">null</b>
+                </div>
+            </div>
+            <div class="mm_btns">
+                <button class="mm_btn" id="mm_swToggle"><i class="iconfont icon-zhengque"></i>开始</button>
+                <button class="mm_btn mmm_ghost" id="mm_swReset"><i class="iconfont icon-huhuan"></i>复位</button>
+            </div>
+        </div>
+
+        <div class="mm_state" style="margin-top: 14px;">
+            <span>计时精度基于 <b>Date.now()</b> 差值计算，避免 setInterval 累积误差</span>
+        </div>
+
+        <div class="mm_log" id="mm_swLog" style="margin-top: 14px;">
+            <div class="mm_log__empty">点「开始」创建 setInterval，再点一次暂停并清除。</div>
+        </div>
+    </section>
+
+    <!-- ============ 四、执行顺序 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-shoucang"></i>
+            <h2>四、实验三：定时器与事件循环的执行顺序</h2>
+            <span class="mm_sub">即使延时为 0 也不会立即执行</span>
+        </div>
+
+        <p style="font-size:.86rem;color:#64748b;line-height:1.9;margin-bottom:14px;">
+            定时器的回调属于<b>宏任务</b>，必须等当前同步代码全部执行完才会进入队列；
+            Promise 的回调属于<b>微任务</b>，会先于宏任务执行。
+        </p>
+
+        <div class="mm_btns" style="margin-top:0;">
+            <button class="mm_btn" id="mm_orderRun"><i class="iconfont icon-yuedu"></i>运行顺序演示</button>
+            <button class="mm_btn mmm_ghost" id="mm_orderClear"><i class="iconfont icon-shanchu"></i>清空日志</button>
+        </div>
+
+        <div class="mm_log" id="mm_orderLog">
+            <div class="mm_log__empty">点击按钮，观察同步代码、微任务、宏任务的输出顺序。</div>
+        </div>
+    </section>
+
+    <!-- ============ 五、对照表 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-baocun"></i>
+            <h2>五、两种定时器对照表</h2>
+            <span class="mm_sub">速查</span>
+        </div>
+
+        <table class="mm_table">
+            <thead>
+                <tr>
+                    <th>对比项</th>
+                    <th>setTimeout</th>
+                    <th>setInterval</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>执行次数</td>
+                    <td>只执行 <b>1 次</b></td>
+                    <td>每隔 delay 毫秒执行 <b>1 次</b>，直到清除</td>
+                </tr>
+                <tr>
+                    <td>是否自动停止</td>
+                    <td>执行完自动失效</td>
+                    <td>不会自动停止，必须 <code>clearInterval</code></td>
+                </tr>
+                <tr>
+                    <td>清除方法</td>
+                    <td><code>clearTimeout(id)</code></td>
+                    <td><code>clearInterval(id)</code></td>
+                </tr>
+                <tr>
+                    <td>延迟参数</td>
+                    <td><code>setTimeout(fn, delay, ...args)</code></td>
+                    <td><code>setInterval(fn, delay, ...args)</code></td>
+                </tr>
+                <tr>
+                    <td>常见问题</td>
+                    <td>页面卸载前未清除会残留引用</td>
+                    <td>回调执行耗时大于 delay 时会“排队追赶”</td>
+                </tr>
+                <tr>
+                    <td>递归替代</td>
+                    <td>在回调里再次调用自身可模拟循环</td>
+                    <td>用递归 setTimeout 可避免任务堆积</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ============ 六、注意事项 ============ -->
+    <section class="mm_card">
+        <div class="mm_card__head">
+            <i class="iconfont icon-fankui"></i>
+            <h2>六、使用要点</h2>
+        </div>
+
+        <ul class="mm_tips">
+            <li><b>最小延时限制：</b>浏览器对嵌套定时器有最小间隔（通常 4ms 起），<code>setTimeout(fn, 0)</code> 依旧会被推迟到下一个宏任务，不会同步执行。</li>
+            <li><b>不精确：</b>定时器只保证“至少等待”这么久，实际时间受主线程忙闲影响，秒表类需求应用 <code>Date.now()</code> 计算真实差值。</li>
+            <li><b>记得清除：</b>组件卸载、页面跳转或重复点击时先 <code>clearTimeout</code> / <code>clearInterval</code>，否则会重复执行或内存泄漏。</li>
+            <li><b>递归 setTimeout：</b>需要可变间隔或避免堆积时，用 <code>setTimeout</code> 在回调内再调用自己，比 <code>setInterval</code> 更可控。</li>
+            <li><b>参数传递：</b><code>setTimeout(fn, 1000, "hello")</code> 中第三个及以后的参数会作为回调实参传入。</li>
+            <li><b>页面隐藏：</b>切换标签页或最小化时，浏览器会降频甚至暂停计时，恢复后可能出现“补执行”现象。</li>
+        </ul>
+    </section>
+
+    <p class="mm_foot">© 2026 孟梦 · 高级网页设计课堂实践 · 17-5 定时器</p>
+</div>
+
+<script>
+    // ============================================================
+    // 公共工具
+    // ============================================================
+    function mm_pad(n, len) {
+        var s = String(n);
+        while (s.length < len) { s = "0" + s; }
+        return s;
+    }
+
+    function mm_clockText() {
+        var d = new Date();
+        return mm_pad(d.getHours(), 2) + ":" + mm_pad(d.getMinutes(), 2)
+             + ":" + mm_pad(d.getSeconds(), 2) + "." + mm_pad(d.getMilliseconds(), 3);
+    }
+
+    // 往日志容器追加一行；keep 为 true 时最多保留 max 条
+    function mm_appendLog(box, text, type, max) {
+        if (!box) { return; }
+        var empty = box.querySelector(".mm_log__empty");
+        if (empty) { empty.remove(); }
+
+        var line = document.createElement("div");
+        line.className = "mm_log__line" + (type ? " mmm_" + type : "");
+
+        var t = document.createElement("span");
+        t.className = "mm_log__time";
+        t.textContent = mm_clockText();
+
+        var s = document.createElement("span");
+        s.className = "mm_log__text";
+        s.textContent = text;
+
+        line.appendChild(t);
+        line.appendChild(s);
+        box.appendChild(line);
+
+        if (max) {
+            while (box.children.length > max) {
+                box.removeChild(box.firstChild);
+            }
+        }
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // 清空日志容器
+    function mm_clearLog(box, tip) {
+        if (!box) { return; }
+        box.innerHTML = "";
+        if (tip) {
+            var d = document.createElement("div");
+            d.className = "mm_log__empty";
+            d.textContent = tip;
+            box.appendChild(d);
+        }
+    }
+
+    // ============================================================
+    // 实验一：setTimeout 一次性延时 + clearTimeout
+    // ============================================================
+    var mm_dSec    = document.getElementById("mm_delaySec");
+    var mm_dBar    = document.getElementById("mm_delayBar");
+    var mm_dState  = document.getElementById("mm_delayState");
+    var mm_dLeft   = document.getElementById("mm_delayLeft");
+    var mm_dId     = document.getElementById("mm_delayId");
+    var mm_dLog    = document.getElementById("mm_delayLog");
+    var mm_dStartBtn = document.getElementById("mm_delayStart");
+
+    // 同时保存延时器与进度刷新器的 id
+    var mm_dTimeoutId = null;
+    var mm_dTickId = null;
+    var mm_dStartAt = 0;
+    var mm_dTotal = 0;
+
+    function mm_dSetState(text, cls) {
+        mm_dState.textContent = text;
+        mm_dState.className = cls || "mmm_off";
+    }
+
+    // 停止全部计时器（进度刷新器也是 setInterval）
+    function mm_dStopTimers() {
+        if (mm_dTimeoutId !== null) { clearTimeout(mm_dTimeoutId); mm_dTimeoutId = null; }
+        if (mm_dTickId !== null) { clearInterval(mm_dTickId); mm_dTickId = null; }
+        mm_dId.textContent = "null";
+    }
+
+    // 重置界面但不写日志
+    function mm_dResetUI() {
+        mm_dBar.style.width = "0%";
+        mm_dLeft.textContent = "—";
+        mm_dSetState("未开始", "mmm_off");
+    }
+
+    function mm_dStart() {
+        // 重复点击时先清掉旧定时器，避免叠加
+        mm_dStopTimers();
+
+        var sec = parseFloat(mm_dSec.value);
+        if (isNaN(sec) || sec <= 0) {
+            mm_dSetState("参数错误", "mmm_off");
+            mm_dLeft.textContent = "—";
+            mm_appendLog(mm_dLog, "参数错误：延时必须是大于 0 的数字", "err");
+            return;
+        }
+        if (sec < 0.1) { sec = 0.1; mm_dSec.value = 0.1; }
+        if (sec > 30) { sec = 30; mm_dSec.value = 30; }
+
+        mm_dTotal = Math.round(sec * 1000);
+        mm_dStartAt = Date.now();
+        mm_dBar.style.width = "0%";
+        mm_dSetState("计时中…", "mmm_run");
+        mm_dLeft.textContent = sec.toFixed(1) + " 秒";
+
+        mm_appendLog(mm_dLog, "setTimeout(fn, " + mm_dTotal + ") 已创建，回调将执行 1 次", "ok");
+
+        // 真正的延时器：只执行一次
+        mm_dTimeoutId = setTimeout(function () {
+            mm_dTimeoutId = null;
+            if (mm_dTickId !== null) { clearInterval(mm_dTickId); mm_dTickId = null; }
+            mm_dId.textContent = "null";
+            mm_dBar.style.width = "100%";
+            mm_dLeft.textContent = "0.0 秒";
+            mm_dSetState("已执行", "mmm_run");
+            mm_appendLog(mm_dLog, "回调执行完毕：setTimeout 只执行这一次，之后自动失效", "ok");
+        }, mm_dTotal);
+        mm_dId.textContent = String(mm_dTimeoutId);
+
+        // 辅助进度条：用 setInterval 每 40ms 刷新一次显示
+        mm_dTickId = setInterval(function () {
+            var pass = Date.now() - mm_dStartAt;
+            if (pass > mm_dTotal) { pass = mm_dTotal; }
+            var pct = (pass / mm_dTotal) * 100;
+            mm_dBar.style.width = pct.toFixed(2) + "%";
+            var left = (mm_dTotal - pass) / 1000;
+            mm_dLeft.textContent = left.toFixed(1) + " 秒";
+        }, 40);
+    }
+
+    // clearTimeout 取消尚未执行的延时
+    function mm_dCancel() {
+        if (mm_dTimeoutId === null) {
+            mm_appendLog(mm_dLog, "当前没有待执行的 setTimeout，无需取消", "warn");
+            return;
+        }
+        var oldId = mm_dTimeoutId;
+        mm_dStopTimers();
+        mm_dBar.style.width = "0%";
+        mm_dLeft.textContent = "—";
+        mm_dSetState("已取消", "mmm_off");
+        mm_appendLog(mm_dLog, "clearTimeout(" + oldId + ") 执行：回调被取消，不会触发", "warn");
+    }
+
+    function mm_dReset() {
+        mm_dStopTimers();
+        mm_dResetUI();
+        mm_appendLog(mm_dLog, "已重置：计时器全部清除，界面归零", "warn");
+    }
+
+    mm_dStartBtn.addEventListener("click", mm_dStart);
+    document.getElementById("mm_delayCancel").addEventListener("click", mm_dCancel);
+    document.getElementById("mm_delayReset").addEventListener("click", mm_dReset);
+
+    // ============================================================
+    // 实验二：setInterval 秒表
+    // ============================================================
+    var mm_swTimeEl = document.getElementById("mm_swTime");
+    var mm_swTicks  = document.getElementById("mm_swTicks");
+    var mm_swIdEl   = document.getElementById("mm_swId");
+    var mm_swToggle = document.getElementById("mm_swToggle");
+    var mm_swLog    = document.getElementById("mm_swLog");
+
+    var mm_swId = null;        // setInterval 返回的 id
+    var mm_swRunning = false;
+    var mm_swAcc = 0;          // 累计毫秒
+    var mm_swBase = 0;         // 本段开始时的 Date.now()
+    var mm_swTickCount = 0;    // interval 触发次数
+
+    function mm_swRender(ms) {
+        var totalCs = Math.floor(ms / 10);           // 百分秒
+        var cs = totalCs % 100;
+        var totalSec = Math.floor(totalCs / 100);
+        var s = totalSec % 60;
+        var m = Math.floor(totalSec / 60);
+        mm_swTimeEl.innerHTML = mm_pad(m, 2) + ":" + mm_pad(s, 2) + "<small>." + mm_pad(cs, 2) + "</small>";
+    }
+
+    function mm_swStop() {
+        if (mm_swId !== null) { clearInterval(mm_swId); mm_swId = null; }
+        mm_swRunning = false;
+        mm_swIdEl.textContent = "null";
+    }
+
+    function mm_swToggleRun() {
+        if (mm_swRunning) {
+            // 暂停：清除 interval，保留累计时间
+            var oldId = mm_swId;
+            mm_swAcc = Date.now() - mm_swBase;
+            mm_swStop();
+            mm_swToggle.innerHTML = '<i class="iconfont icon-zhengque"></i>继续';
+            mm_appendLog(mm_swLog, "clearInterval(" + oldId + ") 暂停：当前 " + (mm_swAcc / 1000).toFixed(2) + " 秒", "warn");
+            return;
+        }
+
+        // 开始/继续：以 Date.now 差值为准，避免 interval 漂移
+        mm_swBase = Date.now() - mm_swAcc;
+        mm_swRunning = true;
+        mm_swTickCount = 0;
+        mm_swTicks.textContent = "0";
+        mm_swId = setInterval(function () {
+            mm_swTickCount++;
+            mm_swAcc = Date.now() - mm_swBase;
+            mm_swRender(mm_swAcc);
+            mm_swTicks.textContent = String(mm_swTickCount);
+        }, 20);
+        mm_swIdEl.textContent = String(mm_swId);
+        mm_swToggle.innerHTML = '<i class="iconfont icon-guanbi-1"></i>暂停';
+
+        if (mm_swAcc === 0) {
+            mm_appendLog(mm_swLog, "setInterval(fn, 20) 已创建，每 20ms 刷新一次", "ok");
+        } else {
+            mm_appendLog(mm_swLog, "继续计时：从 " + (mm_swAcc / 1000).toFixed(2) + " 秒处接着走", "ok");
+        }
+    }
+
+    function mm_swResetAll() {
+        mm_swStop();
+        mm_swAcc = 0;
+        mm_swTickCount = 0;
+        mm_swRender(0);
+        mm_swTicks.textContent = "0";
+        mm_swToggle.innerHTML = '<i class="iconfont icon-zhengque"></i>开始';
+        mm_appendLog(mm_swLog, "复位：已清除 setInterval，计时归零", "warn");
+    }
+
+    mm_swToggle.addEventListener("click", mm_swToggleRun);
+    document.getElementById("mm_swReset").addEventListener("click", mm_swResetAll);
+    mm_swRender(0);
+
+    // ============================================================
+    // 实验三：执行顺序（同步 → 微任务 → 宏任务）
+    // ============================================================
+    var mm_orderLog = document.getElementById("mm_orderLog");
+
+    function mm_orderRun() {
+        mm_clearLog(mm_orderLog, "");
+        mm_appendLog(mm_orderLog, "① 同步代码开始 —— 先把当前脚本跑完", "ok");
+
+        // 微任务：Promise.then 会插到当前宏任务结束之后、下一个宏任务之前
+        Promise.resolve().then(function () {
+            mm_appendLog(mm_orderLog, "③ 微任务：Promise.then 先执行", "ok");
+        });
+
+        // 宏任务：setTimeout 即使延时 0ms 也要等前面的任务清空
+        setTimeout(function () {
+            mm_appendLog(mm_orderLog, "④ 宏任务：setTimeout(fn, 0) 最后执行", "warn");
+        }, 0);
+
+        mm_appendLog(mm_orderLog, "② 同步代码结束 —— 此时才去检查任务队列", "ok");
+    }
+
+    document.getElementById("mm_orderRun").addEventListener("click", mm_orderRun);
+    document.getElementById("mm_orderClear").addEventListener("click", function () {
+        mm_clearLog(mm_orderLog, "日志已清空，可再次运行对比顺序。");
+    });
+
+    // 页面卸载时兜底清理，避免定时器残留
+    window.addEventListener("beforeunload", function () {
+        mm_dStopTimers();
+        if (mm_swId !== null) { clearInterval(mm_swId); }
+    });
+</script>
+</body>
+</html>
