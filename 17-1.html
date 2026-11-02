@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-02，功能名称：JSON 数据格式展示（语法规则、六种值类型、序列化与解析、fetch 加载、合法性校验） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-1 · JSON 数据格式展示</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: #0b1220;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 26px 18px 70px;
+        }
+        .mm_wrap { max-width: 1080px; margin: 0 auto; }
+
+        /* ============ 返回 & 头部 ============ */
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #94a3b8; text-decoration: none; font-size: .88rem;
+            margin-bottom: 16px; transition: color .2s;
+        }
+        .mm_back:hover { color: #22d3ee; }
+
+        .mm_hero {
+            background: linear-gradient(135deg, #12213d 0%, #0f2033 60%, #0d2b2f 100%);
+            border: 1px solid #1e3a5f;
+            border-radius: 16px;
+            padding: 26px 26px 22px;
+            margin-bottom: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .mm_hero::after {
+            content: "{ }";
+            position: absolute; right: 18px; bottom: -18px;
+            font-size: 7rem; font-family: Consolas, monospace;
+            color: rgba(34, 211, 238, .07); font-weight: bold;
+        }
+        .mm_hero h1 {
+            font-size: 1.65rem; margin-bottom: 8px;
+            background: linear-gradient(90deg, #22d3ee, #4ade80);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .mm_hero p { color: #94a3b8; font-size: .92rem; line-height: 1.75; max-width: 720px; }
+        .mm_badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+        .mm_badge {
+            font-size: .76rem; padding: 4px 12px; border-radius: 20px;
+            background: rgba(34, 211, 238, .1); color: #67e8f9;
+            border: 1px solid rgba(34, 211, 238, .3);
+            font-family: Consolas, monospace;
+        }
+
+        /* ============ 通用区块 ============ */
+        .mm_section { margin-bottom: 24px; }
+        .mm_section-head {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+        }
+        .mm_section-head i { color: #22d3ee; font-size: 1.05rem; font-style: normal; }
+        .mm_section-head h2 { font-size: 1.08rem; color: #f1f5f9; }
+        .mm_hint { color: #64748b; font-size: .8rem; margin-left: auto; }
+
+        /* ============ 代码块 ============ */
+        .mm_code {
+            background: #060e1a; border: 1px solid #1b2b44;
+            border-radius: 10px; padding: 12px 14px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: .82rem; line-height: 1.75;
+            color: #cbd5e1; white-space: pre-wrap; word-break: break-word;
+            overflow-x: auto;
+        }
+        .mm_code .mm_k { color: #7dd3fc; }   /* key */
+        .mm_code .mm_s { color: #86efac; }   /* string */
+        .mm_code .mm_n { color: #fbbf24; }   /* number */
+        .mm_code .mm_b { color: #f472b6; }   /* boolean / null */
+
+        /* ============ 规则卡片 ============ */
+        .mm_rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+        .mm_rule {
+            background: #101b2e; border: 1px solid #1e2f4a;
+            border-radius: 12px; padding: 14px 16px;
+        }
+        .mm_rule h3 { font-size: .88rem; color: #e2e8f0; margin-bottom: 6px; }
+        .mm_rule .mm_ok { color: #4ade80; font-family: Consolas, monospace; font-size: .78rem; display: block; }
+        .mm_rule .mm_no { color: #f87171; font-family: Consolas, monospace; font-size: .78rem; display: block; }
+        .mm_rule p { color: #94a3b8; font-size: .78rem; margin-top: 6px; line-height: 1.6; }
+
+        /* ============ 六种值类型 ============ */
+        .mm_types { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+        .mm_type {
+            background: #101b2e; border: 1px solid #1e2f4a; border-radius: 12px;
+            padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .mm_type-top { display: flex; align-items: center; gap: 8px; }
+        .mm_type-name {
+            font-family: Consolas, monospace; font-size: .84rem; font-weight: bold;
+            color: #0b1220; background: #22d3ee; padding: 2px 8px; border-radius: 5px;
+        }
+        .mm_type-desc { color: #94a3b8; font-size: .76rem; }
+        .mm_btn {
+            border: 1px solid #2c4a6e; background: #16263c; color: #cbd5e1;
+            padding: 6px 12px; border-radius: 7px; font-size: .78rem; cursor: pointer;
+            font-family: inherit; transition: all .18s;
+        }
+        .mm_btn:hover { border-color: #22d3ee; color: #22d3ee; background: #0f2f3d; }
+        .mm_btn.mmm_primary {
+            background: linear-gradient(135deg, #0891b2, #16a34a); color: #fff; border: none;
+        }
+        .mm_btn.mmm_primary:hover { filter: brightness(1.15); color: #fff; }
+        .mm_result {
+            font-family: Consolas, monospace; font-size: .76rem; color: #7dd3fc;
+            background: #060e1a; border: 1px dashed #1e3a5f; border-radius: 7px;
+            padding: 7px 10px; min-height: 30px; word-break: break-word;
+            line-height: 1.6;
+        }
+
+        /* ============ 转换实验室 ============ */
+        .mm_lab {
+            background: #101b2e; border: 1px solid #1e2f4a; border-radius: 14px;
+            padding: 16px;
+        }
+        .mm_lab textarea {
+            width: 100%; min-height: 132px; resize: vertical;
+            background: #060e1a; border: 1px solid #1b2b44; border-radius: 10px;
+            color: #cbd5e1; font-family: Consolas, monospace; font-size: .82rem;
+            line-height: 1.7; padding: 12px; outline: none;
+        }
+        .mm_lab textarea:focus { border-color: #22d3ee; }
+        .mm_lab-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 12px; }
+        .mm_out {
+            background: #060e1a; border: 1px solid #1b2b44; border-radius: 10px;
+            padding: 12px; font-family: Consolas, monospace; font-size: .8rem;
+            line-height: 1.75; color: #86efac; white-space: pre-wrap;
+            word-break: break-word; min-height: 60px; max-height: 320px; overflow: auto;
+        }
+        .mm_out .mm_k { color: #7dd3fc; }
+        .mm_out .mm_s { color: #86efac; }
+        .mm_out .mm_n { color: #fbbf24; }
+        .mm_out .mm_b { color: #f472b6; }
+
+        /* ============ fetch 演示 ============ */
+        .mm_fetch { background: #101b2e; border: 1px solid #1e2f4a; border-radius: 14px; padding: 16px; }
+        .mm_news { list-style: none; margin-top: 12px; display: grid; gap: 8px; }
+        .mm_news-item {
+            display: flex; align-items: center; gap: 10px;
+            background: #0d1826; border: 1px solid #1b2b44; border-radius: 9px;
+            padding: 10px 12px; font-size: .82rem;
+        }
+        .mm_news-item .mm_tag {
+            font-size: .68rem; padding: 2px 8px; border-radius: 5px;
+            background: rgba(34, 211, 238, .12); color: #67e8f9;
+            border: 1px solid rgba(34, 211, 238, .28); flex-shrink: 0;
+        }
+        .mm_news-item strong { color: #e2e8f0; font-weight: normal; flex: 1; }
+        .mm_news-item span.mm_num { color: #64748b; font-family: Consolas, monospace; font-size: .74rem; }
+        .mm_status { font-size: .78rem; color: #64748b; margin-top: 10px; font-family: Consolas, monospace; }
+        .mm_status.mmm_ok { color: #4ade80; }
+        .mm_status.mmm_err { color: #f87171; }
+
+        /* ============ 校验器 ============ */
+        .mm_check { background: #101b2e; border: 1px solid #1e2f4a; border-radius: 14px; padding: 16px; }
+        .mm_check-out {
+            margin-top: 10px; font-family: Consolas, monospace; font-size: .8rem;
+            border-radius: 9px; padding: 10px 12px; line-height: 1.7; white-space: pre-wrap;
+        }
+        .mm_check-out.mmm_ok { background: rgba(74, 222, 128, .1); color: #4ade80; border: 1px solid rgba(74, 222, 128, .35); }
+        .mm_check-out.mmm_err { background: rgba(248, 113, 113, .1); color: #f87171; border: 1px solid rgba(248, 113, 113, .35); }
+
+        /* ============ 页脚 ============ */
+        .mm_footer {
+            text-align: center; color: #475569; font-size: .78rem;
+            border-top: 1px solid #1b2b44; padding-top: 18px; margin-top: 26px;
+        }
+
+        @media (max-width: 620px) {
+            .mm_hero h1 { font-size: 1.3rem; }
+            .mm_hero::after { font-size: 4.5rem; }
+            .mm_code, .mm_lab textarea, .mm_out { font-size: .76rem; }
+            .mm_hint { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back"><i class="iconfont icon-shouye1"></i> 返回首页</a>
+
+    <!-- ================= 头部 ================= -->
+    <header class="mm_hero">
+        <h1>{ JSON } 数据格式展示</h1>
+        <p>JSON（JavaScript Object Notation）是一种轻量级的文本数据交换格式，独立于编程语言，如今几乎所有前后端接口都用它传数据。本页把它的语法、取值类型、序列化与解析、网络加载和校验完整演示一遍。</p>
+        <div class="mm_badges">
+            <span class="mm_badge">application/json</span>
+            <span class="mm_badge">纯文本</span>
+            <span class="mm_badge">key 必须双引号</span>
+            <span class="mm_badge">无注释 / 无尾逗号</span>
+        </div>
+    </header>
+
+    <!-- ================= 语法规则 ================= -->
+    <section class="mm_section">
+        <div class="mm_section-head">
+            <i class="iconfont icon-yuedu"></i>
+            <h2>一、六条语法规则</h2>
+            <span class="mm_hint">绿色 = 合法，红色 = 非法</span>
+        </div>
+        <div class="mm_rules">
+            <div class="mm_rule">
+                <h3>1. 键名必须用双引号</h3>
+                <span class="mm_ok">✓ { "name": "孟梦" }</span>
+                <span class="mm_no">✗ { name: "孟梦" }</span>
+                <p>键名不能用单引号，也不能不加引号。</p>
+            </div>
+            <div class="mm_rule">
+                <h3>2. 字符串只能用双引号</h3>
+                <span class="mm_ok">✓ "高级网页设计"</span>
+                <span class="mm_no">✗ '高级网页设计'</span>
+                <p>单引号、反引号都是 JS 语法，不是 JSON。</p>
+            </div>
+            <div class="mm_rule">
+                <h3>3. 不允许写注释</h3>
+                <span class="mm_ok">✓ { "a": 1 }</span>
+                <span class="mm_no">✗ { "a": 1 /* 注释 */ }</span>
+                <p>JSON 是纯数据，不能有 // 或 /* */。</p>
+            </div>
+            <div class="mm_rule">
+                <h3>4. 最后一个成员不能有逗号</h3>
+                <span class="mm_ok">✓ { "a": 1, "b": 2 }</span>
+                <span class="mm_no">✗ { "a": 1, "b": 2, }</span>
+                <p>尾逗号在 JS 里没事，在 JSON 里直接报错。</p>
+            </div>
+            <div class="mm_rule">
+                <h3>5. 值的类型有限</h3>
+                <span class="mm_ok">✓ 只有 6 种(见下节)</span>
+                <span class="mm_no">✗ undefined / 函数 / NaN</span>
+                <p>不支持 undefined、function、日期对象、Infinity。</p>
+            </div>
+            <div class="mm_rule">
+                <h3>6. 顶层可以是对象或数组</h3>
+                <span class="mm_ok">✓ { … } 或 [ … ]</span>
+                <span class="mm_no">✗ 单独的 "abc"（严格版不允许）</span>
+                <p>实际接口一般最外层都包一个对象。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 六种值类型 ================= -->
+    <section class="mm_section">
+        <div class="mm_section-head">
+            <i class="iconfont icon-jifen"></i>
+            <h2>二、JSON 允许的六种值类型</h2>
+            <span class="mm_hint">点击「解析」查看 JavaScript 中对应的值</span>
+        </div>
+        <div class="mm_types" id="mm_types"></div>
+    </section>
+
+    <!-- ================= 转换实验室 ================= -->
+    <section class="mm_section">
+        <div class="mm_section-head">
+            <i class="iconfont icon-huhuan"></i>
+            <h2>三、stringify 与 parse 转换实验室</h2>
+            <span class="mm_hint">左边改 JSON，右边看结果</span>
+        </div>
+        <div class="mm_lab">
+            <textarea id="mm_labInput" spellcheck="false">{
+  "name": "孟梦",
+  "age": 20,
+  "isStudent": true,
+  "skills": ["HTML", "CSS", "JavaScript"],
+  "school": null
+}</textarea>
+            <div class="mm_lab-bar">
+                <button class="mm_btn mmm_primary" onclick="mm_doStringify(false)"><i class="iconfont icon-baocun"></i> 压缩为一行</button>
+                <button class="mm_btn" onclick="mm_doStringify(true)">美化(缩进 2 空格)</button>
+                <button class="mm_btn" onclick="mm_doParse()">JSON.parse → JS 对象</button>
+                <button class="mm_btn" onclick="mm_doTypeof()">查看 typeof 与 key 数量</button>
+            </div>
+            <div class="mm_out" id="mm_labOut">// 点击上方按钮开始转换…</div>
+        </div>
+    </section>
+
+    <!-- ================= fetch 加载 ================= -->
+    <section class="mm_section">
+        <div class="mm_section-head">
+            <i class="iconfont icon-xiaoxi"></i>
+            <h2>四、用 fetch 获取 JSON 数据并渲染</h2>
+            <span class="mm_hint">原生 fetch，无第三方请求库</span>
+        </div>
+        <div class="mm_fetch">
+            <div class="mm_lab-bar" style="margin:0 0 4px;">
+                <button class="mm_btn mmm_primary" onclick="mm_fetchNews()"><i class="iconfont icon-shoucang"></i> 加载榜单数据</button>
+                <button class="mm_btn" onclick="mm_showRaw()">查看原始 JSON 文本</button>
+            </div>
+            <ul class="mm_news" id="mm_news"></ul>
+            <div class="mm_status" id="mm_fetchStatus">等待加载…</div>
+            <div class="mm_out" id="mm_rawOut" style="display:none; margin-top:10px;"></div>
+        </div>
+    </section>
+
+    <!-- ================= 合法性校验 ================= -->
+    <section class="mm_section">
+        <div class="mm_section-head">
+            <i class="iconfont icon-zhengque"></i>
+            <h2>五、JSON 合法性校验器</h2>
+            <span class="mm_hint">改坏了也能看出错在哪</span>
+        </div>
+        <div class="mm_check">
+            <textarea id="mm_checkInput" spellcheck="false" style="width:100%;min-height:104px;resize:vertical;background:#060e1a;border:1px solid #1b2b44;border-radius:10px;color:#cbd5e1;font-family:Consolas,monospace;font-size:.8rem;line-height:1.7;padding:12px;outline:none;">{ "a": 1, "b": 2, }</textarea>
+            <div class="mm_lab-bar" style="margin:10px 0 0;">
+                <button class="mm_btn mmm_primary" onclick="mm_validate()">校验这段 JSON</button>
+                <button class="mm_btn" onclick="mm_fillBad()">填入一个错误示例</button>
+                <button class="mm_btn" onclick="mm_fillGood()">填入一个正确示例</button>
+            </div>
+            <div class="mm_check-out" id="mm_checkOut">// 点击「校验」查看结果</div>
+        </div>
+    </section>
+
+    <footer class="mm_footer">
+        《高级网页设计》 · 17-1 JSON 展示 · 作图：孟梦 · 2026-11-02
+    </footer>
+</div>
+
+<script>
+    /* ============ 1. 六种值类型 ============ */
+    const mm_typeList = [
+        { name: "object",  json: '{\n  "name": "孟梦",\n  "age": 20\n}', desc: "无序的键值对集合，最常用的结构" },
+        { name: "array",   json: '["HTML", "CSS", "JS"]',                desc: "有序的值列表，可嵌套任意类型" },
+        { name: "string",  json: '"Hello JSON"',                          desc: "文本，必须用双引号包裹" },
+        { name: "number",  json: '3.14',                                  desc: "整数或小数，不支持 NaN / Infinity" },
+        { name: "boolean", json: 'true',                                  desc: "只有 true 与 false 两个值" },
+        { name: "null",    json: 'null',                                  desc: "表示空值，注意不是 undefined" }
+    ];
+
+    function mm_renderTypes() {
+        const mm_box = document.getElementById("mm_types");
+        let mm_html = "";
+        mm_typeList.forEach((mm_t, mm_i) => {
+            mm_html +=
+                '<div class="mm_type">' +
+                    '<div class="mm_type-top">' +
+                        '<span class="mm_type-name">' + mm_t.name + '</span>' +
+                        '<span class="mm_type-desc">' + mm_t.desc + '</span>' +
+                    '</div>' +
+                    '<div class="mm_code">' + mm_highlight(mm_t.json) + '</div>' +
+                    '<button class="mm_btn" onclick="mm_parseType(' + mm_i + ')">解析并查看值</button>' +
+                    '<div class="mm_result" id="mm_typeOut_' + mm_i + '">等待解析…</div>' +
+                '</div>';
+        });
+        mm_box.innerHTML = mm_html;
+    }
+
+    function mm_parseType(mm_i) {
+        const mm_t = mm_typeList[mm_i];
+        const mm_val = JSON.parse(mm_t.json);
+        const mm_typeof = Array.isArray(mm_val) ? "array (typeof 为 object)" : typeof mm_val;
+        document.getElementById("mm_typeOut_" + mm_i).innerHTML =
+            "typeof：" + mm_typeof +
+            "<br>值：" + mm_formatValue(mm_val);
+    }
+
+    /* 值 → 彩色 HTML */
+    function mm_formatValue(mm_v) {
+        if (mm_v === null) return '<span class="mm_b">null</span>';
+        if (typeof mm_v === "boolean") return '<span class="mm_b">' + mm_v + '</span>';
+        if (typeof mm_v === "number") return '<span class="mm_n">' + mm_v + '</span>';
+        if (typeof mm_v === "string") return '<span class="mm_s">"' + mm_v + '"</span>';
+        return '<span class="mm_k">' + JSON.stringify(mm_v) + '</span>';
+    }
+
+    /* 简单 JSON 语法高亮：键名蓝色、字符串绿色、数字黄色、布尔/null 粉色 */
+    function mm_highlight(mm_text) {
+        let mm_s = mm_text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        return mm_s.replace(
+            /"([^"]*)"(\s*:)?|-?\d+(?:\.\d+)?|true|false|null/g,
+            function (mm_m, mm_str, mm_colon) {
+                if (mm_m === "true" || mm_m === "false" || mm_m === "null") {
+                    return '<span class="mm_b">' + mm_m + '</span>';
+                }
+                if (mm_str !== undefined && mm_str !== null) {
+                    return mm_colon
+                        ? '<span class="mm_k">"' + mm_str + '"</span>' + mm_colon
+                        : '<span class="mm_s">"' + mm_str + '"</span>';
+                }
+                return '<span class="mm_n">' + mm_m + '</span>';
+            }
+        );
+    }
+
+    /* ============ 2. 转换实验室 ============ */
+    const mm_labInput = document.getElementById("mm_labInput");
+    const mm_labOut = document.getElementById("mm_labOut");
+
+    function mm_doStringify(mm_pretty) {
+        try {
+            const mm_obj = JSON.parse(mm_labInput.value);
+            const mm_str = JSON.stringify(mm_obj, null, mm_pretty ? 2 : 0);
+            mm_labOut.innerHTML =
+                '<span class="mm_b">// JSON.stringify(值, null, ' + (mm_pretty ? 2 : 0) + ') 结果：</span>\n' +
+                mm_highlight(mm_str);
+        } catch (mm_e) {
+            mm_labOut.innerHTML = '<span style="color:#f87171">解析失败：' + mm_e.message + '</span>';
+        }
+    }
+
+    function mm_doParse() {
+        try {
+            const mm_str = JSON.stringify(JSON.parse(mm_labInput.value));
+            const mm_obj = JSON.parse(mm_str);
+            const mm_lines = Object.keys(mm_obj).map(mm_k =>
+                mm_k + " → " + JSON.stringify(mm_obj[mm_k])
+            );
+            mm_labOut.innerHTML =
+                '<span class="mm_b">// JSON.parse() 得到真正的 JavaScript 对象</span>\n' +
+                mm_lines.join("\n");
+        } catch (mm_e) {
+            mm_labOut.innerHTML = '<span style="color:#f87171">解析失败：' + mm_e.message + '</span>';
+        }
+    }
+
+    function mm_doTypeof() {
+        try {
+            const mm_obj = JSON.parse(mm_labInput.value);
+            mm_labOut.innerHTML =
+                "typeof 结果 → " + (Array.isArray(mm_obj) ? "object（数组）" : typeof mm_obj) + "\n" +
+                "顶层键数量 → " + (Array.isArray(mm_obj) ? mm_obj.length + " 项" : Object.keys(mm_obj).length + " 个") + "\n" +
+                "序列化后长度 → " + JSON.stringify(mm_obj).length + " 个字符";
+        } catch (mm_e) {
+            mm_labOut.innerHTML = '<span style="color:#f87171">解析失败：' + mm_e.message + '</span>';
+        }
+    }
+
+    /* ============ 3. fetch 获取 JSON ============ */
+    const mm_newsData = {
+        code: 0,
+        message: "success",
+        data: [
+            { id: 1, tag: "热搜", title: "前端三件套：HTML / CSS / JavaScript", views: 356322 },
+            { id: 2, tag: "教程", title: "fetch 请求 JSON 的标准写法", views: 311246 },
+            { id: 3, tag: "技巧", title: "JSON.stringify 的三个参数", views: 295883 },
+            { id: 4, tag: "避坑", title: "JSON 里为什么不能写注释", views: 266061 },
+            { id: 5, tag: "实战", title: "接口返回结构如何设计", views: 243936 }
+        ]
+    };
+    const mm_newsText = JSON.stringify(mm_newsData);
+    const mm_newsBox = document.getElementById("mm_news");
+    const mm_fetchStatus = document.getElementById("mm_fetchStatus");
+    const mm_rawOut = document.getElementById("mm_rawOut");
+
+    function mm_fetchNews() {
+        mm_newsBox.innerHTML = "";
+        mm_rawOut.style.display = "none";
+        mm_fetchStatus.className = "mm_status";
+        mm_fetchStatus.textContent = "正在请求数据…";
+
+        // 用 data: 协议模拟一个返回 JSON 的服务端接口
+        const mm_url = "data:application/json;charset=utf-8," + encodeURIComponent(mm_newsText);
+
+        fetch(mm_url)
+            .then(mm_res => {
+                if (!mm_res.ok) throw new Error("HTTP " + mm_res.status);
+                return mm_res.json();
+            })
+            .then(mm_json => {
+                mm_fetchStatus.className = "mm_status mmm_ok";
+                mm_fetchStatus.textContent = "请求成功：code=" + mm_json.code + "，共 " + mm_json.data.length + " 条数据";
+                mm_newsBox.innerHTML = mm_json.data.map(mm_n =>
+                    '<li class="mm_news-item">' +
+                        '<span class="mm_tag">' + mm_n.tag + '</span>' +
+                        '<strong>' + mm_n.title + '</strong>' +
+                        '<span class="mm_num">' + mm_n.views + ' 次观看</span>' +
+                    '</li>'
+                ).join("");
+            })
+            .catch(mm_e => {
+                mm_fetchStatus.className = "mm_status mmm_err";
+                mm_fetchStatus.textContent = "请求失败：" + mm_e.message;
+            });
+    }
+
+    function mm_showRaw() {
+        mm_rawOut.style.display = "block";
+        mm_rawOut.innerHTML = mm_highlight(mm_newsText);
+    }
+
+    /* ============ 4. 合法性校验 ============ */
+    const mm_checkOut = document.getElementById("mm_checkOut");
+
+    function mm_validate() {
+        const mm_text = document.getElementById("mm_checkInput").value;
+        try {
+            const mm_val = JSON.parse(mm_text);
+            mm_checkOut.className = "mm_check-out mmm_ok";
+            mm_checkOut.textContent = "✓ 合法 JSON\n顶层类型：" +
+                (Array.isArray(mm_val) ? "数组" : typeof mm_val) +
+                "\n压缩后长度：" + JSON.stringify(mm_val).length + " 字符";
+        } catch (mm_e) {
+            mm_checkOut.className = "mm_check-out mmm_err";
+            mm_checkOut.textContent = "✗ 非法 JSON\n" + mm_e.message;
+        }
+    }
+
+    function mm_fillBad() {
+        document.getElementById("mm_checkInput").value =
+            '{\n  name: "孟梦",\n  "tags": ["前端", "JSON",],\n  // 这里不能写注释\n}';
+        mm_checkOut.className = "mm_check-out";
+        mm_checkOut.textContent = "// 点击「校验」查看结果";
+    }
+
+    function mm_fillGood() {
+        document.getElementById("mm_checkInput").value =
+            '{\n  "name": "孟梦",\n  "tags": ["前端", "JSON"],\n  "score": 95\n}';
+        mm_checkOut.className = "mm_check-out";
+        mm_checkOut.textContent = "// 点击「校验」查看结果";
+    }
+
+    /* ============ 初始化 ============ */
+    mm_renderTypes();
+    document.addEventListener("DOMContentLoaded", mm_fetchNews);
+
+    window.mm_parseType = mm_parseType;
+    window.mm_doStringify = mm_doStringify;
+    window.mm_doParse = mm_doParse;
+    window.mm_doTypeof = mm_doTypeof;
+    window.mm_fetchNews = mm_fetchNews;
+    window.mm_showRaw = mm_showRaw;
+    window.mm_validate = mm_validate;
+    window.mm_fillBad = mm_fillBad;
+    window.mm_fillGood = mm_fillGood;
+</script>
+</body>
+</html>
