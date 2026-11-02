@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<!-- 姓名：孟梦，日期：2026-10-22，功能名称：家常美食分享 - 舌尖味道美食网站的首页导航与菜谱展示 -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>舌尖味道 - 家常美食分享</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		:root {
+			color-scheme: light;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			color: #3a2d24;
+			background: #ffffff;
+			--primary: #e85d3a;
+			--primary-dark: #c44527;
+			--accent: #f2ae3d;
+			--text-main: #3a2d24;
+			--text-sub: #8a7b6f;
+			--bg-light: #fdf7f2;
+			--bg-accent: #fff5e6;
+			--border: #f0e6dc;
+			--radius-sm: 6px;
+			--radius-md: 10px;
+			--radius-lg: 16px;
+			--shadow-card: 0 4px 20px rgba(232, 93, 58, 0.1);
+		}
+
+		body {
+			min-width: 320px;
+			line-height: 1.6;
+		}
+
+		a {
+			text-decoration: none;
+			color: inherit;
+		}
+
+		ul, ol {
+			list-style: none;
+		}
+
+		img {
+			display: block;
+			max-width: 100%;
+		}
+
+		.container {
+			width: min(1140px, 92%);
+			margin: 0 auto;
+		}
+
+		header.nav {
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(8px);
+			border-bottom: 1px solid var(--border);
+		}
+
+		.nav-inner {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			height: 64px;
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			font-size: 18px;
+			font-weight: 700;
+			color: var(--primary);
+		}
+
+		.logo-icon {
+			width: 32px;
+			height: 32px;
+			background: var(--primary);
+			border-radius: 8px;
+		}
+
+		.nav-menu {
+			display: flex;
+			gap: 36px;
+		}
+
+		.nav-menu a {
+			font-size: 15px;
+			color: var(--text-sub);
+			font-weight: 500;
+			transition: color 0.2s;
+		}
+
+		.nav-menu a:hover,
+		.nav-menu a.active {
+			color: var(--primary);
+		}
+
+		.nav-actions {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 10px 20px;
+			font-size: 14px;
+			font-weight: 600;
+			border-radius: var(--radius-sm);
+			cursor: pointer;
+			border: none;
+			transition: background 0.2s, transform 0.1s;
+		}
+
+		.btn:active {
+			transform: scale(0.97);
+		}
+
+		.btn-outline {
+			background: transparent;
+			color: var(--primary);
+			border: 1px solid var(--primary);
+		}
+
+		.btn-outline:hover {
+			background: var(--bg-accent);
+		}
+
+		.btn-primary {
+			background: var(--primary);
+			color: #fff;
+		}
+
+		.btn-primary:hover {
+			background: var(--primary-dark);
+		}
+
+		section.hero {
+			padding: 80px 0;
+			background: linear-gradient(135deg, #fdf7f2 0%, #ffe8d4 100%);
+		}
+
+		.hero-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 60px;
+			align-items: center;
+		}
+
+		.hero-text .eyebrow {
+			display: inline-block;
+			padding: 4px 14px;
+			background: rgba(232, 93, 58, 0.1);
+			color: var(--primary);
+			font-size: 13px;
+			font-weight: 600;
+			border-radius: 20px;
+			margin-bottom: 16px;
+		}
+
+		.hero-text h1 {
+			font-size: clamp(28px, 5vw, 44px);
+			line-height: 1.3;
+			color: var(--text-main);
+			margin-bottom: 20px;
+		}
+
+		.hero-text p {
+			font-size: 16px;
+			color: var(--text-sub);
+			margin-bottom: 28px;
+			max-width: 480px;
+		}
+
+		.hero-actions {
+			display: flex;
+			gap: 14px;
+		}
+
+		.hero-image {
+			position: relative;
+		}
+
+		.hero-img {
+			width: 100%;
+			height: 360px;
+			border-radius: var(--radius-lg);
+			background-image: url("img/18.png");
+			background-size: cover;
+			background-position: center;
+			box-shadow: var(--shadow-card);
+		}
+
+		section.section {
+			padding: 80px 0;
+		}
+
+		.section-header {
+			text-align: center;
+			margin-bottom: 50px;
+		}
+
+		.section-header h2 {
+			font-size: clamp(24px, 4vw, 32px);
+			color: var(--text-main);
+			margin-bottom: 12px;
+		}
+
+		.section-header p {
+			color: var(--text-sub);
+			font-size: 15px;
+			max-width: 540px;
+			margin: 0 auto;
+		}
+
+		.features {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 28px;
+		}
+
+		.feature-card {
+			background: #fff;
+			padding: 28px;
+			border-radius: var(--radius-md);
+			border: 1px solid var(--border);
+			transition: box-shadow 0.25s, transform 0.2s;
+		}
+
+		.feature-card:hover {
+			box-shadow: var(--shadow-card);
+			transform: translateY(-4px);
+		}
+
+		.feature-img {
+			width: 100%;
+			height: 160px;
+			border-radius: var(--radius-sm);
+			background-size: cover;
+			background-position: center;
+			margin-bottom: 16px;
+		}
+
+		.feature-card:nth-child(1) .feature-img {
+			background-image: url("img/25.png");
+		}
+
+		.feature-card:nth-child(2) .feature-img {
+			background-image: url("img/21.png");
+		}
+
+		.feature-card:nth-child(3) .feature-img {
+			background-image: url("img/23.png");
+		}
+
+		.feature-card h3 {
+			font-size: 18px;
+			margin-bottom: 8px;
+			color: var(--text-main);
+		}
+
+		.feature-card p {
+			font-size: 14px;
+			color: var(--text-sub);
+			line-height: 1.7;
+		}
+
+		.alternate {
+			background: var(--bg-light);
+		}
+
+		.alternate-item {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 60px;
+			align-items: center;
+			margin-bottom: 60px;
+		}
+
+		.alternate-item:last-child {
+			margin-bottom: 0;
+		}
+
+		.alternate-item.reverse .alt-img {
+			order: 2;
+		}
+
+		.alt-img {
+			height: 320px;
+			border-radius: var(--radius-md);
+			background-size: cover;
+			background-position: center;
+			box-shadow: var(--shadow-card);
+		}
+
+		.alternate-item:nth-child(1) .alt-img {
+			background-image: url("img/19.png");
+		}
+
+		.alternate-item:nth-child(2) .alt-img {
+			background-image: url("img/22.png");
+		}
+
+		.alt-text h3 {
+			font-size: 26px;
+			color: var(--text-main);
+			margin-bottom: 14px;
+		}
+
+		.alt-text p {
+			color: var(--text-sub);
+			margin-bottom: 18px;
+		}
+
+		.alt-list li {
+			position: relative;
+			padding-left: 22px;
+			color: var(--text-sub);
+			font-size: 14px;
+			margin-bottom: 10px;
+		}
+
+		.alt-list li::before {
+			content: "✓";
+			position: absolute;
+			left: 0;
+			color: var(--primary);
+			font-weight: 700;
+		}
+
+		.alt-extra-img {
+			width: 100%;
+			margin-top: 20px;
+			border-radius: var(--radius-sm);
+			box-shadow: var(--shadow-card);
+		}
+
+		.gallery {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			grid-template-rows: repeat(2, 200px);
+			gap: 14px;
+		}
+
+		.gallery-item {
+			border-radius: var(--radius-md);
+			background-size: cover;
+			background-position: center;
+			transition: transform 0.25s, box-shadow 0.25s;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.gallery-item:hover {
+			transform: scale(1.02);
+			box-shadow: var(--shadow-card);
+		}
+
+		.gallery-item:nth-child(1) {
+			grid-column: span 2;
+			grid-row: span 2;
+			background-image: url("img/13.jpg");
+		}
+
+		.gallery-item:nth-child(2) {
+			background-image: url("img/14.jpg");
+		}
+
+		.gallery-item:nth-child(3) {
+			background-image: url("img/24.png");
+		}
+
+		.gallery-item:nth-child(4) {
+			background-image: url("img/20.png");
+		}
+
+		.gallery-item:nth-child(5) {
+			background-image: url("img/25.png");
+		}
+
+		.gallery-item .gallery-label {
+			position: absolute;
+			left: 12px;
+			bottom: 12px;
+			background: rgba(58, 45, 36, 0.85);
+			color: #fff;
+			padding: 6px 14px;
+			border-radius: 4px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+
+		.dessert-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 28px;
+		}
+
+		.dessert-card {
+			display: grid;
+			grid-template-columns: 220px 1fr;
+			background: #fff;
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			overflow: hidden;
+			transition: box-shadow 0.25s;
+		}
+
+		.dessert-card:hover {
+			box-shadow: var(--shadow-card);
+		}
+
+		.dessert-img {
+			background-size: cover;
+			background-position: center;
+		}
+
+		.dessert-card:nth-child(1) .dessert-img {
+			background-image: url("img/16.jpg");
+		}
+
+		.dessert-card:nth-child(2) .dessert-img {
+			background-image: url("img/17.jpg");
+		}
+
+		.dessert-info {
+			padding: 24px 26px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+
+		.dessert-info h4 {
+			font-size: 20px;
+			color: var(--text-main);
+			margin-bottom: 10px;
+		}
+
+		.dessert-info p {
+			color: var(--text-sub);
+			font-size: 14px;
+			line-height: 1.7;
+		}
+
+		.tabs-wrap {
+			background: #fff;
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			overflow: hidden;
+		}
+
+		.tabs-nav {
+			display: flex;
+			border-bottom: 1px solid var(--border);
+			background: var(--bg-light);
+		}
+
+		.tabs-nav a {
+			flex: 1;
+			text-align: center;
+			padding: 16px 0;
+			font-size: 15px;
+			font-weight: 600;
+			color: var(--text-sub);
+			border-bottom: 3px solid transparent;
+			transition: color 0.2s, border-color 0.2s;
+		}
+
+		.tabs-nav a.active {
+			color: var(--primary);
+			border-bottom-color: var(--primary);
+			background: #fff;
+		}
+
+		.tabs-content {
+			padding: 36px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 40px;
+			align-items: center;
+		}
+
+		.tabs-img {
+			height: 240px;
+			border-radius: var(--radius-sm);
+			background-image: url("img/15.jpg");
+			background-size: cover;
+			background-position: center;
+		}
+
+		.tabs-text h4 {
+			font-size: 20px;
+			color: var(--text-main);
+			margin-bottom: 12px;
+		}
+
+		.tabs-text p {
+			color: var(--text-sub);
+			font-size: 14px;
+			line-height: 1.8;
+		}
+
+		footer {
+			background: #3a2d24;
+			color: #c9b8a8;
+			padding: 48px 0 24px;
+		}
+
+		.footer-grid {
+			display: grid;
+			grid-template-columns: 2fr 1fr 1fr 1fr;
+			gap: 40px;
+			margin-bottom: 36px;
+		}
+
+		.footer-brand .logo {
+			color: #fff;
+			margin-bottom: 14px;
+		}
+
+		.footer-brand p {
+			font-size: 14px;
+			color: #a08f80;
+			line-height: 1.8;
+			max-width: 320px;
+			margin-bottom: 16px;
+		}
+
+		.personal-info {
+			background: rgba(255, 255, 255, 0.06);
+			padding: 14px 18px;
+			border-radius: var(--radius-sm);
+			font-size: 14px;
+			line-height: 1.9;
+			color: #c9b8a8;
+		}
+
+		.personal-info strong {
+			color: #fff;
+		}
+
+		.footer-col h5 {
+			font-size: 15px;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.footer-col li {
+			margin-bottom: 10px;
+		}
+
+		.footer-col a {
+			font-size: 14px;
+			color: #a08f80;
+			transition: color 0.2s;
+		}
+
+		.footer-col a:hover {
+			color: var(--primary);
+		}
+
+		.footer-bottom {
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+			padding-top: 20px;
+			text-align: center;
+			font-size: 13px;
+			color: #7c6b5c;
+		}
+
+		@media (max-width: 860px) {
+			.nav-menu {
+				gap: 20px;
+			}
+
+			.hero-grid,
+			.alternate-item,
+			.alternate-item.reverse .alt-img,
+			.tabs-content,
+			.dessert-row,
+			.dessert-card {
+				grid-template-columns: 1fr;
+				gap: 32px;
+			}
+
+			.dessert-card .dessert-img {
+				height: 200px;
+			}
+
+			.features {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.gallery {
+				grid-template-columns: repeat(2, 1fr);
+				grid-template-rows: auto;
+			}
+
+			.gallery-item:nth-child(1) {
+				grid-column: span 2;
+				grid-row: auto;
+				height: 220px;
+			}
+
+			.gallery-item {
+				height: 160px;
+			}
+
+			.alternate-item.reverse .alt-img {
+				order: 0;
+			}
+
+			.footer-grid {
+				grid-template-columns: 1fr 1fr;
+				gap: 28px;
+			}
+		}
+
+		@media (max-width: 560px) {
+			body {
+				font-size: 15px;
+			}
+
+			.nav-menu {
+				display: none;
+			}
+
+			section.hero,
+			section.section {
+				padding: 56px 0;
+			}
+
+			.hero-img,
+			.alt-img {
+				height: 220px;
+			}
+
+			.features {
+				grid-template-columns: 1fr;
+			}
+
+			.tabs-content {
+				padding: 24px;
+			}
+
+			.gallery {
+				grid-template-columns: 1fr;
+			}
+
+			.gallery-item:nth-child(1) {
+				grid-column: span 1;
+			}
+
+			.footer-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.tabs-nav {
+				flex-wrap: wrap;
+			}
+
+			.tabs-nav a {
+				flex: 1 1 50%;
+				font-size: 13px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header class="nav">
+		<div class="container nav-inner">
+			<div class="logo">
+				<div class="logo-icon"></div>
+				<span>舌尖味道</span>
+			</div>
+			<nav class="nav-menu">
+				<a href="#" class="active">首页</a>
+				<a href="#">菜谱</a>
+				<a href="#">食材</a>
+				<a href="#">故事</a>
+				<a href="#">关于</a>
+			</nav>
+			<div class="nav-actions">
+				<button class="btn btn-outline">登录</button>
+				<button class="btn btn-primary">开始做菜</button>
+			</div>
+		</div>
+	</header>
+
+	<section class="hero">
+		<div class="container hero-grid">
+			<div class="hero-text">
+				<span class="eyebrow">每周精选 · 第 10 期</span>
+				<h1>家常菜里的人间烟火，<br>一口就是家的味道</h1>
+				<p>从食材挑选到火候掌控，跟着我们一起走进厨房。无论你是新手小白还是资深食客，都能在这里找到属于自己的那道菜。</p>
+				<div class="hero-actions">
+					<button class="btn btn-primary">浏览菜谱</button>
+					<button class="btn btn-outline">本周推荐</button>
+				</div>
+			</div>
+			<div class="hero-image">
+				<div class="hero-img"></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-header">
+				<h2>热门分类</h2>
+				<p>肉类主菜、饮品轻食、甜品下午茶，总有一款满足你的味蕾</p>
+			</div>
+			<div class="features">
+				<div class="feature-card">
+					<div class="feature-img"></div>
+					<h3>牛排肉食</h3>
+					<p>煎牛排、烤羊排、黑椒牛柳，在家也能做出西餐厅的水准。</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-img"></div>
+					<h3>咖啡饮品</h3>
+					<p>拿铁、卡布奇诺、手冲单品，学会拉花技巧，在家开咖啡馆。</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-img"></div>
+					<h3>轻食沙拉</h3>
+					<p>时蔬沙拉、藜麦碗、低卡鸡胸，健康美味两不误，健身首选。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section alternate">
+		<div class="container">
+			<div class="section-header">
+				<h2>精选菜谱</h2>
+				<p>图文步骤清晰，在家也能做出饭店水准</p>
+			</div>
+
+			<div class="alternate-item">
+				<div class="alt-img"></div>
+				<div class="alt-text">
+					<h3>香煎牛排配芦笋</h3>
+					<p>选用新鲜西冷牛排，双面煎至金黄，搭配鲜嫩芦笋和浓郁黑椒汁。外焦里嫩，一口下去汁水四溢。</p>
+					<ul class="alt-list">
+						<li>准备时间 10 分钟 · 烹饪时间 20 分钟</li>
+						<li>难度：中等（适合有一定基础）</li>
+						<li>建议配红酒或温热黑咖啡</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-header">
+				<h2>美食画廊</h2>
+				<p>记录每一道令人心动的美味瞬间</p>
+			</div>
+			<div class="gallery">
+				<div class="gallery-item"><span class="gallery-label">美食合集</span></div>
+				<div class="gallery-item"><span class="gallery-label">玛格丽特披萨</span></div>
+				<div class="gallery-item"><span class="gallery-label">芝士披萨</span></div>
+				<div class="gallery-item"><span class="gallery-label">奶油蛋糕</span></div>
+				<div class="gallery-item"><span class="gallery-label">煎牛排</span></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section alternate">
+		<div class="container">
+			<div class="section-header">
+				<h2>甜品与饮品</h2>
+				<p>生活需要一点甜，犒劳辛苦的自己</p>
+			</div>
+			<div class="dessert-row">
+				<div class="dessert-card">
+					<div class="dessert-img"></div>
+					<div class="dessert-info">
+						<h4>轻甜蛋糕系列</h4>
+						<p>低糖低卡，轻盈无负担。草莓奶油、抹茶千层、芒果慕斯，每一款都是下午茶的完美主角。</p>
+					</div>
+				</div>
+				<div class="dessert-card">
+					<div class="dessert-img"></div>
+					<div class="dessert-info">
+						<h4>国际咖啡日特辑</h4>
+						<p>一杯好咖啡，唤醒一整天的活力。从经典拿铁到手冲单品，带你走进咖啡的世界。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-header">
+				<h2>地方风味</h2>
+				<p>一方水土养一方人，来看看各大地标美食</p>
+			</div>
+
+			<div class="tabs-wrap">
+				<nav class="tabs-nav">
+					<a href="#" class="active">川菜</a>
+					<a href="#">粤菜</a>
+					<a href="#">西餐</a>
+				</nav>
+				<div class="tabs-content">
+					<div class="tabs-img"></div>
+					<div class="tabs-text">
+						<h4>西餐 · 经典牛排</h4>
+						<p>以牛排为代表的西餐料理，讲究食材本味与酱汁搭配。菲力、西冷、肋眼各有风味，搭配芦笋、土豆泥或新鲜沙拉，一餐就是一场仪式感。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<footer>
+		<div class="container">
+			<div class="footer-grid">
+				<div class="footer-brand">
+					<div class="logo">
+						<div class="logo-icon"></div>
+						<span>舌尖味道</span>
+					</div>
+					<p>记录中华饮食文化，分享家的味道。愿每一餐都能让你感到幸福。</p>
+					<div class="personal-info">
+						<div><strong>作者：</strong>孟梦</div>
+						<div><strong>学号：</strong>24002430222</div>
+						<div><strong>邮箱：</strong>mengmeng@example.com</div>
+					</div>
+				</div>
+				<div class="footer-col">
+					<h5>菜谱分类</h5>
+					<ul>
+						<li><a href="#">热菜</a></li>
+						<li><a href="#">凉菜</a></li>
+						<li><a href="#">汤羹</a></li>
+					</ul>
+				</div>
+				<div class="footer-col">
+					<h5>食材指南</h5>
+					<ul>
+						<li><a href="#">应季食材</a></li>
+						<li><a href="#">选购技巧</a></li>
+						<li><a href="#">储存方法</a></li>
+					</ul>
+				</div>
+				<div class="footer-col">
+					<h5>关于我们</h5>
+					<ul>
+						<li><a href="#">团队介绍</a></li>
+						<li><a href="#">投稿合作</a></li>
+						<li><a href="#">联系方式</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-bottom">
+				© 2026 舌尖味道 · 作者 孟梦 · 学号 24002430222
+			</div>
+		</div>
+	</footer>
+</body>
+</html>
