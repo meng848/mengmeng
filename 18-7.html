@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：three.js 3D 图表 - 用本地 three.js 渲染客服渠道咨询量柱状图与意图分布环形饼图 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-7 · three.js 3D 图表（柱状图 / 环形饼图）</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <script src="cdn/three/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --mm_ink: #1f2937;
+            --mm_sub: #64748b;
+            --mm_line: #e5e7eb;
+            --mm_accent: #1d4ed8;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--mm_ink);
+            background: linear-gradient(180deg, #f7f8fb 0%, #eef1f7 100%);
+            min-height: 100vh; padding: 24px 18px 56px;
+        }
+        .mm_wrap { max-width: 1180px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7b8aa3; text-decoration: none; font-size: .86rem; margin-bottom: 12px;
+        }
+        .mm_back:hover { color: #2563eb; }
+
+        .mm_head {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            gap: 16px; margin-bottom: 18px;
+        }
+        .mm_head h1 { font-size: clamp(1.3rem, 3vw, 1.7rem); letter-spacing: .02em; }
+        .mm_head h1 b { color: var(--mm_accent); }
+        .mm_head p { margin-top: 7px; font-size: .82rem; color: var(--mm_sub); line-height: 1.8; }
+        .mm_tag {
+            flex-shrink: 0; padding: 5px 12px; font-size: .72rem; font-family: Consolas, monospace;
+            color: #475569; background: #fff; border: 1px solid var(--mm_line); border-radius: 999px;
+        }
+
+        .mm_card {
+            background: #fff; border: 1px solid var(--mm_line); border-radius: 16px;
+            padding: 20px 22px 18px; margin-bottom: 16px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .07);
+        }
+        .mm_card__hd { margin-bottom: 12px; }
+        .mm_card__hd h2 {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            font-size: 1rem; letter-spacing: .02em;
+        }
+        .mm_card__hd h2 .iconfont { color: var(--mm_accent); font-size: 1rem; }
+        .mm_card__hd p { margin-top: 8px; font-size: .8rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_badge {
+            padding: 2px 9px; font-size: .68rem; font-family: Consolas, monospace; font-weight: normal;
+            color: #1d4ed8; background: #eff4ff; border-radius: 5px;
+        }
+
+        .mm_stage {
+            position: relative; height: 470px; border-radius: 12px; overflow: hidden;
+            background: radial-gradient(circle at 50% 38%, #ffffff 0%, #eef3fb 62%, #e4ebf6 100%);
+            border: 1px solid #e8eef8;
+        }
+        .mm_stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+        .mm_stage canvas:active { cursor: grabbing; }
+        .mm_hint {
+            position: absolute; right: 12px; bottom: 10px; padding: 4px 10px;
+            font-size: .7rem; color: #7b8aa3; background: rgba(255,255,255,.82);
+            border: 1px solid #e6ecf5; border-radius: 999px; pointer-events: none;
+        }
+        .mm_fail {
+            position: absolute; inset: 0; display: grid; place-items: center;
+            padding: 20px; font-size: .84rem; line-height: 1.9; color: #b91c1c;
+            background: rgba(255,255,255,.94); text-align: center;
+        }
+
+        .mm_legend { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 14px; }
+        .mm_legend span {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: .76rem; color: var(--mm_sub);
+        }
+        .mm_legend i { width: 11px; height: 11px; border-radius: 3px; }
+
+        .mm_notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+        .mm_note { padding: 16px 18px; background: #fff; border: 1px solid var(--mm_line); border-radius: 13px; }
+        .mm_note h3 { display: flex; align-items: center; gap: 7px; font-size: .88rem; margin-bottom: 8px; }
+        .mm_note h3 .iconfont { color: #2563eb; font-size: .9rem; }
+        .mm_note p { font-size: .79rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: #1d4ed8; background: #eff4ff; border-radius: 4px;
+        }
+
+        @media (max-width: 620px) {
+            body { padding: 16px 12px 46px; }
+            .mm_head { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .mm_card { padding: 16px 14px 14px; }
+            .mm_stage { height: 340px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <div>
+            <h1>three.js 3D 图表：<b>柱状图</b> 与 <b>环形饼图</b></h1>
+            <p>用本地 three.js 把客服系统的统计数据放进三维场景：柱状图对比各渠道会话量，环形饼图展示意图分布。
+               鼠标拖拽可旋转、滚轮可缩放，图表带入场生长动画。</p>
+        </div>
+        <span class="mm_tag">18-7 · three.js r149</span>
+    </header>
+
+    <section class="mm_card">
+        <div class="mm_card__hd">
+            <h2><i class="iconfont icon-xinxi"></i>各渠道会话量（3D 柱状图）<span class="mm_badge">BoxGeometry</span></h2>
+            <p>近 30 天智能客服的接入渠道分布：小程序与网页是主要入口，电话渠道占比最低。柱体用 <code>BoxGeometry</code> 挤出，
+                高度按数值等比映射，入场时从 0 生长到目标高度。</p>
+        </div>
+        <div class="mm_stage" id="mm_barBox">
+            <canvas id="mm_barCanvas"></canvas>
+            <span class="mm_hint">拖拽旋转 · 滚轮缩放</span>
+        </div>
+        <div class="mm_legend">
+            <span><i style="background:#2563eb"></i>App 42 百次</span>
+            <span><i style="background:#0ea5e9"></i>网页 63 百次</span>
+            <span><i style="background:#16a34a"></i>小程序 78 百次</span>
+            <span><i style="background:#f59e0b"></i>微信 55 百次</span>
+            <span><i style="background:#db2777"></i>电话 31 百次</span>
+        </div>
+    </section>
+
+    <section class="mm_card">
+        <div class="mm_card__hd">
+            <h2><i class="iconfont icon-fankui"></i>用户意图分布（3D 环形饼图）<span class="mm_badge">ExtrudeGeometry</span></h2>
+            <p>按识别出的意图统计会话占比：业务咨询最多，其次是订单查询与售后投诉。每个扇区由 <code>Shape</code> 的内外两段圆弧
+                组成，再用 <code>ExtrudeGeometry</code> 拉伸成有厚度的扇块。</p>
+        </div>
+        <div class="mm_stage" id="mm_pieBox">
+            <canvas id="mm_pieCanvas"></canvas>
+            <span class="mm_hint">拖拽旋转 · 滚轮缩放</span>
+        </div>
+        <div class="mm_legend">
+            <span><i style="background:#2563eb"></i>业务咨询 38%</span>
+            <span><i style="background:#0ea5e9"></i>订单查询 24%</span>
+            <span><i style="background:#16a34a"></i>售后投诉 18%</span>
+            <span><i style="background:#f59e0b"></i>闲聊 12%</span>
+            <span><i style="background:#db2777"></i>其他 8%</span>
+        </div>
+    </section>
+
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-baocun"></i>本地依赖</h3>
+            <p><code>cdn/three/three.min.js</code>（r149，约 594 KB）已下载到项目内，页面不引用任何外部地址，断网也能渲染。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-yuedu"></i>三维场景</h3>
+            <p>每个图表各用一套 <code>Scene + PerspectiveCamera + WebGLRenderer</code>，灯光用环境光加两盏方向光；
+                文字标签由 <code>CanvasTexture</code> 贴到 <code>Sprite</code> 上，始终朝向镜头。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-huhuan"></i>交互与动画</h3>
+            <p>未封装 OrbitControls，改用原生 <code>pointer</code> 与 <code>wheel</code> 事件控制模型旋转和相机距离；
+                <code>requestAnimationFrame</code> 里用缓动函数让柱体与饼图在入场时生长。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 公共工具：文字精灵、场景初始化、拖拽与缩放
+    // ============================================================
+    function mm_textSprite(text, opts) {
+        opts = opts || {};
+        var fs = opts.fontSize || 30;
+        var color = opts.color || '#1f2937';
+        var W = 256, H = 96;
+        var ratio = Math.min(window.devicePixelRatio || 1, 2);
+        var cv = document.createElement('canvas');
+        cv.width = W * ratio;
+        cv.height = H * ratio;
+        var ctx = cv.getContext('2d');
+        ctx.scale(ratio, ratio);
+        ctx.font = 'bold ' + fs + 'px "Microsoft YaHei", "PingFang SC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(text, W / 2, H / 2);
+        var tex = new THREE.CanvasTexture(cv);
+        tex.anisotropy = 4;
+        var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+        var sp = new THREE.Sprite(mat);
+        var s = opts.scale || 1;
+        sp.scale.set(1.8 * s, 0.675 * s, 1);
+        return sp;
+    }
+
+    function mm_scene(canvas, host) {
+        var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+        var d1 = new THREE.DirectionalLight(0xffffff, 0.86);
+        d1.position.set(7, 13, 9);
+        scene.add(d1);
+        var d2 = new THREE.DirectionalLight(0xc7d7ff, 0.42);
+        d2.position.set(-9, 7, -7);
+        scene.add(d2);
+
+        function resize() {
+            var w = host.clientWidth || 1;
+            var h = host.clientHeight || 1;
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        resize();
+        if (window.ResizeObserver) {
+            new ResizeObserver(resize).observe(host);
+        } else {
+            window.addEventListener('resize', resize);
+        }
+        return { renderer: renderer, scene: scene, camera: camera, resize: resize };
+    }
+
+    function mm_placeCamera(camera, target, dir, dist) {
+        camera.position.copy(target).addScaledVector(dir, dist);
+        camera.lookAt(target);
+    }
+
+    function mm_bindOrbit(canvas, group, camera, target, dir, state) {
+        var dist = state.dist;
+        var dragging = false;
+        var px = 0, py = 0;
+
+        canvas.addEventListener('pointerdown', function (e) {
+            dragging = true;
+            state.dragging = true;
+            px = e.clientX;
+            py = e.clientY;
+            if (canvas.setPointerCapture) { canvas.setPointerCapture(e.pointerId); }
+        });
+        canvas.addEventListener('pointermove', function (e) {
+            if (!dragging) { return; }
+            group.rotation.y += (e.clientX - px) * 0.0075;
+            group.rotation.x += (e.clientY - py) * 0.0035;
+            group.rotation.x = Math.max(-0.42, Math.min(0.6, group.rotation.x));
+            px = e.clientX;
+            py = e.clientY;
+        });
+        function stop(e) {
+            dragging = false;
+            state.dragging = false;
+            if (canvas.releasePointerCapture && e && e.pointerId !== undefined) {
+                try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+            }
+        }
+        canvas.addEventListener('pointerup', stop);
+        canvas.addEventListener('pointercancel', stop);
+        canvas.addEventListener('pointerleave', function (e) { if (dragging) { stop(e); } });
+        canvas.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            dist = Math.max(state.minDist, Math.min(state.maxDist, dist + e.deltaY * 0.015));
+            mm_placeCamera(camera, target, dir, dist);
+        }, { passive: false });
+    }
+
+    function mm_showFail(host, msg) {
+        var tip = document.createElement('div');
+        tip.className = 'mm_fail';
+        tip.textContent = msg;
+        host.appendChild(tip);
+    }
+
+    // ============================================================
+    // 2. 图一：3D 柱状图（各渠道会话量）
+    // ============================================================
+    function mm_buildBars() {
+        var host = document.getElementById('mm_barBox');
+        var canvas = document.getElementById('mm_barCanvas');
+
+        var mm_data = [
+            { name: 'App', value: 42, color: 0x2563eb },
+            { name: '网页', value: 63, color: 0x0ea5e9 },
+            { name: '小程序', value: 78, color: 0x16a34a },
+            { name: '微信', value: 55, color: 0xf59e0b },
+            { name: '电话', value: 31, color: 0xdb2777 }
+        ];
+        var mm_max = 80;
+        var mm_space = 2.15;
+        var mm_width = 1.34;
+
+        var ctx = mm_scene(canvas, host);
+        var camera = ctx.camera;
+        var target = new THREE.Vector3(0, 2.6, 0);
+        var dir = new THREE.Vector3(0, 0.46, 1).normalize();
+        mm_placeCamera(camera, target, dir, 17.5);
+
+        var group = new THREE.Group();
+        ctx.scene.add(group);
+
+        var grid = new THREE.GridHelper(13, 13, 0xbccbe0, 0xe3ebf6);
+        grid.material.transparent = true;
+        grid.material.opacity = 0.9;
+        group.add(grid);
+
+        var geo = new THREE.BoxGeometry(mm_width, 1, mm_width);
+        var bars = [];
+        var startX = -(mm_data.length - 1) * mm_space / 2;
+
+        mm_data.forEach(function (d, i) {
+            var h = (d.value / mm_max) * 5.7;
+            var mat = new THREE.MeshStandardMaterial({ color: d.color, roughness: 0.42, metalness: 0.16 });
+            var mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(startX + i * mm_space, h / 2, 0);
+            mesh.scale.y = 0.001;
+            group.add(mesh);
+            bars.push({ mesh: mesh, h: h });
+
+            var name = mm_textSprite(d.name, { fontSize: 26, color: '#475569', scale: 0.86 });
+            name.position.set(startX + i * mm_space, 0.34, 1.45);
+            group.add(name);
+
+            var val = mm_textSprite(String(d.value), { fontSize: 30, color: '#1e293b', scale: 0.8 });
+            val.position.set(startX + i * mm_space, h + 0.42, 0);
+            group.add(val);
+            bars[i].label = val;
+
+            var ringGeo = new THREE.CylinderGeometry(mm_width * 0.72, mm_width * 0.72, 0.05, 24);
+            var ring = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({ color: d.color, roughness: 0.8 }));
+            ring.position.set(startX + i * mm_space, 0.03, 0);
+            group.add(ring);
+        });
+
+        var state = { dragging: false, dist: 17.5, minDist: 10, maxDist: 30 };
+        mm_bindOrbit(canvas, group, camera, target, dir, state);
+
+        var t = 0;
+        var clock = new THREE.Clock();
+        function frame() {
+            requestAnimationFrame(frame);
+            var dt = Math.min(clock.getDelta(), 0.05);
+            t += dt;
+
+            var p = Math.max(0, Math.min(1, (t - 0.12) / 1.15));
+            var e = 1 - Math.pow(1 - p, 3);
+            bars.forEach(function (b) {
+                b.mesh.scale.y = Math.max(0.001, b.h * e);
+                b.mesh.position.y = b.h * e / 2;
+                b.label.position.y = b.h * e + 0.42;
+                b.label.material.opacity = e;
+            });
+
+            if (!state.dragging) { group.rotation.y += dt * 0.32; }
+            ctx.renderer.render(ctx.scene, camera);
+        }
+        frame();
+    }
+
+    // ============================================================
+    // 3. 图二：3D 环形饼图（意图分布）
+    // ============================================================
+    function mm_buildPie() {
+        var host = document.getElementById('mm_pieBox');
+        var canvas = document.getElementById('mm_pieCanvas');
+
+        var mm_data = [
+            { name: '业务咨询', value: 38, color: 0x2563eb },
+            { name: '订单查询', value: 24, color: 0x0ea5e9 },
+            { name: '售后投诉', value: 18, color: 0x16a34a },
+            { name: '闲聊', value: 12, color: 0xf59e0b },
+            { name: '其他', value: 8, color: 0xdb2777 }
+        ];
+        var R = 4.5, r = 2.05, D = 0.85;
+
+        var ctx = mm_scene(canvas, host);
+        var camera = ctx.camera;
+        var target = new THREE.Vector3(0, 0.55, 0);
+        var dir = new THREE.Vector3(0, 0.78, 1).normalize();
+        mm_placeCamera(camera, target, dir, 13.2);
+
+        var group = new THREE.Group();
+        ctx.scene.add(group);
+
+        // 底座
+        var base = new THREE.Mesh(
+            new THREE.CylinderGeometry(R * 1.06, R * 1.06, 0.12, 64),
+            new THREE.MeshStandardMaterial({ color: 0xdbe4f1, roughness: 0.9 })
+        );
+        base.position.y = -0.06;
+        group.add(base);
+
+        var start = -Math.PI / 2;
+        var slices = [];
+        var pieLabels = [];
+
+        mm_data.forEach(function (d) {
+            var ang = (d.value / 100) * Math.PI * 2;
+            var end = start + ang;
+
+            var shape = new THREE.Shape();
+            shape.moveTo(R * Math.cos(start), R * Math.sin(start));
+            shape.absarc(0, 0, R, start, end, false);
+            shape.lineTo(r * Math.cos(end), r * Math.sin(end));
+            shape.absarc(0, 0, r, end, start, true);
+            shape.closePath();
+
+            var geo = new THREE.ExtrudeGeometry(shape, {
+                depth: D, bevelEnabled: true, bevelThickness: 0.05,
+                bevelSize: 0.05, bevelSegments: 2, curveSegments: 40
+            });
+
+            var mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+                color: d.color, roughness: 0.4, metalness: 0.18, flatShading: false
+            }));
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.y = D;
+            group.add(mesh);
+            slices.push(mesh);
+
+            // 百分比标签：shape 平面 (x, y) 绕 X 轴 -90° 后映射为 (x, 0, -y)
+            var mid = start + ang / 2;
+            var rm = (R + r) / 2;
+            var label = mm_textSprite(d.value + '%', { fontSize: 28, color: '#ffffff', scale: 0.72 });
+            label.position.set(Math.cos(mid) * rm, D + 0.05, -Math.sin(mid) * rm);
+            group.add(label);
+            pieLabels.push(label);
+
+            start = end;
+        });
+
+        var state = { dragging: false, dist: 13.2, minDist: 8, maxDist: 26 };
+        mm_bindOrbit(canvas, group, camera, target, dir, state);
+
+        var t = 0;
+        var clock = new THREE.Clock();
+        function frame() {
+            requestAnimationFrame(frame);
+            var dt = Math.min(clock.getDelta(), 0.05);
+            t += dt;
+
+            var p = Math.max(0, Math.min(1, (t - 0.1) / 1.1));
+            var e = 1 - Math.pow(1 - p, 3);
+            slices.forEach(function (m) {
+                m.scale.set(1, 1, Math.max(0.001, e));
+                m.position.y = D * e;
+            });
+            pieLabels.forEach(function (lb) {
+                lb.position.y = D * e + 0.05;
+                lb.material.opacity = e;
+            });
+
+            if (!state.dragging) { group.rotation.y += dt * 0.26; }
+            ctx.renderer.render(ctx.scene, camera);
+        }
+        frame();
+    }
+
+    // ============================================================
+    // 4. 启动
+    // ============================================================
+    if (!window.THREE) {
+        mm_showFail(document.getElementById('mm_barBox'), 'three.js 未加载，请确认 cdn/three/three.min.js 存在');
+        mm_showFail(document.getElementById('mm_pieBox'), 'three.js 未加载，请确认 cdn/three/three.min.js 存在');
+    } else {
+        try {
+            mm_buildBars();
+            mm_buildPie();
+        } catch (err) {
+            mm_showFail(document.getElementById('mm_barBox'), '3D 图表初始化失败：' + err.message);
+            console.error(err);
+        }
+    }
+</script>
+</body>
+</html>

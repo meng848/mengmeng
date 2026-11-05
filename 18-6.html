@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：Mermaid 智能客服系统图 - 用本地 mermaid 渲染客服业务流程图与数据库 ER 图 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-6 · Mermaid 智能客服系统（流程图 / ER 图）</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <script src="cdn/mermaid/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --mm_ink: #1f2937;
+            --mm_sub: #64748b;
+            --mm_line: #e5e7eb;
+            --mm_accent: #1d4ed8;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--mm_ink);
+            background: linear-gradient(180deg, #f7f8fb 0%, #eef1f7 100%);
+            min-height: 100vh; padding: 24px 18px 56px;
+        }
+        .mm_wrap { max-width: 1180px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7b8aa3; text-decoration: none; font-size: .86rem; margin-bottom: 12px;
+        }
+        .mm_back:hover { color: #2563eb; }
+
+        .mm_head {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            gap: 16px; margin-bottom: 18px;
+        }
+        .mm_head h1 { font-size: clamp(1.3rem, 3vw, 1.7rem); letter-spacing: .02em; }
+        .mm_head h1 b { color: var(--mm_accent); }
+        .mm_head p { margin-top: 7px; font-size: .82rem; color: var(--mm_sub); line-height: 1.8; }
+        .mm_tag {
+            flex-shrink: 0; padding: 5px 12px; font-size: .72rem; font-family: Consolas, monospace;
+            color: #475569; background: #fff; border: 1px solid var(--mm_line); border-radius: 999px;
+        }
+
+        .mm_card {
+            background: #fff; border: 1px solid var(--mm_line); border-radius: 16px;
+            padding: 20px 22px 18px; margin-bottom: 16px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .07);
+        }
+        .mm_card__hd { margin-bottom: 12px; }
+        .mm_card__hd h2 {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            font-size: 1rem; letter-spacing: .02em;
+        }
+        .mm_card__hd h2 .iconfont { color: var(--mm_accent); font-size: 1rem; }
+        .mm_card__hd p { margin-top: 8px; font-size: .8rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_badge {
+            padding: 2px 9px; font-size: .68rem; font-family: Consolas, monospace; font-weight: normal;
+            color: #1d4ed8; background: #eff4ff; border-radius: 5px;
+        }
+
+        #mm_flow, #mm_er {
+            position: relative; min-height: 120px; padding: 10px 4px;
+            overflow-x: auto; text-align: center;
+        }
+        #mm_flow svg, #mm_er svg { max-width: 100%; height: auto; }
+        .mm_loading, .mm_fail {
+            padding: 34px 12px; font-size: .84rem; color: #94a3b8; text-align: center;
+        }
+        .mm_fail { color: #b91c1c; line-height: 1.9; }
+        .mm_fail b { display: block; margin-bottom: 6px; font-size: .9rem; }
+
+        .mm_legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; }
+        .mm_legend span {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: .75rem; color: var(--mm_sub);
+        }
+        .mm_legend i {
+            width: 12px; height: 12px; border-radius: 4px; border: 1.5px solid;
+        }
+
+        .mm_code { margin-top: 14px; border-top: 1px dashed var(--mm_line); padding-top: 10px; }
+        .mm_code summary {
+            font-size: .76rem; color: #8b9ab6; cursor: pointer; list-style: none;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .mm_code summary::-webkit-details-marker { display: none; }
+        .mm_code summary::before { content: "▸"; font-size: .8rem; }
+        .mm_code[open] summary::before { content: "▾"; }
+        .mm_code pre {
+            margin-top: 10px; padding: 14px 16px; max-height: 340px; overflow: auto;
+            font-family: Consolas, "Courier New", monospace; font-size: .74rem; line-height: 1.75;
+            color: #334155; background: #f8fafc; border: 1px solid var(--mm_line);
+            border-radius: 10px; white-space: pre;
+        }
+
+        .mm_notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+        .mm_note { padding: 16px 18px; background: #fff; border: 1px solid var(--mm_line); border-radius: 13px; }
+        .mm_note h3 { display: flex; align-items: center; gap: 7px; font-size: .88rem; margin-bottom: 8px; }
+        .mm_note h3 .iconfont { color: #2563eb; font-size: .9rem; }
+        .mm_note p { font-size: .79rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: #1d4ed8; background: #eff4ff; border-radius: 4px;
+        }
+
+        @media (max-width: 620px) {
+            body { padding: 16px 12px 46px; }
+            .mm_head { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .mm_card { padding: 16px 14px 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <div>
+            <h1>Mermaid 智能客服系统：<b>流程图</b> 与 <b>ER 图</b></h1>
+            <p>用本地部署的 mermaid 把「文本描述」直接渲染成矢量图：一张客服业务流程图把机器人应答、知识检索、转人工与工单串成闭环，
+               一张 ER 图描述用户、会话、消息、知识、坐席与工单之间的数据库关系。</p>
+        </div>
+        <span class="mm_tag">18-6 · mermaid 11.4.0</span>
+    </header>
+
+    <section class="mm_card">
+        <div class="mm_card__hd">
+            <h2><i class="iconfont icon-fankui"></i>客服业务流程图<span class="mm_badge">flowchart TD</span></h2>
+            <p>用户从 App、网页、小程序或电话任一渠道进入后，先建立会话并做意图识别：业务咨询走「知识检索 + LLM 生成」，投诉售后走业务系统查询；
+                置信度不达标时转人工坐席并生成工单，最终完成满意度评价与会话归档，质检语料再回流优化模型。</p>
+        </div>
+        <div id="mm_flow"><p class="mm_loading">流程图渲染中…</p></div>
+        <div class="mm_legend">
+            <span><i style="background:#eef4ff;border-color:#2563eb"></i>接入与建立会话</span>
+            <span><i style="background:#fff7ed;border-color:#f59e0b"></i>判断分支</span>
+            <span><i style="background:#f0fdf4;border-color:#16a34a"></i>检索与生成（AI）</span>
+            <span><i style="background:#fdf2f8;border-color:#db2777"></i>人工坐席与工单</span>
+            <span><i style="background:#f8fafc;border-color:#94a3b8"></i>应答与归档</span>
+        </div>
+        <details class="mm_code">
+            <summary>查看 mermaid 源码</summary>
+            <pre id="mm_flowSrc"></pre>
+        </details>
+    </section>
+
+    <section class="mm_card">
+        <div class="mm_card__hd">
+            <h2><i class="iconfont icon-baocun"></i>数据库 ER 图<span class="mm_badge">erDiagram</span></h2>
+            <p>以「用户 → 会话 → 消息」为主链路，向外关联意图识别结果、命中的知识条目、知识分类、人工坐席、工单与满意度评价，共 9 个实体。
+                <code>PK</code> 为主键、<code>FK</code> 为外键，连线上的 <code>||--o{</code> 表示「一对多」基数。</p>
+        </div>
+        <div id="mm_er"><p class="mm_loading">ER 图渲染中…</p></div>
+        <details class="mm_code">
+            <summary>查看 mermaid 源码</summary>
+            <pre id="mm_erSrc"></pre>
+        </details>
+    </section>
+
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-baocun"></i>本地依赖</h3>
+            <p><code>cdn/mermaid/mermaid.min.js</code>（11.4.0，约 2.5 MB）已下载到项目内，页面不引用任何外部地址，断网也能渲染。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-yuedu"></i>渲染方式</h3>
+            <p>关闭自动渲染 <code>startOnLoad:false</code>，再用 <code>mermaid.render(id, 源码)</code> 返回 Promise，把 <code>res.svg</code> 写入容器，
+                并调用 <code>bindFunctions</code> 绑定图内交互。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-xinxi"></i>语法要点</h3>
+            <p>流程图用 <code>A -->|标签| B</code> 连边、<code>classDef</code> 统一配色；ER 图属性行为「类型 名称 PK "注释"」，关系用 <code>||--o{</code> 表达基数。</</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 两张图的 mermaid 源码（中文标点放在引号内，避免解析歧义）
+    // ============================================================
+    var mm_flowSrc = [
+        'flowchart TD',
+        '    A["用户接入<br/>App / 网页 / 小程序 / 电话"] --> B["会话建立<br/>身份识别 · 上下文加载"]',
+        '    B --> C{"意图识别<br/>文本分类 · 实体抽取"}',
+        '    C -->|"问候闲聊"| D["闲聊应答<br/>情绪安抚"]',
+        '    C -->|"业务咨询"| E["知识检索<br/>向量召回 · 重排"]',
+        '    C -->|"投诉售后"| F["业务系统查询<br/>订单 / 物流 / 账单"]',
+        '    E --> G["答案生成<br/>LLM 结合知识片段"]',
+        '    F --> G',
+        '    D --> G',
+        '    G --> H{"置信度是否达标"}',
+        '    H -->|"达标"| I["答案下发<br/>追问引导"]',
+        '    H -->|"不达标"| J["转人工坐席<br/>同步会话上下文"]',
+        '    J --> K["创建工单<br/>分派 · 跟进"]',
+        '    I --> L["满意度评价"]',
+        '    K --> L',
+        '    L --> M["会话归档<br/>质检 · 数据沉淀"]',
+        '    M -.->|"语料回流"| C',
+        '    classDef mm_start fill:#eef4ff,stroke:#2563eb,stroke-width:1.5,color:#1e3a8a',
+        '    classDef mm_judge fill:#fff7ed,stroke:#f59e0b,stroke-width:1.5,color:#9a3412',
+        '    classDef mm_ai fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5,color:#14532d',
+        '    classDef mm_human fill:#fdf2f8,stroke:#db2777,stroke-width:1.5,color:#831843',
+        '    classDef mm_end fill:#f8fafc,stroke:#94a3b8,stroke-width:1.5,color:#334155',
+        '    class A,B mm_start',
+        '    class C,H mm_judge',
+        '    class E,G mm_ai',
+        '    class J,K mm_human',
+        '    class D,F,I,L,M mm_end'
+    ].join('\n');
+
+    var mm_erSrc = [
+        'erDiagram',
+        '    USER ||--o{ SESSION : "发起"',
+        '    SESSION ||--o{ MESSAGE : "包含"',
+        '    SESSION ||--|| INTENT : "识别为"',
+        '    SESSION ||--o| TICKET : "转人工生成"',
+        '    SESSION ||--o| RATING : "被评价"',
+        '    INTENT }o--o{ KB_ARTICLE : "命中知识"',
+        '    KB_ARTICLE }o--|| CATEGORY : "归属分类"',
+        '    TICKET }o--|| AGENT : "由坐席受理"',
+        '',
+        '    USER {',
+        '        bigint user_id PK "用户主键"',
+        '        string nickname "昵称"',
+        '        string phone "手机号"',
+        '        string channel "来源渠道"',
+        '        datetime created_at "注册时间"',
+        '    }',
+        '    SESSION {',
+        '        bigint session_id PK "会话主键"',
+        '        bigint user_id FK "所属用户"',
+        '        string channel "接入渠道"',
+        '        datetime start_time "开始时间"',
+        '        datetime end_time "结束时间"',
+        '        string status "状态：进行中 / 已结束"',
+        '        decimal csat_score "满意度分值"',
+        '    }',
+        '    MESSAGE {',
+        '        bigint msg_id PK "消息主键"',
+        '        bigint session_id FK "所属会话"',
+        '        string role "角色：用户 / 机器人 / 坐席"',
+        '        text content "消息内容"',
+        '        datetime created_at "发送时间"',
+        '    }',
+        '    INTENT {',
+        '        bigint intent_id PK "意图主键"',
+        '        bigint session_id FK "所属会话"',
+        '        string name "意图名称"',
+        '        decimal confidence "置信度"',
+        '        string handler_type "处理方式：机器人 / 人工"',
+        '    }',
+        '    KB_ARTICLE {',
+        '        bigint article_id PK "知识主键"',
+        '        bigint category_id FK "所属分类"',
+        '        string title "标题"',
+        '        text content "正文"',
+        '        int hit_count "命中次数"',
+        '        datetime updated_at "更新时间"',
+        '    }',
+        '    CATEGORY {',
+        '        bigint category_id PK "分类主键"',
+        '        bigint parent_id FK "父级分类"',
+        '        string name "分类名称"',
+        '    }',
+        '    AGENT {',
+        '        bigint agent_id PK "坐席主键"',
+        '        string name "坐席姓名"',
+        '        string skill_group "技能组"',
+        '        string status "在线状态"',
+        '        int workload "当前接待量"',
+        '    }',
+        '    TICKET {',
+        '        bigint ticket_id PK "工单主键"',
+        '        bigint session_id FK "来源会话"',
+        '        bigint agent_id FK "受理坐席"',
+        '        string type "工单类型"',
+        '        string priority "优先级"',
+        '        string status "处理状态"',
+        '        datetime created_at "创建时间"',
+        '    }',
+        '    RATING {',
+        '        bigint rating_id PK "评价主键"',
+        '        bigint session_id FK "所属会话"',
+        '        int score "评分 1-5"',
+        '        string comment "用户留言"',
+        '        datetime created_at "评价时间"',
+        '    }'
+    ].join('\n');
+
+    // ============================================================
+    // 2. 渲染工具
+    // ============================================================
+    var mm_flowBox = document.getElementById('mm_flow');
+    var mm_erBox = document.getElementById('mm_er');
+
+    document.getElementById('mm_flowSrc').textContent = mm_flowSrc;
+    document.getElementById('mm_erSrc').textContent = mm_erSrc;
+
+    function mm_fail(box, title, err) {
+        box.innerHTML = '<div class="mm_fail"><b>' + title + '</b>' + (err && err.message ? err.message : err) + '</div>';
+    }
+
+    function mm_draw(id, src, box, title) {
+        return mermaid.render(id, src).then(function (res) {
+            box.innerHTML = res.svg;
+            if (typeof res.bindFunctions === 'function') { res.bindFunctions(box); }
+        }).catch(function (err) {
+            mm_fail(box, title + '渲染失败', err);
+        });
+    }
+
+    // ============================================================
+    // 3. 初始化并渲染
+    // ============================================================
+    if (!window.mermaid) {
+        mm_fail(mm_flowBox, 'mermaid 未加载', '请确认 cdn/mermaid/mermaid.min.js 存在');
+        mm_fail(mm_erBox, 'mermaid 未加载', '请确认 cdn/mermaid/mermaid.min.js 存在');
+    } else {
+        mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'strict',
+            theme: 'base',
+            themeVariables: {
+                fontFamily: '"Microsoft YaHei", "PingFang SC", Arial, sans-serif',
+                fontSize: '14px',
+                primaryColor: '#eef4ff',
+                primaryTextColor: '#1e293b',
+                primaryBorderColor: '#93b4f7',
+                lineColor: '#94a3b8',
+                secondaryColor: '#f8fafc',
+                tertiaryColor: '#ffffff',
+                edgeLabelBackground: '#ffffff',
+                attributeBackgroundColorOdd: '#f8fafc',
+                attributeBackgroundColorEven: '#ffffff'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 42,
+                rankSpacing: 58,
+                padding: 16,
+                useMaxWidth: true
+            },
+            er: {
+                useMaxWidth: true,
+                minEntityWidth: 130,
+                minEntityHeight: 60,
+                entityPadding: 16
+            }
+        });
+
+        mm_draw('mm_mermaid_flow', mm_flowSrc, mm_flowBox, '流程图');
+        mm_draw('mm_mermaid_er', mm_erSrc, mm_erBox, 'ER 图');
+    }
+</script>
+</body>
+</html>

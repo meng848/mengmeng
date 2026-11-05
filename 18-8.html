@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：智能客服数据大屏 - 三列布局，中上为 ECharts 全国会话分布地图，配合趋势、渠道、意图、排行与满意度图表 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-8 · 智能客服数据大屏</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <script src="cdn/echarts/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --mm_bg: #050d1e;
+            --mm_panel: rgba(9, 24, 48, .9);
+            --mm_line: rgba(34, 211, 238, .22);
+            --mm_cyan: #22d3ee;
+            --mm_text: #a8c7ee;
+            --mm_strong: #e8f3ff;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--mm_text);
+            background:
+                radial-gradient(circle at 50% -10%, rgba(34, 211, 238, .18), transparent 55%),
+                radial-gradient(circle at 8% 90%, rgba(59, 130, 246, .14), transparent 45%),
+                linear-gradient(180deg, #050d1e 0%, #061224 60%, #040a17 100%);
+            min-height: 100vh;
+        }
+        .mm_screen {
+            max-width: 1560px; margin: 0 auto; padding: 12px 16px 16px;
+            min-height: 100vh; display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .mm_top {
+            display: flex; align-items: center; gap: 18px;
+            padding: 6px 10px 10px; border-bottom: 1px solid rgba(34, 211, 238, .18);
+        }
+        .mm_top__back {
+            display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+            font-size: .74rem; color: #6f8cb3; text-decoration: none;
+            padding: 5px 10px; border: 1px solid rgba(34, 211, 238, .22); border-radius: 6px;
+        }
+        .mm_top__back:hover { color: var(--mm_cyan); border-color: var(--mm_cyan); }
+        .mm_title { flex-shrink: 0; }
+        .mm_title h1 {
+            font-size: clamp(1.05rem, 1.7vw, 1.5rem); letter-spacing: .16em;
+            color: var(--mm_strong); text-shadow: 0 0 18px rgba(34, 211, 238, .45);
+        }
+        .mm_title p { margin-top: 4px; font-size: .68rem; letter-spacing: .22em; color: #5d7ea8; }
+
+        .mm_kpi { display: flex; flex: 1; justify-content: center; gap: clamp(14px, 3vw, 44px); }
+        .mm_kpi div { text-align: center; }
+        .mm_kpi b {
+            display: block; font-size: clamp(1.05rem, 1.8vw, 1.6rem); font-family: Consolas, monospace;
+            color: #ffffff; text-shadow: 0 0 16px rgba(34, 211, 238, .55);
+        }
+        .mm_kpi b small { font-size: .62em; color: var(--mm_cyan); margin-left: 2px; }
+        .mm_kpi span { font-size: .68rem; color: #6f8cb3; letter-spacing: .1em; }
+
+        .mm_clock { flex-shrink: 0; text-align: right; font-family: Consolas, monospace; }
+        .mm_clock b { display: block; font-size: .96rem; color: #cfe6ff; letter-spacing: .06em; }
+        .mm_clock span { font-size: .68rem; color: #6f8cb3; }
+
+        .mm_main {
+            flex: 1; display: grid; grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 10px; min-height: 0;
+        }
+        .mm_col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+        .mm_col--c .mm_mapBox { flex: 1.4; }
+        .mm_col--c .mm_trendBox { flex: 1; }
+
+        .mm_panel {
+            position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0;
+            background: var(--mm_panel); border: 1px solid var(--mm_line); border-radius: 10px;
+            box-shadow: inset 0 0 34px rgba(34, 211, 238, .06), 0 10px 26px rgba(0, 0, 0, .32);
+            overflow: hidden;
+        }
+        .mm_panel__hd {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 8px 12px; border-bottom: 1px solid rgba(34, 211, 238, .14);
+            background: linear-gradient(90deg, rgba(34, 211, 238, .13), rgba(34, 211, 238, 0));
+        }
+        .mm_panel__hd h2 {
+            display: flex; align-items: center; gap: 7px;
+            font-size: .8rem; font-weight: normal; color: var(--mm_strong); letter-spacing: .06em;
+        }
+        .mm_panel__hd h2 i {
+            width: 3px; height: 12px; border-radius: 2px; background: var(--mm_cyan);
+            box-shadow: 0 0 8px rgba(34, 211, 238, .8);
+        }
+        .mm_panel__hd span { font-size: .64rem; color: #5d7ea8; font-family: Consolas, monospace; }
+
+        .mm_chart { flex: 1; min-height: 120px; }
+        .mm_chart--map { min-height: 260px; }
+        .mm_mask {
+            position: absolute; inset: 36px 0 0; display: grid; place-items: center;
+            font-size: .78rem; color: #7f9bc4; background: rgba(5, 13, 30, .92);
+            transition: opacity .3s; z-index: 2; text-align: center; padding: 12px;
+        }
+        .mm_mask.mmm_hide { opacity: 0; pointer-events: none; }
+        .mm_mask.mmm_err { color: #f87171; }
+
+        @media (max-width: 1080px) {
+            .mm_main { grid-template-columns: 1fr; }
+            .mm_col--c { order: -1; }
+            .mm_panel { min-height: 260px; }
+            .mm_mapBox { min-height: 340px !important; }
+            .mm_kpi { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_screen">
+    <header class="mm_top">
+        <a href="index.html" class="mm_top__back">← 首页</a>
+        <div class="mm_title">
+            <h1>智能客服运营数据大屏</h1>
+            <p>SMART SERVICE REAL-TIME MONITOR</p>
+        </div>
+        <div class="mm_kpi">
+            <div><b id="mm_kpiSession">0</b><span>今日会话量</span></div>
+            <div><b id="mm_kpiAgent">0</b><span>在线坐席</span></div>
+            <div><b id="mm_kpiResp">0<small>s</small></b><span>平均响应</span></div>
+            <div><b id="mm_kpiCsat">0<small>%</small></b><span>满意度</span></div>
+        </div>
+        <div class="mm_clock">
+            <b id="mm_clockTime">--:--:--</b>
+            <span id="mm_clockDate">--</span>
+        </div>
+    </header>
+
+    <main class="mm_main">
+        <!-- 左列 -->
+        <section class="mm_col">
+            <div class="mm_panel">
+                <div class="mm_panel__hd"><h2><i></i>各渠道会话量</h2><span>近 30 天 / 百次</span></div>
+                <div class="mm_chart" id="mm_barChannel"></div>
+            </div>
+            <div class="mm_panel">
+                <div class="mm_panel__hd"><h2><i></i>用户意图占比</h2><span>意图识别</span></div>
+                <div class="mm_chart" id="mm_pieIntent"></div>
+            </div>
+        </section>
+
+        <!-- 中列：上为地理信息地图，下为趋势 -->
+        <section class="mm_col mm_col--c">
+            <div class="mm_panel mm_mapBox">
+                <div class="mm_panel__hd"><h2><i></i>全国会话分布</h2><span>GEO / China</span></div>
+                <div class="mm_chart mm_chart--map" id="mm_mapChina"></div>
+                <div class="mm_mask" id="mm_mapMask">地图加载中…（本地 GeoJSON 约 570 KB）</div>
+            </div>
+            <div class="mm_panel mm_trendBox">
+                <div class="mm_panel__hd"><h2><i></i>24 小时会话趋势</h2><span>机器人 / 人工</span></div>
+                <div class="mm_chart" id="mm_lineTrend"></div>
+            </div>
+        </section>
+
+        <!-- 右列 -->
+        <section class="mm_col">
+            <div class="mm_panel">
+                <div class="mm_panel__hd"><h2><i></i>坐席响应排行</h2><span>TOP 5 / 秒</span></div>
+                <div class="mm_chart" id="mm_barAgent"></div>
+            </div>
+            <div class="mm_panel">
+                <div class="mm_panel__hd"><h2><i></i>满意度与工单</h2><span>CSAT</span></div>
+                <div class="mm_chart" id="mm_gaugeCsat"></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 数据
+    // ============================================================
+    var mm_channels = [
+        { name: '小程序', value: 78 },
+        { name: '网页', value: 63 },
+        { name: '微信', value: 55 },
+        { name: 'App', value: 42 },
+        { name: '电话', value: 31 }
+    ];
+    var mm_intents = [
+        { name: '业务咨询', value: 38 },
+        { name: '订单查询', value: 24 },
+        { name: '售后投诉', value: 18 },
+        { name: '闲聊', value: 12 },
+        { name: '其他', value: 8 }
+    ];
+    var mm_agents = [
+        { name: '王芳', value: 1.2 },
+        { name: '李静', value: 1.5 },
+        { name: '张伟', value: 1.7 },
+        { name: '陈晨', value: 1.9 },
+        { name: '刘洋', value: 2.2 }
+    ];
+    var mm_mapData = [
+        { name: '广东省', value: 1280 }, { name: '江苏省', value: 960 },
+        { name: '浙江省', value: 880 }, { name: '山东省', value: 820 },
+        { name: '河南省', value: 700 }, { name: '四川省', value: 640 },
+        { name: '湖北省', value: 560 }, { name: '北京市', value: 540 },
+        { name: '上海市', value: 520 }, { name: '河北省', value: 460 },
+        { name: '湖南省', value: 420 }, { name: '福建省', value: 400 },
+        { name: '安徽省', value: 380 }, { name: '辽宁省', value: 320 },
+        { name: '陕西省', value: 300 }, { name: '重庆市', value: 280 },
+        { name: '江西省', value: 260 }, { name: '云南省', value: 220 },
+        { name: '广西壮族自治区', value: 200 }, { name: '山西省', value: 190 },
+        { name: '贵州省', value: 180 }, { name: '黑龙江省', value: 160 },
+        { name: '天津市', value: 150 }, { name: '吉林省', value: 120 },
+        { name: '甘肃省', value: 90 }, { name: '内蒙古自治区', value: 80 },
+        { name: '新疆维吾尔自治区', value: 70 }, { name: '海南省', value: 60 },
+        { name: '宁夏回族自治区', value: 50 }, { name: '青海省', value: 40 },
+        { name: '台湾省', value: 40 }, { name: '香港特别行政区', value: 30 },
+        { name: '澳门特别行政区', value: 20 }, { name: '西藏自治区', value: 20 }
+    ];
+
+    var mm_hours = [];
+    var mm_robot = [];
+    var mm_human = [];
+    for (var i = 0; i < 24; i++) {
+        mm_hours.push((i < 10 ? '0' + i : i) + ':00');
+        var mm_base = Math.round(60 + 210 * Math.exp(-Math.pow((i - 11) / 5.4, 2)) + 150 * Math.exp(-Math.pow((i - 19) / 3.4, 2)));
+        mm_robot.push(mm_base);
+        mm_human.push(Math.round(mm_base * 0.22));
+    }
+
+    var mm_axisLabel = { color: '#7f9bc4', fontSize: 10 };
+    var mm_splitLine = { lineStyle: { color: 'rgba(120, 170, 220, .13)', type: 'dashed' } };
+    var mm_tip = {
+        backgroundColor: 'rgba(8, 24, 46, .94)',
+        borderColor: 'rgba(34, 211, 238, .4)',
+        textStyle: { color: '#dcecff', fontSize: 11 }
+    };
+
+    // ============================================================
+    // 2. 图表
+    // ============================================================
+    var mm_charts = [];
+
+    function mm_make(id) {
+        var el = document.getElementById(id);
+        var c = echarts.init(el, null, { renderer: 'canvas' });
+        mm_charts.push(c);
+        return c;
+    }
+
+    // 2.1 渠道会话量（横向条形）
+    var mm_barChannel = mm_make('mm_barChannel');
+    mm_barChannel.setOption({
+        tooltip: mm_tip,
+        grid: { left: 6, right: 38, top: 12, bottom: 6, containLabel: true },
+        xAxis: {
+            type: 'value', axisLabel: mm_axisLabel, splitLine: mm_splitLine,
+            axisLine: { show: false }, axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'category', inverse: true, data: mm_channels.map(function (d) { return d.name; }),
+            axisLabel: { color: '#a8c7ee', fontSize: 11 }, axisTick: { show: false },
+            axisLine: { lineStyle: { color: 'rgba(120, 170, 220, .25)' } }
+        },
+        series: [{
+            type: 'bar', barWidth: 10,
+            itemStyle: {
+                borderRadius: [0, 5, 5, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: '#1d4ed8' }, { offset: 1, color: '#22d3ee' }
+                ])
+            },
+            label: { show: true, position: 'right', color: '#8fd6f0', fontSize: 10, formatter: '{c}' },
+            data: mm_channels.map(function (d) { return d.value; })
+        }]
+    });
+
+    // 2.2 意图占比（环形饼图）
+    var mm_pieIntent = mm_make('mm_pieIntent');
+    mm_pieIntent.setOption({
+        color: ['#22d3ee', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e'],
+        tooltip: Object.assign({ trigger: 'item', formatter: '{b}：{c}%' }, mm_tip),
+        legend: {
+            bottom: 2, left: 'center', itemWidth: 8, itemHeight: 8, icon: 'circle',
+            itemGap: 10, textStyle: { color: '#9fb6d4', fontSize: 10 }
+        },
+        series: [{
+            type: 'pie', radius: ['40%', '64%'], center: ['50%', '44%'],
+            itemStyle: { borderColor: '#08172c', borderWidth: 2 },
+            label: { color: '#cfe3ff', fontSize: 10, formatter: '{d}%' },
+            emphasis: { scale: true, scaleSize: 6 },
+            data: mm_intents
+        }]
+    });
+
+    // 2.3 24 小时趋势（折线面积）
+    var mm_lineTrend = mm_make('mm_lineTrend');
+    mm_lineTrend.setOption({
+        color: ['#22d3ee', '#f59e0b'],
+        tooltip: Object.assign({ trigger: 'axis' }, mm_tip),
+        legend: {
+            top: 4, right: 8, itemWidth: 10, itemHeight: 6,
+            textStyle: { color: '#8ba7cb', fontSize: 10 }
+        },
+        grid: { left: 8, right: 14, top: 30, bottom: 6, containLabel: true },
+        xAxis: {
+            type: 'category', boundaryGap: false, data: mm_hours,
+            axisLabel: { color: '#7f9bc4', fontSize: 10, interval: 3 },
+            axisTick: { show: false },
+            axisLine: { lineStyle: { color: 'rgba(120, 170, 220, .25)' } }
+        },
+        yAxis: {
+            type: 'value', axisLabel: mm_axisLabel, splitLine: mm_splitLine,
+            axisLine: { show: false }, axisTick: { show: false }
+        },
+        series: [
+            {
+                name: '机器人', type: 'line', smooth: true, symbol: 'none',
+                lineStyle: { width: 2, color: '#22d3ee' },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(34, 211, 238, .34)' },
+                        { offset: 1, color: 'rgba(34, 211, 238, 0)' }
+                    ])
+                },
+                data: mm_robot
+            },
+            {
+                name: '人工', type: 'line', smooth: true, symbol: 'none',
+                lineStyle: { width: 2, color: '#f59e0b' },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(245, 158, 11, .28)' },
+                        { offset: 1, color: 'rgba(245, 158, 11, 0)' }
+                    ])
+                },
+                data: mm_human
+            }
+        ]
+    });
+
+    // 2.4 坐席响应排行（横向条形）
+    var mm_barAgent = mm_make('mm_barAgent');
+    mm_barAgent.setOption({
+        tooltip: Object.assign({ trigger: 'axis', axisPointer: { type: 'shadow' } }, mm_tip),
+        grid: { left: 6, right: 34, top: 12, bottom: 6, containLabel: true },
+        xAxis: {
+            type: 'value', max: 2.6, axisLabel: mm_axisLabel, splitLine: mm_splitLine,
+            axisLine: { show: false }, axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'category', inverse: true, data: mm_agents.map(function (d) { return d.name; }),
+            axisLabel: { color: '#a8c7ee', fontSize: 11 }, axisTick: { show: false },
+            axisLine: { lineStyle: { color: 'rgba(120, 170, 220, .25)' } }
+        },
+        series: [{
+            type: 'bar', barWidth: 10,
+            itemStyle: {
+                borderRadius: [0, 5, 5, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: '#7c3aed' }, { offset: 1, color: '#22d3ee' }
+                ])
+            },
+            label: { show: true, position: 'right', color: '#8fd6f0', fontSize: 10, formatter: '{c}s' },
+            data: mm_agents.map(function (d) { return d.value; })
+        }]
+    });
+
+    // 2.5 满意度仪表盘
+    var mm_gauge = mm_make('mm_gaugeCsat');
+    mm_gauge.setOption({
+        series: [{
+            type: 'gauge', startAngle: 210, endAngle: -30, min: 0, max: 100,
+            center: ['50%', '58%'], radius: '82%',
+            progress: { show: true, width: 8, itemStyle: { color: '#22d3ee' } },
+            axisLine: { lineStyle: { width: 8, color: [[1, 'rgba(120, 170, 220, .18)']] } },
+            axisTick: { show: false },
+            splitLine: { show: false },
+            axisLabel: { color: '#7f9bc4', fontSize: 9, distance: -16 },
+            pointer: { length: '62%', width: 3, itemStyle: { color: '#22d3ee' } },
+            anchor: { show: true, size: 8, itemStyle: { color: '#22d3ee' } },
+            title: { color: '#9fb6d4', fontSize: 10, offsetCenter: [0, '88%'] },
+            detail: {
+                valueAnimation: true, formatter: '{value}%', color: '#ffffff',
+                fontSize: 18, offsetCenter: [0, '62%']
+            },
+            data: [{ value: 96.4, name: '用户满意度' }]
+        }]
+    });
+
+    // ============================================================
+    // 3. 地理信息图（全国会话分布）
+    // ============================================================
+    var mm_mapChart = mm_make('mm_mapChina');
+    var mm_mask = document.getElementById('mm_mapMask');
+
+    function mm_mapOption() {
+        return {
+            tooltip: Object.assign({
+                trigger: 'item',
+                formatter: function (p) {
+                    return p.name + '<br/>会话量：' + (p.value || 0) + ' 次';
+                }
+            }, mm_tip),
+            visualMap: {
+                min: 0, max: 1300, left: 10, bottom: 10, orient: 'horizontal',
+                itemWidth: 10, itemHeight: 60, calculable: true,
+                textStyle: { color: '#8ba7cb', fontSize: 9 },
+                inRange: {
+                    color: ['#0b2440', '#155e8a', '#1e9ec9', '#22d3ee', '#facc15']
+                }
+            },
+            geo: {
+                map: 'china', roam: true, zoom: 1.15,
+                layoutCenter: ['50%', '48%'], layoutSize: '108%',
+                itemStyle: { areaColor: '#0b2440', borderColor: 'rgba(34, 211, 238, .5)', borderWidth: 1 },
+                emphasis: {
+                    itemStyle: { areaColor: '#155e8a' },
+                    label: { show: true, color: '#ffffff', fontSize: 10 }
+                },
+                scaleLimit: { min: 1, max: 4 }
+            },
+            series: [{
+                name: '会话量', type: 'map', map: 'china', geoIndex: 0,
+                data: mm_mapData
+            }]
+        };
+    }
+
+    function mm_loadGeo() {
+        return fetch('cdn/echarts/map/china.json').then(function (res) {
+            if (!res.ok) { throw new Error('HTTP ' + res.status); }
+            return res.json();
+        }).catch(function () {
+            return new Promise(function (resolve, reject) {
+                if (window.MM_CHINA_GEO) { resolve(window.MM_CHINA_GEO); return; }
+                var s = document.createElement('script');
+                s.src = 'cdn/echarts/map/china-map.js';
+                s.onload = function () {
+                    if (window.MM_CHINA_GEO) { resolve(window.MM_CHINA_GEO); }
+                    else { reject(new Error('地图数据未定义')); }
+                };
+                s.onerror = function () { reject(new Error('地图数据加载失败')); };
+                document.head.appendChild(s);
+            });
+        });
+    }
+
+    mm_loadGeo().then(function (geo) {
+        echarts.registerMap('china', geo);
+        mm_mapChart.setOption(mm_mapOption());
+        mm_mask.classList.add('mmm_hide');
+    }).catch(function (err) {
+        mm_mask.classList.add('mmm_err');
+        mm_mask.textContent = '地图加载失败：' + err.message;
+    });
+
+    // ============================================================
+    // 4. 时钟、KPI 数字滚动、自适应
+    // ============================================================
+    var mm_week = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    function mm_pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function mm_tick() {
+        var d = new Date();
+        document.getElementById('mm_clockTime').textContent =
+            mm_pad(d.getHours()) + ':' + mm_pad(d.getMinutes()) + ':' + mm_pad(d.getSeconds());
+        document.getElementById('mm_clockDate').textContent =
+            d.getFullYear() + '-' + mm_pad(d.getMonth() + 1) + '-' + mm_pad(d.getDate()) + ' ' + mm_week[d.getDay()];
+    }
+    mm_tick();
+    setInterval(mm_tick, 1000);
+
+    function mm_countUp(el, target, suffix, decimals) {
+        var start = performance.now();
+        var dur = 1300;
+        function step(now) {
+            var p = Math.min(1, (now - start) / dur);
+            var e = 1 - Math.pow(1 - p, 3);
+            var v = target * e;
+            if (decimals) {
+                el.innerHTML = v.toFixed(decimals) + (suffix ? '<small>' + suffix + '</small>' : '');
+            } else {
+                el.innerHTML = Math.round(v).toLocaleString() + (suffix ? '<small>' + suffix + '</small>' : '');
+            }
+            if (p < 1) { requestAnimationFrame(step); }
+        }
+        requestAnimationFrame(step);
+    }
+    mm_countUp(document.getElementById('mm_kpiSession'), 128460, '', 0);
+    mm_countUp(document.getElementById('mm_kpiAgent'), 326, '', 0);
+    mm_countUp(document.getElementById('mm_kpiResp'), 1.8, 's', 1);
+    mm_countUp(document.getElementById('mm_kpiCsat'), 96.4, '%', 1);
+
+    function mm_resize() {
+        mm_charts.forEach(function (c) { c.resize(); });
+    }
+    window.addEventListener('resize', mm_resize);
+    if (window.ResizeObserver) {
+        new ResizeObserver(mm_resize).observe(document.querySelector('.mm_main'));
+    }
+    setTimeout(mm_resize, 120);
+</script>
+</body>
+</html>
