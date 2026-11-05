@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：ECharts 地图路线图 - 用 ECharts 加载本地 SVG 地图，通过 route1/route2 两个按钮切换高亮两条史前迁徙路线 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-4 · ECharts 地图路线（route1 / route2）</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <script src="cdn/echarts/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --mm_ink: #1f2937;
+            --mm_sub: #64748b;
+            --mm_line: #e5e7eb;
+            --mm_accent: #b50205;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--mm_ink);
+            background: linear-gradient(180deg, #f7f8fb 0%, #eef1f7 100%);
+            min-height: 100vh; padding: 24px 18px 56px;
+        }
+        .mm_wrap { max-width: 1180px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7b8aa3; text-decoration: none; font-size: .86rem; margin-bottom: 12px;
+        }
+        .mm_back:hover { color: #2563eb; }
+
+        .mm_head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        .mm_head h1 { font-size: clamp(1.3rem, 3vw, 1.7rem); letter-spacing: .02em; }
+        .mm_head h1 b { color: var(--mm_accent); }
+        .mm_head p { margin-top: 7px; font-size: .82rem; color: var(--mm_sub); line-height: 1.8; }
+        .mm_tag {
+            flex-shrink: 0; padding: 5px 12px; font-size: .72rem; font-family: Consolas, monospace;
+            color: #475569; background: #fff; border: 1px solid var(--mm_line); border-radius: 999px;
+        }
+
+        .mm_panel {
+            position: relative; padding: 10px; background: #fff;
+            border: 1px solid var(--mm_line); border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, .08);
+        }
+        #mm_chart { width: 100%; height: 620px; }
+
+        .mm_mask {
+            position: absolute; inset: 10px; display: grid; place-items: center;
+            background: rgba(255,255,255,.94); border-radius: 12px; z-index: 3;
+            transition: opacity .3s; text-align: center; padding: 20px;
+        }
+        .mm_mask.mmm_hide { opacity: 0; pointer-events: none; }
+        .mm_mask__spin {
+            width: 34px; height: 34px; margin: 0 auto 12px; border-radius: 50%;
+            border: 3px solid #e5e7eb; border-top-color: #2563eb;
+            animation: mm_spin 0.9s linear infinite;
+        }
+        @keyframes mm_spin { to { transform: rotate(360deg); } }
+        .mm_mask p { font-size: .84rem; color: var(--mm_sub); line-height: 1.8; }
+        .mm_mask p b { color: var(--mm_accent); }
+
+        .mm_bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 17px; font-size: .84rem; font-weight: bold;
+            color: #334155; background: #fff; border: 1px solid var(--mm_line);
+            border-radius: 9px; cursor: pointer; transition: all .18s;
+        }
+        .mm_btn:hover { border-color: #c7d2fe; box-shadow: 0 6px 16px rgba(37,99,235,.12); color: #1d4ed8; }
+        .mm_btn .iconfont { font-size: .9rem; }
+        .mm_barText { margin-left: auto; font-size: .76rem; color: #93a1b8; }
+
+        .mm_routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; margin-top: 16px; }
+        .mm_route {
+            padding: 16px 18px; background: #fff; border: 1px solid var(--mm_line);
+            border-radius: 13px; border-top: 3px solid var(--mm_accent);
+            transition: box-shadow .2s, transform .2s;
+        }
+        .mm_route:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(15,23,42,.09); }
+        .mm_route h3 { display: flex; align-items: center; gap: 8px; font-size: .95rem; margin-bottom: 9px; }
+        .mm_route h3 span {
+            padding: 2px 8px; font-size: .68rem; font-family: Consolas, monospace;
+            color: #fff; background: var(--mm_accent); border-radius: 5px;
+        }
+        .mm_route dl { font-size: .8rem; line-height: 1.9; color: var(--mm_sub); }
+        .mm_route dt { float: left; width: 62px; color: #94a3b8; }
+        .mm_route dd { margin-left: 62px; color: #475569; }
+
+        .mm_notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+        .mm_note { padding: 16px 18px; background: #fff; border: 1px solid var(--mm_line); border-radius: 13px; }
+        .mm_note h3 { display: flex; align-items: center; gap: 7px; font-size: .88rem; margin-bottom: 8px; }
+        .mm_note h3 .iconfont { color: #2563eb; font-size: .9rem; }
+        .mm_note p { font-size: .79rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: #1d4ed8; background: #eff4ff; border-radius: 4px;
+        }
+
+        @media (max-width: 620px) {
+            body { padding: 16px 12px 46px; }
+            .mm_head { flex-direction: column; align-items: flex-start; gap: 8px; }
+            #mm_chart { height: 440px; }
+            .mm_barText { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <div>
+            <h1>ECharts 地图路线：<b>route1</b> 与 <b>route2</b></h1>
+            <p>用 ECharts 的 <code>geo</code> 组件加载本地 SVG 地图（西西里岛史前地形图），把图中两个路线区域注册为可选区域，
+               点击顶部按钮即可高亮对应路线并弹出说明。</p>
+        </div>
+        <span class="mm_tag">18-4 · echarts 5.5.1</span>
+    </header>
+
+    <div class="mm_panel">
+        <div id="mm_chart"></div>
+        <div class="mm_mask" id="mm_mask">
+            <div>
+                <div class="mm_mask__spin"></div>
+                <p id="mm_maskText">地图加载中…（本地 SVG 约 3.7 MB，首次打开稍等）</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mm_bar">
+        <button class="mm_btn" id="mm_reset"><i class="iconfont icon-huhuan"></i>清除选择</button>
+        <span class="mm_barText">提示：点击上方 route1 / route2 按钮切换路线，滚轮缩放、拖拽平移</span>
+    </div>
+
+    <div class="mm_routes">
+        <article class="mm_route">
+            <h3><span>route1</span>Elymoi 西部路线</h3>
+            <dl>
+                <dt>族群</dt><dd>Elymoi（艾利米人），西西里最早的定居族群之一</dd>
+                <dt>路径</dt><dd>Erice → Segesta → Entella → M. d'Oro → Palermo</dd>
+                <dt>特征</dt><dd>山地与海岸混合地形，Erice、Segesta 保留古希腊时期遗址</dd>
+                <dt>长度</dt><dd>约 120 km</dd>
+            </dl>
+        </article>
+
+        <article class="mm_route">
+            <h3><span>route2</span>Sikeloi 东南路线</h3>
+            <dl>
+                <dt>族群</dt><dd>Sikeloi（西凯尔人），聚居于岛屿中东部</dd>
+                <dt>路径</dt><dd>Palermo 南侧 → Colle Madore → Monte Marzo → Ragusa</dd>
+                <dt>特征</dt><dd>穿越 Cavaliere 平原与 Etna 火山南麓，串联多处遗址点</dd>
+                <dt>长度</dt><dd>约 180 km</dd>
+            </dl>
+        </article>
+    </div>
+
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-baocun"></i>本地依赖</h3>
+            <p><code>cdn/echarts/echarts.min.js</code> 与 <code>cdn/echarts/Sicily_prehellenic_topographic_map.svg</code> 已下载到项目内，页面不引用任何外部地址。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-yuedu"></i>SVG 地图注册</h3>
+            <p>用 <code>fetch</code> 读取 SVG 文本，再执行 <code>echarts.registerMap('sicily', { svg })</code>；SVG 中 <code>name="route1"</code> 的路径会自动成为可选中区域。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-huhuan"></i>按钮实现</h3>
+            <p>两个按钮并非 DOM 元素，而是隐藏在顶部网格中的 <code>scatter</code> 数据点，<code>selectchanged</code> 再把选择同步给 <code>geoSelect</code> 与 <code>showTip</code>。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 路线文案
+    // ============================================================
+    var mm_route1Text = [
+        'Route 1 ：Elymoi 西部路线',
+        '族群：Elymoi（艾利米人）',
+        '路径：Erice → Segesta → Entella',
+        '再沿 M. d\'Oro、Monte Jato 抵达 Palermo',
+        '沿途可见 Erice、Segesta 等古希腊时期遗址',
+        '全程约 120 km，山地与海岸混合地形'
+    ].join('<br>');
+
+    var mm_route2Text = [
+        'Route 2 ：Sikeloi 东南路线',
+        '族群：Sikeloi（西凯尔人）',
+        '路径：Palermo 南侧 → Colle Madore',
+        '经 Monte Marzo 穿越 Cavaliere 平原',
+        '南下抵达 Ragusa、Thapsos 一带',
+        '全程约 180 km，跨 Etna 火山南麓'
+    ].join('<br>');
+
+    var mm_introText = [
+        '西西里岛史前迁徙路线图',
+        '底图来自 ECharts 官方示例资源（本地 SVG）',
+        '红色箭头对应 route1 / route2 两条路线',
+        '滚轮可缩放，拖拽可平移',
+        '点击顶部按钮高亮对应路线'
+    ].join('<br>');
+
+    // ============================================================
+    // 2. 读取 SVG 地图（优先 fetch，file:// 下回退到 JS 数据文件）
+    // ============================================================
+    function mm_loadSvgByScript() {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            s.src = "cdn/echarts/sicily-map.js";
+            s.onload = function () {
+                if (window.MM_SICILY_SVG) { resolve(window.MM_SICILY_SVG); }
+                else { reject(new Error("地图数据文件为空")); }
+            };
+            s.onerror = function () { reject(new Error("地图文件加载失败")); };
+            document.head.appendChild(s);
+        });
+    }
+
+    function mm_loadSvg() {
+        return fetch("cdn/echarts/Sicily_prehellenic_topographic_map.svg")
+            .then(function (res) {
+                if (!res.ok) { throw new Error("HTTP " + res.status); }
+                return res.text();
+            })
+            .catch(function () {
+                // 直接双击打开（file://）时 fetch 会被拦截，改用脚本文件读取
+                return mm_loadSvgByScript();
+            });
+    }
+
+    // ============================================================
+    // 3. 图表实例
+    // ============================================================
+    var mm_chart = echarts.init(document.getElementById("mm_chart"));
+    var mm_mask = document.getElementById("mm_mask");
+    var mm_maskText = document.getElementById("mm_maskText");
+
+    function mm_option() {
+        return {
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: function (params) {
+                    return params.name ? params.name + '（点击上方按钮查看路线说明）' : '';
+                }
+            },
+            geo: [
+                {
+                    map: "sicily",
+                    roam: true,
+                    layoutCenter: ["50%", "56%"],
+                    layoutSize: "94%",
+                    selectedMode: "single",
+                    tooltip: {
+                        show: true,
+                        confine: true,
+                        formatter: mm_introText
+                    },
+                    itemStyle: {
+                        color: undefined,
+                        borderColor: "rgba(255,255,255,0.25)"
+                    },
+                    emphasis: {
+                        label: { show: false }
+                    },
+                    select: {
+                        itemStyle: { color: "#b50205", borderWidth: 0 },
+                        label: { show: false }
+                    },
+                    regions: [
+                        {
+                            name: "route1",
+                            itemStyle: { borderWidth: 0 },
+                            select: {
+                                itemStyle: { color: "#b5280d", borderWidth: 0 }
+                            },
+                            tooltip: {
+                                position: "right",
+                                alwaysShowContent: true,
+                                enterable: true,
+                                extraCssText: "user-select: text; box-shadow: 0 6px 20px rgba(15,23,42,.18); border-radius: 8px;",
+                                formatter: mm_route1Text
+                            }
+                        },
+                        {
+                            name: "route2",
+                            itemStyle: { borderWidth: 0 },
+                            select: {
+                                itemStyle: { color: "#b5280d", borderWidth: 0 }
+                            },
+                            tooltip: {
+                                position: "left",
+                                alwaysShowContent: true,
+                                enterable: true,
+                                extraCssText: "user-select: text; box-shadow: 0 6px 20px rgba(15,23,42,.18); border-radius: 8px;",
+                                formatter: mm_route2Text
+                            }
+                        }
+                    ]
+                }
+            ],
+            // --------- 顶部两个按钮（用散点 + 标签实现） ---------
+            grid: {
+                top: 10,
+                left: "center",
+                width: 170,
+                height: 26
+            },
+            xAxis: {
+                axisLine: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                axisTick: { show: false },
+                min: -0.35,
+                max: 1.35
+            },
+            yAxis: {
+                axisLine: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                axisTick: { show: false }
+            },
+            series: {
+                type: "scatter",
+                symbolSize: 0,
+                label: {
+                    show: true,
+                    borderColor: "#999",
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    backgroundColor: "#fff",
+                    padding: [6, 12],
+                    fontSize: 15,
+                    color: "#333"
+                },
+                encode: { label: 2 },
+                tooltip: { show: false },
+                selectedMode: "single",
+                select: {
+                    label: {
+                        color: "#fff",
+                        borderColor: "#555",
+                        backgroundColor: "#555"
+                    }
+                },
+                data: [
+                    [0, 0, "route1"],
+                    [1, 0, "route2"]
+                ]
+            }
+            // --------- 按钮结束 ---------
+        };
+    }
+
+    // ============================================================
+    // 4. 选中同步：散点按钮 ↔ geo 区域 ↔ tooltip
+    // ============================================================
+    function mm_bindEvents(option) {
+        mm_chart.on("selectchanged", function (params) {
+            if (!params.selected.length) {
+                mm_chart.dispatchAction({ type: "hideTip" });
+                mm_chart.dispatchAction({ type: "geoSelect", geoIndex: 0 });
+                return;
+            }
+            // 只处理来自顶部按钮（scatter）的选中，忽略直接点击地图区域
+            var mm_sel = params.selected[0];
+            if (!mm_sel || !mm_sel.dataIndex || mm_sel.seriesIndex === undefined) { return; }
+            var mm_idx = mm_sel.dataIndex[0];
+            if (typeof mm_idx !== "number") { return; }
+            var mm_name = option.series.data[mm_idx][2];
+            mm_chart.dispatchAction({ type: "geoSelect", geoIndex: 0, name: mm_name });
+            mm_chart.dispatchAction({ type: "showTip", geoIndex: 0, name: mm_name });
+        });
+    }
+
+    // ============================================================
+    // 5. 启动
+    // ============================================================
+    function mm_fail(msg) {
+        mm_mask.classList.remove("mmm_hide");
+        mm_mask.querySelector(".mm_mask__spin").style.display = "none";
+        mm_maskText.innerHTML = "地图加载失败：<b>" + msg + "</b><br>请确认 cdn/echarts/ 目录下的地图文件完整，或通过本地服务器打开本页。";
+    }
+
+    mm_loadSvg().then(function (svg) {
+        echarts.registerMap("sicily", { svg: svg });
+        var mm_opt = mm_option();
+        mm_chart.setOption(mm_opt);
+        mm_bindEvents(mm_opt);
+        mm_mask.classList.add("mmm_hide");
+    }).catch(function (err) {
+        mm_fail(err && err.message ? err.message : "未知错误");
+    });
+
+    document.getElementById("mm_reset").addEventListener("click", function () {
+        mm_chart.dispatchAction({ type: "unselect", seriesIndex: 0 });
+        mm_chart.dispatchAction({ type: "geoSelect", geoIndex: 0 });
+        mm_chart.dispatchAction({ type: "hideTip" });
+    });
+
+    window.addEventListener("resize", function () {
+        mm_chart.resize();
+    });
+</script>
+</body>
+</html>

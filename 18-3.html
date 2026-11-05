@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：基于知识库的智能客服系统架构图 - 用 SVG 绘制五层架构与 RAG 主链路，并列出科研方向 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-3 · 知识库智能客服系统架构（SVG）</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --mm_ink: #1e293b;
+            --mm_sub: #64748b;
+            --mm_line: #e2e8f0;
+            --mm_accent: #1d4ed8;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--mm_ink);
+            background:
+                radial-gradient(circle at 12% 0%, #eef4ff 0%, transparent 42%),
+                radial-gradient(circle at 88% 6%, #f5f0ff 0%, transparent 40%),
+                #f7f8fb;
+            min-height: 100vh;
+            padding: 24px 18px 64px;
+        }
+        .mm_wrap { max-width: 1180px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7b8aa3; text-decoration: none; font-size: .86rem; margin-bottom: 14px;
+        }
+        .mm_back:hover { color: var(--mm_accent); }
+
+        .mm_head { margin-bottom: 18px; }
+        .mm_head h1 {
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+            letter-spacing: .02em; color: #0f172a;
+        }
+        .mm_head h1 em {
+            font-style: normal; color: var(--mm_accent);
+        }
+        .mm_head p { margin-top: 9px; font-size: .85rem; color: var(--mm_sub); line-height: 1.85; max-width: 940px; }
+        .mm_meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .mm_meta span {
+            padding: 4px 12px; font-size: .74rem; font-family: Consolas, monospace;
+            color: #475569; background: #fff; border: 1px solid var(--mm_line); border-radius: 999px;
+        }
+
+        .mm_panel {
+            position: relative; padding: 10px; background: #fff;
+            border: 1px solid var(--mm_line); border-radius: 18px;
+            box-shadow: 0 18px 46px rgba(15, 23, 42, .08);
+        }
+        .mm_svg { display: block; width: 100%; height: auto; }
+
+        .mm_bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 17px; font-size: .84rem; font-weight: bold;
+            color: var(--mm_accent); background: #eff4ff;
+            border: 1px solid #cddcff; border-radius: 9px; cursor: pointer;
+            transition: all .18s;
+        }
+        .mm_btn:hover { background: #e2ebff; border-color: #9fb9ff; box-shadow: 0 6px 16px rgba(29,78,216,.12); }
+        .mm_btn .iconfont { font-size: .9rem; }
+        .mm_barText { margin-left: auto; font-size: .76rem; color: #93a1b8; }
+
+        .mm_info {
+            display: flex; align-items: flex-start; gap: 14px;
+            margin-top: 14px; padding: 16px 18px;
+            background: #fff; border: 1px solid var(--mm_line); border-left: 3px solid var(--mm_accent);
+            border-radius: 12px;
+        }
+        .mm_info__icon {
+            display: grid; place-items: center; flex-shrink: 0;
+            width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem;
+            color: var(--mm_accent); background: #eff4ff; border: 1px solid #dbe6ff;
+        }
+        .mm_info__body h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .98rem; }
+        .mm_info__body h3 span {
+            padding: 2px 9px; font-size: .7rem; font-weight: normal;
+            color: #7b8aa3; background: #f1f5f9; border-radius: 999px;
+        }
+        .mm_info__body p { margin-top: 6px; font-size: .82rem; line-height: 1.85; color: var(--mm_sub); }
+
+        .mm_secTitle {
+            display: flex; align-items: center; gap: 9px;
+            margin: 30px 0 14px; font-size: 1.08rem; color: #0f172a;
+        }
+        .mm_secTitle .iconfont { color: var(--mm_accent); font-size: 1.05rem; }
+        .mm_secTitle small { font-size: .74rem; font-weight: normal; color: #93a1b8; margin-left: 4px; }
+
+        .mm_research {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: 14px;
+        }
+        .mm_rcard {
+            padding: 18px 19px; background: #fff;
+            border: 1px solid var(--mm_line); border-radius: 14px;
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .mm_rcard:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(15,23,42,.09); border-color: #cfdcff; }
+        .mm_rcard__no {
+            display: inline-grid; place-items: center;
+            width: 26px; height: 26px; margin-bottom: 10px;
+            font-size: .74rem; font-family: Consolas, monospace; font-weight: bold; color: #fff;
+            background: linear-gradient(135deg, #2563eb, #6d28d9); border-radius: 7px;
+        }
+        .mm_rcard h3 { font-size: .95rem; margin-bottom: 7px; color: #0f172a; }
+        .mm_rcard p { font-size: .8rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_rcard em {
+            display: block; margin-top: 10px; padding-top: 9px;
+            font-style: normal; font-size: .74rem; color: #8a97ad; border-top: 1px dashed var(--mm_line);
+        }
+
+        .mm_notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+        .mm_note {
+            padding: 16px 18px; background: #fff; border: 1px solid var(--mm_line); border-radius: 13px;
+        }
+        .mm_note h3 { display: flex; align-items: center; gap: 7px; font-size: .88rem; margin-bottom: 8px; color: #0f172a; }
+        .mm_note h3 .iconfont { color: var(--mm_accent); font-size: .9rem; }
+        .mm_note p { font-size: .79rem; line-height: 1.85; color: var(--mm_sub); }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: var(--mm_accent); background: #eff4ff; border-radius: 4px;
+        }
+
+        @media (max-width: 620px) {
+            body { padding: 16px 12px 50px; }
+            .mm_barText { margin-left: 0; }
+            .mm_panel { padding: 4px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <h1>基于知识库的<em>智能客服系统</em>架构图</h1>
+        <p>整张图以 SVG 矢量绘制（可无损缩放、可单独导出）。自上而下分为用户交互层、接入与调度层、核心能力层、知识库层与支撑与工程层，
+           其中「意图理解 → 知识检索 → 答案生成」构成检索增强生成（RAG）主链路，是当前智能客服研究与应用的核心方向。</p>
+        <div class="mm_meta">
+            <span>18-3 · SVG 矢量图</span>
+            <span>5 层 · 22 个模块</span>
+            <span>RAG 检索增强生成</span>
+        </div>
+    </header>
+
+    <!-- ============ 架构图 ============ -->
+    <div class="mm_panel">
+        <svg id="mm_svg" class="mm_svg" viewBox="0 0 1180 720" xmlns="http://www.w3.org/2000/svg"
+             role="img" aria-labelledby="mm_svgTitle">
+            <title id="mm_svgTitle">基于知识库的智能客服系统架构图</title>
+            <defs>
+                <style>
+                    .mms_band { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1; }
+                    .mms_pill rect { fill: #ffffff; }
+                    .mms_pill text { font-size: 11px; font-weight: 600; }
+                    .mms_box {
+                        fill: #ffffff; stroke-width: 1.4;
+                        transition: fill .18s, stroke-width .18s, filter .18s;
+                        cursor: pointer;
+                    }
+                    .mms_t {
+                        font-size: 13px; font-weight: 600; fill: #1e293b;
+                        text-anchor: middle; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+                        pointer-events: none;
+                    }
+                    .mms_s {
+                        font-size: 10px; fill: #64748b;
+                        text-anchor: middle; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+                        pointer-events: none;
+                    }
+                    .mms_badge rect { fill: #0891b2; opacity: .14; }
+                    .mms_badge text { font-size: 9px; fill: #0e7490; font-weight: 700; text-anchor: middle; font-family: Consolas, monospace; }
+                    .mms_arrow { stroke-width: 1.3; opacity: .75; }
+                    .mms_head { stroke-width: 1.1; opacity: .55; }
+                    .mms_lg rect { stroke-linecap: round; }
+                    .mms_lg text { font-size: 11px; fill: #475569; }
+                    .mms_foot { font-size: 11px; fill: #94a3b8; text-anchor: end; font-family: "Microsoft YaHei", sans-serif; }
+
+                    /* 分层配色 */
+                    .mms_l1 .mms_band { fill: #f5f9ff; stroke: #dbe7ff; }
+                    .mms_l1 .mms_pill rect { stroke: #2563eb; }
+                    .mms_l1 .mms_pill text { fill: #1d4ed8; }
+                    .mms_l1 .mms_box { stroke: #93b4f5; }
+                    .mms_l1 .mms_node:hover .mms_box,
+                    .mms_l1 .mms_node.mmm_sel .mms_box { fill: #eaf2ff; stroke: #2563eb; stroke-width: 2.2; filter: drop-shadow(0 6px 12px rgba(37,99,235,.18)); }
+
+                    .mms_l2 .mms_band { fill: #faf6ff; stroke: #ece2ff; }
+                    .mms_l2 .mms_pill rect { stroke: #7c3aed; }
+                    .mms_l2 .mms_pill text { fill: #6d28d9; }
+                    .mms_l2 .mms_box { stroke: #c3a8f2; }
+                    .mms_l2 .mms_node:hover .mms_box,
+                    .mms_l2 .mms_node.mmm_sel .mms_box { fill: #f4edff; stroke: #7c3aed; stroke-width: 2.2; filter: drop-shadow(0 6px 12px rgba(124,58,237,.18)); }
+
+                    .mms_l3 .mms_band { fill: #f2fdff; stroke: #d5f2f8; }
+                    .mms_l3 .mms_pill rect { stroke: #0891b2; }
+                    .mms_l3 .mms_pill text { fill: #0e7490; }
+                    .mms_l3 .mms_box { stroke: #8ed7e6; }
+                    .mms_l3 .mms_node:hover .mms_box,
+                    .mms_l3 .mms_node.mmm_sel .mms_box { fill: #e8fbff; stroke: #0891b2; stroke-width: 2.2; filter: drop-shadow(0 6px 12px rgba(8,145,178,.2)); }
+
+                    .mms_l4 .mms_band { fill: #fffaf0; stroke: #fdeccd; }
+                    .mms_l4 .mms_pill rect { stroke: #d97706; }
+                    .mms_l4 .mms_pill text { fill: #b45309; }
+                    .mms_l4 .mms_box { stroke: #f0c47c; }
+                    .mms_l4 .mms_node:hover .mms_box,
+                    .mms_l4 .mms_node.mmm_sel .mms_box { fill: #fff5e3; stroke: #d97706; stroke-width: 2.2; filter: drop-shadow(0 6px 12px rgba(217,119,6,.2)); }
+
+                    .mms_l5 .mms_band { fill: #fdf5fa; stroke: #fbe0ee; }
+                    .mms_l5 .mms_pill rect { stroke: #db2777; }
+                    .mms_l5 .mms_pill text { fill: #be185d; }
+                    .mms_l5 .mms_box { stroke: #f2a7c3; }
+                    .mms_l5 .mms_node:hover .mms_box,
+                    .mms_l5 .mms_node.mmm_sel .mms_box { fill: #fff0f7; stroke: #db2777; stroke-width: 2.2; filter: drop-shadow(0 6px 12px rgba(219,39,119,.18)); }
+                </style>
+            </defs>
+
+            <!-- ==================== 1 用户交互层 ==================== -->
+            <g class="mms_layer mms_l1" data-layer="用户交互层">
+                <rect class="mms_band" x="24" y="24" width="1132" height="104" rx="14"/>
+                <g class="mms_pill">
+                    <rect x="36" y="12" width="96" height="24" rx="12"/>
+                    <text x="50" y="29">用户交互层</text>
+                </g>
+
+                <g class="mms_node" data-t="网页在线客服" data-s="Web Chat · 图文会话"
+                   data-d="浏览器内嵌的在线客服窗口，支持图文、表情、文件与订单卡片，是官网与商城的默认入口。">
+                    <rect class="mms_box" x="48" y="46" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="177" y="72">网页在线客服</text>
+                    <text class="mms_s" x="177" y="91">Web Chat · 图文会话</text>
+                </g>
+
+                <g class="mms_node" data-t="移动端 / App 客服" data-s="SDK 嵌入 · 消息推送"
+                   data-d="以 SDK 形式嵌入 App，复用同一套会话协议，并借助系统推送把坐席回复送达离线用户。">
+                    <rect class="mms_box" x="323" y="46" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="452" y="72">移动端 / App 客服</text>
+                    <text class="mms_s" x="452" y="91">SDK 嵌入 · 消息推送</text>
+                </g>
+
+                <g class="mms_node" data-t="微信 / 小程序" data-s="公众号 · 模板消息"
+                   data-d="对接公众号与小程序消息接口，用户无需离开微信即可咨询，回复以模板消息或客服消息下发。">
+                    <rect class="mms_box" x="598" y="46" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="727" y="72">微信 / 小程序</text>
+                    <text class="mms_s" x="727" y="91">公众号 · 模板消息</text>
+                </g>
+
+                <g class="mms_node" data-t="电话语音客服" data-s="ASR + TTS"
+                   data-d="电话渠道经 ASR 转写成文本进入问答流程，答案再由 TTS 合成语音播报，形成语音机器人闭环。">
+                    <rect class="mms_box" x="873" y="46" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="1002" y="72">电话语音客服</text>
+                    <text class="mms_s" x="1002" y="91">ASR + TTS</text>
+                </g>
+            </g>
+
+            <!-- 连线 1→2 -->
+            <g>
+                <line class="mms_arrow" x1="300" y1="130" x2="300" y2="146" stroke="#2563eb"/>
+                <polygon points="300,151 295,143 305,143" fill="#2563eb" opacity="0.7"/>
+                <line class="mms_arrow" x1="590" y1="130" x2="590" y2="146" stroke="#2563eb"/>
+                <polygon points="590,151 585,143 595,143" fill="#2563eb" opacity="0.7"/>
+                <line class="mms_arrow" x1="880" y1="130" x2="880" y2="146" stroke="#2563eb"/>
+                <polygon points="880,151 875,143 885,143" fill="#2563eb" opacity="0.7"/>
+            </g>
+
+            <!-- ==================== 2 接入与调度层 ==================== -->
+            <g class="mms_layer mms_l2" data-layer="接入与调度层">
+                <rect class="mms_band" x="24" y="152" width="1132" height="104" rx="14"/>
+                <g class="mms_pill">
+                    <rect x="36" y="140" width="108" height="24" rx="12"/>
+                    <text x="50" y="157">接入与调度层</text>
+                </g>
+
+                <g class="mms_node" data-t="API 网关" data-s="鉴权 · 限流 · 路由"
+                   data-d="所有渠道的统一入口，负责 Token 鉴权、租户隔离、限流熔断与请求路由，屏蔽内部服务细节。">
+                    <rect class="mms_box" x="48" y="174" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="177" y="200">API 网关</text>
+                    <text class="mms_s" x="177" y="219">鉴权 · 限流 · 路由</text>
+                </g>
+
+                <g class="mms_node" data-t="会话管理" data-s="上下文 · 状态存储"
+                   data-d="为每次会话生成唯一 ID，维护多轮上下文、用户画像与待补全槽位，超时会话按策略归档。">
+                    <rect class="mms_box" x="323" y="174" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="452" y="200">会话管理</text>
+                    <text class="mms_s" x="452" y="219">上下文 · 状态存储</text>
+                </g>
+
+                <g class="mms_node" data-t="意图路由" data-s="业务域分发"
+                   data-d="依据识别出的意图与业务域，把请求分发给售前咨询、订单售后、技术支持等对应的处理链路。">
+                    <rect class="mms_box" x="598" y="174" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="727" y="200">意图路由</text>
+                    <text class="mms_s" x="727" y="219">业务域分发</text>
+                </g>
+
+                <g class="mms_node" data-t="人工坐席转接" data-s="排队 · 溢出策略"
+                   data-d="置信度不足、用户要求人工或情绪激烈时转入人工坐席，按技能组排队并携带完整会话上下文。">
+                    <rect class="mms_box" x="873" y="174" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="1002" y="200">人工坐席转接</text>
+                    <text class="mms_s" x="1002" y="219">排队 · 溢出策略</text>
+                </g>
+            </g>
+
+            <!-- 连线 2→3 -->
+            <g>
+                <line class="mms_arrow" x1="300" y1="258" x2="300" y2="274" stroke="#7c3aed"/>
+                <polygon points="300,279 295,271 305,271" fill="#7c3aed" opacity="0.7"/>
+                <line class="mms_arrow" x1="590" y1="258" x2="590" y2="274" stroke="#7c3aed"/>
+                <polygon points="590,279 585,271 595,271" fill="#7c3aed" opacity="0.7"/>
+                <line class="mms_arrow" x1="880" y1="258" x2="880" y2="274" stroke="#7c3aed"/>
+                <polygon points="880,279 875,271 885,271" fill="#7c3aed" opacity="0.7"/>
+            </g>
+
+            <!-- ==================== 3 核心能力层 ==================== -->
+            <g class="mms_layer mms_l3" data-layer="核心能力层">
+                <rect class="mms_band" x="24" y="280" width="1132" height="104" rx="14"/>
+                <g class="mms_pill">
+                    <rect x="36" y="268" width="96" height="24" rx="12"/>
+                    <text x="50" y="285">核心能力层</text>
+                </g>
+
+                <g class="mms_node" data-t="意图理解" data-s="意图识别 · 槽位填充"
+                   data-d="把用户自然语言映射到业务意图，并抽取订单号、时间、商品等槽位；小样本场景常用提示词工程或微调模型。">
+                    <rect class="mms_box" x="49" y="302" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="151" y="328">意图理解</text>
+                    <text class="mms_s" x="151" y="347">意图识别 · 槽位填充</text>
+                </g>
+
+                <g class="mms_node" data-t="知识检索" data-s="混合召回 · 重排"
+                   data-d="把问题向量化后在知识库中做向量与关键词混合召回，再由重排模型精排，输出带出处的证据片段。">
+                    <rect class="mms_box" x="268" y="302" width="205" height="58" rx="10"/>
+                    <g class="mms_badge">
+                        <rect x="440" y="308" width="28" height="14" rx="7"/>
+                        <text x="454" y="318">RAG</text>
+                    </g>
+                    <text class="mms_t" x="370" y="328">知识检索</text>
+                    <text class="mms_s" x="370" y="347">混合召回 · 重排</text>
+                </g>
+
+                <g class="mms_node" data-t="答案生成" data-s="LLM · 引用溯源"
+                   data-d="把证据片段与对话上下文交给大模型生成答案，强制引用来源并做事实一致性校验，降低幻觉概率。">
+                    <rect class="mms_box" x="487" y="302" width="205" height="58" rx="10"/>
+                    <g class="mms_badge">
+                        <rect x="659" y="308" width="28" height="14" rx="7"/>
+                        <text x="673" y="318">RAG</text>
+                    </g>
+                    <text class="mms_t" x="589" y="328">答案生成</text>
+                    <text class="mms_s" x="589" y="347">LLM · 引用溯源</text>
+                </g>
+
+                <g class="mms_node" data-t="多轮对话" data-s="指代消解 · 状态跟踪"
+                   data-d="维护对话状态与话题栈，处理「这个订单」「再查一下」等指代与省略，必要时主动追问澄清。">
+                    <rect class="mms_box" x="706" y="302" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="808" y="328">多轮对话</text>
+                    <text class="mms_s" x="808" y="347">指代消解 · 状态跟踪</text>
+                </g>
+
+                <g class="mms_node" data-t="工单与回访" data-s="未解决闭环"
+                   data-d="机器人无法解决的问题自动生成工单并流转到责任人，解决后邀评回访，形成服务质量闭环。">
+                    <rect class="mms_box" x="925" y="302" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="1027" y="328">工单与回访</text>
+                    <text class="mms_s" x="1027" y="347">未解决闭环</text>
+                </g>
+            </g>
+
+            <!-- 连线 3→4 -->
+            <g>
+                <line class="mms_arrow" x1="300" y1="386" x2="300" y2="402" stroke="#0891b2"/>
+                <polygon points="300,407 295,399 305,399" fill="#0891b2" opacity="0.7"/>
+                <line class="mms_arrow" x1="590" y1="386" x2="590" y2="402" stroke="#0891b2"/>
+                <polygon points="590,407 585,399 595,399" fill="#0891b2" opacity="0.7"/>
+                <line class="mms_arrow" x1="880" y1="386" x2="880" y2="402" stroke="#0891b2"/>
+                <polygon points="880,407 875,399 885,399" fill="#0891b2" opacity="0.7"/>
+            </g>
+
+            <!-- ==================== 4 知识库层 ==================== -->
+            <g class="mms_layer mms_l4" data-layer="知识库层">
+                <rect class="mms_band" x="24" y="408" width="1132" height="104" rx="14"/>
+                <g class="mms_pill">
+                    <rect x="36" y="396" width="84" height="24" rx="12"/>
+                    <text x="50" y="413">知识库层</text>
+                </g>
+
+                <g class="mms_node" data-t="文档解析" data-s="PDF · Word · HTML"
+                   data-d="把产品手册、FAQ、工单记录等异构文档解析为结构化文本，保留标题层级、表格与图片说明。">
+                    <rect class="mms_box" x="49" y="430" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="151" y="456">文档解析</text>
+                    <text class="mms_s" x="151" y="475">PDF · Word · HTML</text>
+                </g>
+
+                <g class="mms_node" data-t="清洗与切分" data-s="去噪 · 语义分块"
+                   data-d="去除页眉页脚与重复内容，按语义或固定长度切块并保留重叠，避免检索时证据被截断。">
+                    <rect class="mms_box" x="268" y="430" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="370" y="456">清洗与切分</text>
+                    <text class="mms_s" x="370" y="475">去噪 · 语义分块</text>
+                </g>
+
+                <g class="mms_node" data-t="向量化" data-s="Embedding 模型"
+                   data-d="用中文 Embedding 模型把文本块编码成稠密向量，标题与问题可拼接入模以增强语义匹配。">
+                    <rect class="mms_box" x="487" y="430" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="589" y="456">向量化</text>
+                    <text class="mms_s" x="589" y="475">Embedding 模型</text>
+                </g>
+
+                <g class="mms_node" data-t="向量数据库" data-s="Milvus · FAISS"
+                   data-d="存储向量与元数据，支持近似最近邻检索与按业务标签过滤，是知识检索的索引底座。">
+                    <rect class="mms_box" x="706" y="430" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="808" y="456">向量数据库</text>
+                    <text class="mms_s" x="808" y="475">Milvus · FAISS</text>
+                </g>
+
+                <g class="mms_node" data-t="知识图谱" data-s="实体 · 关系 · 三元组"
+                   data-d="用实体—关系—属性刻画业务概念，补足向量检索缺乏的显式推理能力，可做多跳问答与知识校验。">
+                    <rect class="mms_box" x="925" y="430" width="205" height="58" rx="10"/>
+                    <text class="mms_t" x="1027" y="456">知识图谱</text>
+                    <text class="mms_s" x="1027" y="475">实体 · 关系 · 三元组</text>
+                </g>
+            </g>
+
+            <!-- 连线 4→5 -->
+            <g>
+                <line class="mms_arrow" x1="300" y1="514" x2="300" y2="530" stroke="#d97706"/>
+                <polygon points="300,535 295,527 305,527" fill="#d97706" opacity="0.7"/>
+                <line class="mms_arrow" x1="590" y1="514" x2="590" y2="530" stroke="#d97706"/>
+                <polygon points="590,535 585,527 595,527" fill="#d97706" opacity="0.7"/>
+                <line class="mms_arrow" x1="880" y1="514" x2="880" y2="530" stroke="#d97706"/>
+                <polygon points="880,535 875,527 885,527" fill="#d97706" opacity="0.7"/>
+            </g>
+
+            <!-- ==================== 5 支撑与工程层 ==================== -->
+            <g class="mms_layer mms_l5" data-layer="支撑与工程层">
+                <rect class="mms_band" x="24" y="536" width="1132" height="104" rx="14"/>
+                <g class="mms_pill">
+                    <rect x="36" y="524" width="108" height="24" rx="12"/>
+                    <text x="50" y="541">支撑与工程层</text>
+                </g>
+
+                <g class="mms_node" data-t="LLM 推理服务" data-s="部署 · 量化 · 批处理"
+                   data-d="承载大模型推理，含显存优化、量化、流式输出与并发批处理，为答案生成提供低延迟算力。">
+                    <rect class="mms_box" x="48" y="558" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="177" y="584">LLM 推理服务</text>
+                    <text class="mms_s" x="177" y="603">部署 · 量化 · 批处理</text>
+                </g>
+
+                <g class="mms_node" data-t="评测与标注" data-s="命中率 · 幻觉检测"
+                   data-d="用标注好的问答集评估召回率、答案正确率与引用一致性，做版本对比与回归，指导知识与模型迭代。">
+                    <rect class="mms_box" x="323" y="558" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="452" y="584">评测与标注</text>
+                    <text class="mms_s" x="452" y="603">命中率 · 幻觉检测</text>
+                </g>
+
+                <g class="mms_node" data-t="监控与日志" data-s="链路追踪 · 会话回溯"
+                   data-d="记录全链路耗时、召回结果与生成内容，支持按会话回放，快速定位答非所问与漏召回问题。">
+                    <rect class="mms_box" x="598" y="558" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="727" y="584">监控与日志</text>
+                    <text class="mms_s" x="727" y="603">链路追踪 · 会话回溯</text>
+                </g>
+
+                <g class="mms_node" data-t="数据安全" data-s="脱敏 · 权限 · 审计"
+                   data-d="对手机号、订单等信息做脱敏，按角色控制知识库可见范围，并留存审计日志满足合规要求。">
+                    <rect class="mms_box" x="873" y="558" width="259" height="58" rx="10"/>
+                    <text class="mms_t" x="1002" y="584">数据安全</text>
+                    <text class="mms_s" x="1002" y="603">脱敏 · 权限 · 审计</text>
+                </g>
+            </g>
+
+            <!-- ==================== 图例 ==================== -->
+            <g class="mms_lg">
+                <rect x="40" y="657" width="12" height="12" rx="3" fill="#93b4f5"/>
+                <text x="58" y="668">用户交互层</text>
+
+                <rect x="150" y="657" width="12" height="12" rx="3" fill="#c3a8f2"/>
+                <text x="168" y="668">接入与调度层</text>
+
+                <rect x="275" y="657" width="12" height="12" rx="3" fill="#8ed7e6"/>
+                <text x="293" y="668">核心能力层</text>
+
+                <rect x="400" y="657" width="12" height="12" rx="3" fill="#f0c47c"/>
+                <text x="418" y="668">知识库层</text>
+
+                <rect x="520" y="657" width="12" height="12" rx="3" fill="#f2a7c3"/>
+                <text x="538" y="668">支撑与工程层</text>
+
+                <text x="700" y="668" fill="#94a3b8">悬停查看模块说明 · 点击可固定选中</text>
+            </g>
+
+            <text class="mms_foot" x="1144" y="704">孟梦 · 高级网页设计 · 18-3</text>
+        </svg>
+    </div>
+
+    <div class="mm_bar">
+        <button class="mm_btn" id="mm_download"><i class="iconfont icon-baocun"></i>下载 SVG</button>
+        <button class="mm_btn" id="mm_clear"><i class="iconfont icon-shanchu"></i>清除选中</button>
+        <span class="mm_barText">提示：悬停模块查看说明，点击可固定选中</span>
+    </div>
+
+    <div class="mm_info">
+        <div class="mm_info__icon"><i class="iconfont icon-xinxi"></i></div>
+        <div class="mm_info__body">
+            <h3 id="mm_iTitle">模块说明 <span id="mm_iTag">悬停任意模块</span></h3>
+            <p id="mm_iDesc">把鼠标移到架构图中的任意模块上，这里会显示该模块的职责与它在整条客服链路中的位置。</p>
+        </div>
+    </div>
+
+    <!-- ============ 科研方向 ============ -->
+    <h2 class="mm_secTitle"><i class="iconfont icon-yuedu"></i>科研方向<small>基于该架构可展开的研究问题</small></h2>
+    <div class="mm_research">
+        <article class="mm_rcard">
+            <span class="mm_rcard__no">01</span>
+            <h3>检索增强生成（RAG）</h3>
+            <p>研究混合召回、语义重排与证据压缩，把大模型幻觉率压到业务可接受范围；关注长文档切块策略、查询改写与多跳检索。</p>
+            <em>对应模块：知识检索 → 答案生成</em>
+        </article>
+
+        <article class="mm_rcard">
+            <span class="mm_rcard__no">02</span>
+            <h3>知识表示与图谱</h3>
+            <p>围绕实体抽取、关系推断与多源知识融合，构建可推理的业务知识图谱，弥补向量检索缺乏显式推理的不足。</p>
+            <em>对应模块：知识图谱 · 向量化</em>
+        </article>
+
+        <article class="mm_rcard">
+            <span class="mm_rcard__no">03</span>
+            <h3>多轮对话理解</h3>
+            <p>研究指代消解、对话状态跟踪与主动澄清策略，让机器人在省略、纠错、话题切换中仍能保持上下文一致性。</p>
+            <em>对应模块：会话管理 · 多轮对话</em>
+        </article>
+
+        <article class="mm_rcard">
+            <span class="mm_rcard__no">04</span>
+            <h3>可信与可解释</h3>
+            <p>为答案建立置信度评估与来源溯源机制，置信度不足时主动拒答或转人工，使自动化回复可控、可审计。</p>
+            <em>对应模块：答案生成 · 评测与标注</em>
+        </article>
+
+        <article class="mm_rcard">
+            <span class="mm_rcard__no">05</span>
+            <h3>持续学习与小样本</h3>
+            <p>研究领域小样本微调、增量知识更新与冷启动方案，让新业务线在少量语料下也能快速达到可用水平，并支持知识的在线热更新。</p>
+            <em>对应模块：LLM 推理服务 · 文档解析</em>
+        </article>
+    </div>
+
+    <h2 class="mm_secTitle"><i class="iconfont icon-zhengque"></i>实现说明</h2>
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-yuedu"></i>为什么用 SVG</h3>
+            <p>矢量图形无损缩放，放大到任意倍率都不模糊；文字仍是可检索文本，利于无障碍阅读；单个 SVG 文件既能内嵌在页面，也能独立导出复用。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-huhuan"></i>RAG 主链路</h3>
+            <p>问题先做意图理解，再到知识库做 <code>向量 + 关键词</code> 混合召回与重排，最后把证据片段交给 LLM 生成答案并强制标注来源；知识库离线构建，线上只读检索。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-fankui"></i>分层与解耦</h3>
+            <p>上层只依赖下层暴露的接口：更换向量库不影响问答逻辑，替换大模型不影响渠道接入，新增渠道也无需改动核心能力层，便于独立演进与灰度。</p>
+        </div>
+    </div>
+
+    <p style="margin-top:22px; text-align:right; font-size:.76rem; color:#9aa7bd;">孟梦 · 高级网页设计课堂实践 · 18-3 知识库智能客服架构（SVG）</p>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 悬停 / 点击 展示模块说明
+    // ============================================================
+    var mm_allNodes = Array.prototype.slice.call(document.querySelectorAll(".mms_node"));
+    var mm_selected = null;
+
+    var mm_iTitle = document.getElementById("mm_iTitle");
+    var mm_iTag = document.getElementById("mm_iTag");
+    var mm_iDesc = document.getElementById("mm_iDesc");
+
+    function mm_show(node) {
+        if (!node) {
+            mm_iTitle.firstChild.textContent = "模块说明 ";
+            mm_iTag.textContent = "悬停任意模块";
+            mm_iDesc.textContent = "把鼠标移到架构图中的任意模块上，这里会显示该模块的职责与它在整条客服链路中的位置。";
+            return;
+        }
+        var layer = node.closest(".mms_layer");
+        mm_iTitle.firstChild.textContent = node.getAttribute("data-t") + " ";
+        mm_iTag.textContent = layer ? layer.getAttribute("data-layer") : "架构模块";
+        mm_iDesc.textContent = node.getAttribute("data-d");
+    }
+
+    function mm_select(node) {
+        mm_allNodes.forEach(function (n) { n.classList.remove("mmm_sel"); });
+        if (node) { node.classList.add("mmm_sel"); }
+        mm_selected = node;
+        mm_show(node);
+    }
+
+    mm_allNodes.forEach(function (node) {
+        node.addEventListener("mouseenter", function () {
+            if (!mm_selected) { mm_show(node); }
+        });
+        node.addEventListener("mouseleave", function () {
+            if (!mm_selected) { mm_show(null); }
+        });
+        node.addEventListener("click", function () {
+            mm_select(node === mm_selected ? null : node);
+        });
+    });
+
+    document.getElementById("mm_clear").addEventListener("click", function () {
+        mm_select(null);
+    });
+
+    // ============================================================
+    // 2. 把整张 SVG 导出为独立文件
+    // ============================================================
+    document.getElementById("mm_download").addEventListener("click", function () {
+        var svg = document.getElementById("mm_svg");
+        var xml = new XMLSerializer().serializeToString(svg);
+        var blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + xml], {
+            type: "image/svg+xml;charset=utf-8"
+        });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "知识库智能客服系统架构图.svg";
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+</script>
+</body>
+</html>

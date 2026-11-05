@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：Canvas 粒子文字动画 - 用像素采样把「袁磊」二字拆成数千粒子，鼠标推开、点击散开动画 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-1 · Canvas 粒子文字动画</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #16233f 0%, #0a0f1e 45%, #070912 100%);
+            color: #dbe4f5;
+            min-height: 100vh;
+            padding: 22px 18px 60px;
+        }
+        .mm_wrap { max-width: 1120px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7f8fae; text-decoration: none; font-size: .86rem; margin-bottom: 12px;
+        }
+        .mm_back:hover { color: #67e8f9; }
+
+        .mm_head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        .mm_head h1 {
+            font-size: clamp(1.32rem, 3vw, 1.75rem); letter-spacing: .04em;
+            background: linear-gradient(90deg, #67e8f9, #a78bfa 55%, #f472b6);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .mm_head p { margin-top: 7px; font-size: .82rem; color: #8092b0; line-height: 1.75; }
+        .mm_tag {
+            flex-shrink: 0; padding: 5px 12px; font-size: .72rem; font-family: Consolas, monospace;
+            color: #67e8f9; background: rgba(34,211,238,.08);
+            border: 1px solid rgba(34,211,238,.3); border-radius: 999px;
+        }
+
+        .mm_stage {
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(120,160,255,.14); border-radius: 18px;
+            background: #05080f;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255,255,255,.03) inset;
+        }
+        #mm_canvas {
+            display: block; width: 100%; height: auto; aspect-ratio: 1100 / 560;
+            cursor: crosshair; touch-action: none;
+        }
+        .mm_hint {
+            position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+            padding: 5px 14px; font-size: .74rem; color: #7f93b5;
+            background: rgba(8, 14, 26, .7); border: 1px solid rgba(120,160,255,.16);
+            border-radius: 999px; backdrop-filter: blur(6px); white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .mm_bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            margin-top: 16px;
+        }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 17px; font-size: .84rem; font-weight: bold; color: #e6edff;
+            background: rgba(99, 132, 255, .16); border: 1px solid rgba(120,160,255,.32);
+            border-radius: 9px; cursor: pointer; transition: all .18s;
+        }
+        .mm_btn:hover { background: rgba(99, 132, 255, .3); border-color: rgba(140,180,255,.55); }
+        .mm_btn.mmm_primary {
+            color: #04121a; background: linear-gradient(135deg, #67e8f9, #a78bfa);
+            border-color: transparent;
+        }
+        .mm_btn.mmm_primary:hover { box-shadow: 0 8px 22px rgba(103,232,249,.3); }
+        .mm_btn .iconfont { font-size: .92rem; }
+
+        .mm_stats { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+        .mm_stat {
+            padding: 6px 12px; font-size: .74rem; color: #8ea3c4;
+            background: rgba(255,255,255,.03); border: 1px solid rgba(120,160,255,.14);
+            border-radius: 8px;
+        }
+        .mm_stat b { font-family: Consolas, monospace; color: #67e8f9; }
+
+        .mm_notes {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 12px; margin-top: 18px;
+        }
+        .mm_note {
+            padding: 15px 17px; background: rgba(255,255,255,.03);
+            border: 1px solid rgba(120,160,255,.1); border-radius: 13px;
+        }
+        .mm_note h3 {
+            display: flex; align-items: center; gap: 7px;
+            font-size: .88rem; color: #c8d6ef; margin-bottom: 8px;
+        }
+        .mm_note h3 .iconfont { font-size: .88rem; color: #67e8f9; }
+        .mm_note p { font-size: .78rem; line-height: 1.85; color: #7f93b5; }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: #a5b4fc; background: rgba(129,140,248,.12); border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px 12px 50px; }
+            .mm_head { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .mm_stats { margin-left: 0; }
+            .mm_hint { font-size: .68rem; padding: 4px 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <div>
+            <h1>Canvas 粒子文字动画</h1>
+            <p>先把「袁磊」二字画到离屏 canvas 上，逐像素采样得到成千上万个坐标点，再让粒子以弹簧缓动飞向这些点，最终拼出文字。</p>
+        </div>
+        <span class="mm_tag">18-1 · canvas 2d</span>
+    </header>
+
+    <div class="mm_stage">
+        <canvas id="mm_canvas" aria-label="Canvas 粒子文字动画：袁磊"></canvas>
+        <span class="mm_hint">移动鼠标推开粒子 · 点击画布让粒子散开</span>
+    </div>
+
+    <div class="mm_bar">
+        <button class="mm_btn mmm_primary" id="mm_gather"><i class="iconfont icon-huhuan"></i>重新聚合</button>
+        <button class="mm_btn" id="mm_scatter"><i class="iconfont icon-fankui"></i>散开</button>
+        <button class="mm_btn" id="mm_toggle"><i class="iconfont icon-guanbi-1"></i>暂停</button>
+        <div class="mm_stats">
+            <span class="mm_stat">粒子 <b id="mm_count">0</b></span>
+            <span class="mm_stat">帧率 <b id="mm_fps">--</b> FPS</span>
+            <span class="mm_stat">状态 <b id="mm_state">聚合中</b></span>
+        </div>
+    </div>
+
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-paizhao"></i>采样原理</h3>
+            <p>用 <code>fillText</code> 把文字画到离屏画布，再用 <code>getImageData</code> 读取像素，凡 alpha 大于 128 的坐标就记录成一个粒子目标点，按固定步长（本页 3px）扫描即可得到文字轮廓。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-huhuan"></i>运动模型</h3>
+            <p>每个粒子朝自己的目标点做弹簧运动：加速度 = 距离 × 系数，速度每帧衰减 8%，加上正弦相位让文字像水面一样轻微起伏。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-baocun"></i>渲染优化</h3>
+            <p>粒子按色相分成 12 组，每组用一条 <code>beginPath</code> 批量画圆再统一填充，避免逐个切换 <code>fillStyle</code>；画布尺寸按 <code>devicePixelRatio</code> 放大，保证高分屏清晰。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-zhengque"></i>交互</h3>
+            <p><code>requestAnimationFrame</code> 驱动主循环；鼠标 100px 范围内产生排斥力；点击触发散开，粒子获得随机速度后再次被弹簧拉回目标。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 画布初始化（逻辑坐标 1100×560，按 DPR 放大保证清晰）
+    // ============================================================
+    var MM_W = 1100, MM_H = 560;
+    var mm_canvas = document.getElementById("mm_canvas");
+    var mm_ctx = mm_canvas.getContext("2d");
+    var mm_dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    mm_canvas.width = MM_W * mm_dpr;
+    mm_canvas.height = MM_H * mm_dpr;
+    mm_ctx.setTransform(mm_dpr, 0, 0, mm_dpr, 0, 0);
+
+    // 离屏画布，只用来把文字栅格化后采样
+    var mm_off = document.createElement("canvas");
+    mm_off.width = MM_W;
+    mm_off.height = MM_H;
+    var mm_offCtx = mm_off.getContext("2d");
+
+    // ============================================================
+    // 2. 文字像素采样
+    // ============================================================
+    function mm_sample(step) {
+        mm_offCtx.clearRect(0, 0, MM_W, MM_H);
+        mm_offCtx.fillStyle = "#ffffff";
+        mm_offCtx.font = "900 172px 'Microsoft YaHei', 'PingFang SC', sans-serif";
+        mm_offCtx.textAlign = "center";
+        mm_offCtx.textBaseline = "middle";
+        mm_offCtx.fillText("袁磊", MM_W / 2, MM_H / 2 - 26);
+
+        var img = mm_offCtx.getImageData(0, 0, MM_W, MM_H).data;
+        var pts = [];
+        for (var y = 0; y < MM_H; y += step) {
+            for (var x = 0; x < MM_W; x += step) {
+                if (img[(y * MM_W + x) * 4 + 3] > 128) {
+                    pts.push({ x: x, y: y });
+                }
+            }
+        }
+        return pts;
+    }
+
+    // ============================================================
+    // 3. 粒子数据
+    // ============================================================
+    var mm_particles = [];     // 全部粒子
+    var mm_buckets = [];       // 按色相分组，便于批量绘制
+    var mm_bucketColors = [];
+    var MM_BUCKETS = 12;
+    var mm_mode = "gather";    // gather | scatter
+    var mm_paused = false;
+    var mm_t = 0;
+    var mm_mouse = { x: -9999, y: -9999, active: false };
+
+    function mm_colors() {
+        mm_bucketColors = [];
+        for (var i = 0; i < MM_BUCKETS; i++) {
+            var hue = 186 + (i / (MM_BUCKETS - 1)) * 132;   // 青 → 紫 → 粉
+            mm_bucketColors.push("hsl(" + hue.toFixed(0) + ", 92%, 64%)");
+        }
+    }
+
+    function mm_buildParticles() {
+        var step = 3;
+        var pts = mm_sample(step);
+        var guard = 0;
+        while (pts.length > 3400 && guard < 8) {   // 控制粒子总数，保证流畅
+            step++;
+            pts = mm_sample(step);
+            guard++;
+        }
+
+        mm_buckets = [];
+        for (var b = 0; b < MM_BUCKETS; b++) { mm_buckets.push([]); }
+        mm_particles = [];
+
+        for (var i = 0; i < pts.length; i++) {
+            var p = pts[i];
+            var idx = Math.min(MM_BUCKETS - 1, Math.floor((p.x / MM_W) * MM_BUCKETS));
+            var part = {
+                tx: p.x,
+                ty: p.y,
+                x: p.x + (Math.random() - 0.5) * 1100,
+                y: p.y + (Math.random() - 0.5) * 760,
+                vx: 0,
+                vy: 0,
+                r: 0.9 + Math.random() * 1.3,
+                ph: Math.random() * Math.PI * 2,
+                b: idx
+            };
+            mm_particles.push(part);
+            mm_buckets[idx].push(part);
+        }
+
+        document.getElementById("mm_count").textContent = mm_particles.length;
+    }
+
+    // ============================================================
+    // 4. 背景：深色渐变 + 点阵 + 漂浮光斑
+    // ============================================================
+    function mm_drawBg() {
+        var g = mm_ctx.createLinearGradient(0, 0, MM_W, MM_H);
+        g.addColorStop(0, "#060a15");
+        g.addColorStop(0.5, "#0b1430");
+        g.addColorStop(1, "#120a1e");
+        mm_ctx.fillStyle = g;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+
+        // 点阵网格
+        mm_ctx.fillStyle = "rgba(120, 170, 255, 0.075)";
+        for (var x = 0; x <= MM_W; x += 44) {
+            for (var y = 0; y <= MM_H; y += 44) {
+                mm_ctx.fillRect(x, y, 1.2, 1.2);
+            }
+        }
+
+        // 文字背后的中心光晕
+        var cx = MM_W / 2 + (mm_mouse.active ? (mm_mouse.x - MM_W / 2) * 0.16 : 0);
+        var cy = MM_H / 2 + (mm_mouse.active ? (mm_mouse.y - MM_H / 2) * 0.14 : 0);
+        var glow = mm_ctx.createRadialGradient(cx, cy - 20, 0, cx, cy - 20, 460);
+        glow.addColorStop(0, "rgba(110, 170, 255, 0.16)");
+        glow.addColorStop(0.55, "rgba(120, 90, 255, 0.07)");
+        glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+        mm_ctx.fillStyle = glow;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+
+        // 两团缓慢漂浮的光斑
+        var ox = MM_W * 0.24 + Math.sin(mm_t * 0.35) * 60;
+        var oy = MM_H * 0.28 + Math.cos(mm_t * 0.28) * 40;
+        var orb = mm_ctx.createRadialGradient(ox, oy, 0, ox, oy, 240);
+        orb.addColorStop(0, "rgba(34, 211, 238, 0.13)");
+        orb.addColorStop(1, "rgba(34, 211, 238, 0)");
+        mm_ctx.fillStyle = orb;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+
+        var ox2 = MM_W * 0.78 + Math.cos(mm_t * 0.3) * 70;
+        var oy2 = MM_H * 0.7 + Math.sin(mm_t * 0.24) * 45;
+        var orb2 = mm_ctx.createRadialGradient(ox2, oy2, 0, ox2, oy2, 260);
+        orb2.addColorStop(0, "rgba(244, 114, 182, 0.11)");
+        orb2.addColorStop(1, "rgba(244, 114, 182, 0)");
+        mm_ctx.fillStyle = orb2;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+    }
+
+    // ============================================================
+    // 5. 每帧更新粒子
+    // ============================================================
+    function mm_update(dt) {
+        var i, p, dx, dy, dist, force;
+
+        for (i = 0; i < mm_particles.length; i++) {
+            p = mm_particles[i];
+
+            if (mm_mode === "gather") {
+                // 目标点带正弦起伏，像水面一样轻微波动
+                var wave = Math.sin(mm_t * 1.6 + p.ph) * 1.6;
+                dx = p.tx - p.x;
+                dy = p.ty + wave - p.y;
+
+                // 弹簧加速度 + 阻尼
+                p.vx += dx * 0.042;
+                p.vy += dy * 0.042;
+                p.vx *= 0.9;
+                p.vy *= 0.9;
+            } else {
+                p.vx *= 0.994;
+                p.vy *= 0.994;
+            }
+
+            // 鼠标排斥
+            if (mm_mouse.active) {
+                dx = p.x - mm_mouse.x;
+                dy = p.y - mm_mouse.y;
+                dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 110 && dist > 0.001) {
+                    force = (110 - dist) / 110;
+                    p.vx += (dx / dist) * force * 3.2;
+                    p.vy += (dy / dist) * force * 3.2;
+                }
+            }
+
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+        }
+    }
+
+    // ============================================================
+    // 6. 绘制粒子（按色相分组批量填充）
+    // ============================================================
+    function mm_draw() {
+        mm_ctx.globalCompositeOperation = "lighter";
+
+        var b, i, p, arr;
+
+        // 外圈光晕
+        mm_ctx.globalAlpha = 0.16;
+        for (b = 0; b < MM_BUCKETS; b++) {
+            arr = mm_buckets[b];
+            if (!arr.length) { continue; }
+            mm_ctx.fillStyle = mm_bucketColors[b];
+            mm_ctx.beginPath();
+            for (i = 0; i < arr.length; i++) {
+                p = arr[i];
+                mm_ctx.arc(p.x, p.y, p.r * 2.4, 0, Math.PI * 2);
+            }
+            mm_ctx.fill();
+        }
+
+        // 内核
+        mm_ctx.globalAlpha = 0.95;
+        for (b = 0; b < MM_BUCKETS; b++) {
+            arr = mm_buckets[b];
+            if (!arr.length) { continue; }
+            mm_ctx.fillStyle = mm_bucketColors[b];
+            mm_ctx.beginPath();
+            for (i = 0; i < arr.length; i++) {
+                p = arr[i];
+                mm_ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            }
+            mm_ctx.fill();
+        }
+
+        mm_ctx.globalAlpha = 1;
+        mm_ctx.globalCompositeOperation = "source-over";
+
+        // 画布上的说明文字
+        mm_ctx.fillStyle = "rgba(160, 185, 220, 0.55)";
+        mm_ctx.font = "500 13px Consolas, monospace";
+        mm_ctx.textAlign = "left";
+        mm_ctx.fillText("18-1  ·  PARTICLE TEXT", 30, 40);
+
+        mm_ctx.textAlign = "right";
+        mm_ctx.fillStyle = "rgba(160, 185, 220, 0.4)";
+        mm_ctx.fillText("孟梦 · 高级网页设计", MM_W - 30, 40);
+
+        mm_ctx.textAlign = "center";
+        mm_ctx.fillStyle = "rgba(150, 175, 210, 0.42)";
+        mm_ctx.font = "500 12px Consolas, monospace";
+        mm_ctx.fillText("C A N V A S   P A R T I C L E   A N I M A T I O N", MM_W / 2, MM_H - 42);
+        mm_ctx.textAlign = "left";
+    }
+
+    // ============================================================
+    // 7. 主循环
+    // ============================================================
+    var mm_last = 0, mm_fpsAcc = 0, mm_fpsCount = 0, mm_fpsTimer = 0;
+
+    function mm_loop(now) {
+        if (!mm_last) { mm_last = now; }
+        var delta = Math.min(now - mm_last, 40);   // 掉帧时限制单步位移
+        mm_last = now;
+
+        // 帧率统计
+        mm_fpsAcc += delta;
+        mm_fpsCount++;
+        mm_fpsTimer += delta;
+        if (mm_fpsTimer >= 500) {
+            var fps = Math.round(1000 / (mm_fpsAcc / mm_fpsCount));
+            document.getElementById("mm_fps").textContent = fps;
+            mm_fpsAcc = 0;
+            mm_fpsCount = 0;
+            mm_fpsTimer = 0;
+        }
+
+        if (!mm_paused) {
+            mm_t += delta / 1000;
+            mm_update(delta / 16.67);   // 以 60fps 为基准的位移倍数
+        }
+
+        mm_drawBg();
+        mm_draw();
+
+        requestAnimationFrame(mm_loop);
+    }
+
+    // ============================================================
+    // 8. 交互
+    // ============================================================
+    function mm_toLogical(e) {
+        var rect = mm_canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX - rect.left) * (MM_W / rect.width),
+            y: (e.clientY - rect.top) * (MM_H / rect.height)
+        };
+    }
+
+    mm_canvas.addEventListener("mousemove", function (e) {
+        var pt = mm_toLogical(e);
+        mm_mouse.x = pt.x;
+        mm_mouse.y = pt.y;
+        mm_mouse.active = true;
+    });
+
+    mm_canvas.addEventListener("mouseleave", function () {
+        mm_mouse.active = false;
+    });
+
+    mm_canvas.addEventListener("touchmove", function (e) {
+        var t = e.touches[0];
+        if (!t) { return; }
+        var pt = mm_toLogical(t);
+        mm_mouse.x = pt.x;
+        mm_mouse.y = pt.y;
+        mm_mouse.active = true;
+        e.preventDefault();
+    }, { passive: false });
+
+    mm_canvas.addEventListener("touchend", function () {
+        mm_mouse.active = false;
+    });
+
+    mm_canvas.addEventListener("click", function () {
+        mm_scatter();
+    });
+
+    function mm_setState(text) {
+        document.getElementById("mm_state").textContent = text;
+    }
+
+    function mm_gather() {
+        mm_mode = "gather";
+        mm_setState("聚合中");
+    }
+
+    function mm_scatter() {
+        mm_mode = "scatter";
+        mm_setState("散开");
+        for (var i = 0; i < mm_particles.length; i++) {
+            var p = mm_particles[i];
+            var ang = Math.random() * Math.PI * 2;
+            var speed = 3 + Math.random() * 7;
+            p.vx += Math.cos(ang) * speed;
+            p.vy += Math.sin(ang) * speed;
+        }
+    }
+
+    document.getElementById("mm_gather").addEventListener("click", function () {
+        mm_gather();
+    });
+
+    document.getElementById("mm_scatter").addEventListener("click", function () {
+        mm_scatter();
+    });
+
+    document.getElementById("mm_toggle").addEventListener("click", function () {
+        mm_paused = !mm_paused;
+        this.innerHTML = mm_paused
+            ? '<i class="iconfont icon-zhengque"></i>继续'
+            : '<i class="iconfont icon-guanbi-1"></i>暂停';
+        mm_setState(mm_paused ? "已暂停" : (mm_mode === "gather" ? "聚合中" : "散开"));
+    });
+
+    // ============================================================
+    // 9. 启动
+    // ============================================================
+    mm_colors();
+    mm_buildParticles();
+    requestAnimationFrame(mm_loop);
+</script>
+</body>
+</html>

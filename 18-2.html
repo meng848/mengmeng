@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 姓名：孟梦，日期：2026-11-05，功能名称：Canvas 电商全站架构图 - 用 canvas 绘制用户层、接入层、服务层、数据层与基础设施五层架构，悬停查看模块说明 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-2 · Canvas 电商系统架构图</title>
+    <link rel="stylesheet" href="font/font_5244875_7pxofbmupmt/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: radial-gradient(circle at 50% -10%, #14233d 0%, #0a1020 50%, #060910 100%);
+            color: #dbe4f5; min-height: 100vh; padding: 22px 18px 56px;
+        }
+        .mm_wrap { max-width: 1160px; margin: 0 auto; }
+
+        .mm_back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #7f8fae; text-decoration: none; font-size: .86rem; margin-bottom: 12px;
+        }
+        .mm_back:hover { color: #67e8f9; }
+
+        .mm_head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        .mm_head h1 {
+            font-size: clamp(1.32rem, 3vw, 1.75rem); letter-spacing: .04em;
+            background: linear-gradient(90deg, #67e8f9, #a78bfa 55%, #34d399);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .mm_head p { margin-top: 7px; font-size: .82rem; color: #8092b0; line-height: 1.75; }
+        .mm_tag {
+            flex-shrink: 0; padding: 5px 12px; font-size: .72rem; font-family: Consolas, monospace;
+            color: #a78bfa; background: rgba(167,139,250,.08);
+            border: 1px solid rgba(167,139,250,.3); border-radius: 999px;
+        }
+
+        .mm_stage {
+            border: 1px solid rgba(120,160,255,.14); border-radius: 18px; overflow: hidden;
+            background: #05080f;
+            box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03) inset;
+        }
+        #mm_canvas {
+            display: block; width: 100%; height: auto; aspect-ratio: 1100 / 700;
+        }
+
+        .mm_bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+        .mm_btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 17px; font-size: .84rem; font-weight: bold; color: #e6edff;
+            background: rgba(99,132,255,.16); border: 1px solid rgba(120,160,255,.32);
+            border-radius: 9px; cursor: pointer; transition: all .18s;
+        }
+        .mm_btn:hover { background: rgba(99,132,255,.3); border-color: rgba(140,180,255,.55); }
+        .mm_btn .iconfont { font-size: .9rem; }
+        .mm_tipText { margin-left: auto; font-size: .76rem; color: #7183a2; }
+
+        .mm_info {
+            display: flex; align-items: flex-start; gap: 14px;
+            margin-top: 16px; padding: 16px 18px;
+            background: rgba(255,255,255,.03); border: 1px solid rgba(120,160,255,.12);
+            border-left: 3px solid #67e8f9; border-radius: 12px;
+            transition: border-color .2s;
+        }
+        .mm_info__icon {
+            display: grid; place-items: center; flex-shrink: 0;
+            width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem;
+            color: #67e8f9; background: rgba(103,232,249,.1); border: 1px solid rgba(103,232,249,.22);
+        }
+        .mm_info__body h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .98rem; color: #e8efff; }
+        .mm_info__body h3 span {
+            padding: 2px 9px; font-size: .7rem; font-weight: normal;
+            color: #8ea3c4; background: rgba(255,255,255,.05); border-radius: 999px;
+        }
+        .mm_info__body p { margin-top: 6px; font-size: .82rem; line-height: 1.8; color: #8496b4; }
+
+        .mm_notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 16px; }
+        .mm_note {
+            padding: 15px 17px; background: rgba(255,255,255,.03);
+            border: 1px solid rgba(120,160,255,.1); border-radius: 13px;
+        }
+        .mm_note h3 { display: flex; align-items: center; gap: 7px; font-size: .88rem; color: #c8d6ef; margin-bottom: 8px; }
+        .mm_note h3 .iconfont { font-size: .88rem; color: #a78bfa; }
+        .mm_note p { font-size: .78rem; line-height: 1.85; color: #7f93b5; }
+        .mm_note code {
+            font-family: Consolas, monospace; font-size: .74rem;
+            padding: 1px 5px; color: #a5b4fc; background: rgba(129,140,248,.12); border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px 12px 46px; }
+            .mm_head { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .mm_tipText { margin-left: 0; }
+            .mm_info { padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="mm_wrap">
+    <a href="index.html" class="mm_back">← 返回首页</a>
+
+    <header class="mm_head">
+        <div>
+            <h1>电商系统 · 全站架构图</h1>
+            <p>全部图形由 canvas 绘制：分层色带、圆角模块、渐变连线与流动光点；鼠标悬停可查看每个模块的职责说明。</p>
+        </div>
+        <span class="mm_tag">18-2 · canvas 2d</span>
+    </header>
+
+    <div class="mm_stage">
+        <canvas id="mm_canvas" aria-label="电商系统五层架构图"></canvas>
+    </div>
+
+    <div class="mm_bar">
+        <button class="mm_btn" id="mm_export"><i class="iconfont icon-baocun"></i>导出 PNG</button>
+        <button class="mm_btn" id="mm_clear"><i class="iconfont icon-shanchu"></i>清除选中</button>
+        <span class="mm_tipText">提示：悬停模块查看说明，点击可固定选中</span>
+    </div>
+
+    <div class="mm_info">
+        <div class="mm_info__icon"><i class="iconfont icon-xinxi"></i></div>
+        <div class="mm_info__body">
+            <h3 id="mm_infoTitle">模块说明 <span id="mm_infoTag">悬停任意模块</span></h3>
+            <p id="mm_infoDesc">把鼠标移到架构图中的任意模块上，这里会显示它的职责、依赖关系与常用技术选型。</p>
+        </div>
+    </div>
+
+    <div class="mm_notes">
+        <div class="mm_note">
+            <h3><i class="iconfont icon-yuedu"></i>五层分层</h3>
+            <p>自上而下为用户层、接入层、应用服务层、数据存储层与基础设施层，上层只依赖下层的接口，便于独立扩容与替换。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-huhuan"></i>绘制方式</h3>
+            <p>用 <code>roundRect</code> 画圆角模块、<code>createLinearGradient</code> 画色带与按钮、<code>createRadialGradient</code> 画背景光晕，命中检测靠逻辑坐标矩形比对。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-zhengque"></i>动态细节</h3>
+            <p>连线上的光点由 <code>requestAnimationFrame</code> 按时间步进，模拟请求自上而下流经网关、服务与存储的动线。</p>
+        </div>
+        <div class="mm_note">
+            <h3><i class="iconfont icon-baocun"></i>高清与导出</h3>
+            <p>画布按 <code>devicePixelRatio</code> 放大 2 倍绘制，避免模糊；<code>toDataURL</code> 可直接把整张架构图导出为 PNG。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 画布与坐标
+    // ============================================================
+    var MM_W = 1100, MM_H = 700;
+    var mm_canvas = document.getElementById("mm_canvas");
+    var mm_ctx = mm_canvas.getContext("2d");
+    var mm_dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    mm_canvas.width = MM_W * mm_dpr;
+    mm_canvas.height = MM_H * mm_dpr;
+    mm_ctx.setTransform(mm_dpr, 0, 0, mm_dpr, 0, 0);
+
+    // ============================================================
+    // 2. 架构数据（五层）
+    // ============================================================
+    var mm_layers = [
+        {
+            key: "user", name: "用户层", note: "触达端", color: "#38bdf8", y: 72,
+            items: [
+                { t: "PC 商城", s: "Web 浏览器", d: "站内主站，承载商品浏览、购物车、下单与支付的完整交易链路，同时提供商家后台入口。" },
+                { t: "H5 商城", s: "移动端网页", d: "自适应移动端商城，是分享链接、活动落地页与广告投放的主要承接页面。" },
+                { t: "微信小程序", s: "平台内入口", d: "依托微信登录态与微信支付，适合拉新和私域运营，无需下载即可完成交易。" },
+                { t: "App 客户端", s: "iOS / Android", d: "原生客户端，使用与 H5 相同的 REST 接口，额外提供推送、扫码与本地缓存能力。" }
+            ]
+        },
+        {
+            key: "access", name: "接入层", note: "流量入口", color: "#a78bfa", y: 196,
+            items: [
+                { t: "CDN", s: "静态资源加速", d: "就近分发图片、脚本与静态页，降低源站带宽压力并缩短首屏加载时间。" },
+                { t: "Nginx", s: "负载均衡", d: "反向代理与四/七层转发，负责 SSL 卸载、限流、灰度分流与静态文件服务。" },
+                { t: "API 网关", s: "统一入口", d: "统一路由与协议转换，集中做鉴权、限流、黑白名单、日志埋点与请求聚合。" },
+                { t: "统一鉴权", s: "登录态校验", d: "校验 JWT / OAuth2 令牌，解析用户身份与权限，向下游服务透传可信的用户上下文。" }
+            ]
+        },
+        {
+            key: "service", name: "应用服务层", note: "业务中台", color: "#34d399", y: 320,
+            items: [
+                { t: "商品服务", s: "SPU / SKU", d: "维护类目、属性、价格与上下架状态，向搜索与详情页提供商品聚合数据。" },
+                { t: "用户服务", s: "会员体系", d: "注册登录、收货地址、等级成长、积分与实名信息，是订单与营销的基础依赖。" },
+                { t: "订单服务", s: "交易状态机", d: "负责下单、拆单、支付回调、发货与售后，用状态机保证交易流转的幂等与一致性。" },
+                { t: "支付服务", s: "聚合支付", d: "对接多渠道支付，处理回调验签、退款、对账与资金流水，是交易闭环的关键环节。" },
+                { t: "库存服务", s: "预占与扣减", d: "下单预占、支付扣减、超时回滚，配合分布式锁与分段库存防止超卖。" },
+                { t: "营销服务", s: "券 / 满减 / 秒杀", d: "优惠券发放与核销、满减规则计算、秒杀排队与限购，为结算页提供优惠试算。" },
+                { t: "搜索服务", s: "检索与排序", d: "基于倒排索引提供关键词检索、筛选项聚合、销量与相关性排序。" },
+                { t: "消息服务", s: "通知中心", d: "统一发送短信、App 推送、站内信与模板消息，消费交易事件做异步通知。" }
+            ]
+        },
+        {
+            key: "data", name: "数据存储层", note: "持久化", color: "#fbbf24", y: 444,
+            items: [
+                { t: "MySQL 主从", s: "交易数据", d: "订单、用户、商品等核心数据持久化，主从读写分离，大表按用户或订单号分库分表。" },
+                { t: "Redis 集群", s: "缓存 / 锁", d: "缓存热点商品与会话，提供分布式锁、限流计数、库存原子扣减与排行榜。" },
+                { t: "Elasticsearch", s: "全文检索", d: "商品与日志的倒排索引，支撑多条件筛选、关键词高亮与聚合统计。" },
+                { t: "Kafka", s: "消息队列", d: "订单创建、支付成功、库存变更等事件异步解耦，起到削峰填谷与最终一致性保障作用。" },
+                { t: "对象存储 OSS", s: "图片 / 视频", d: "存放商品主图、详情长图与用户上传附件，配合 CDN 回源与图片处理。" }
+            ]
+        },
+        {
+            key: "infra", name: "基础设施层", note: "运行底座", color: "#f472b6", y: 568,
+            items: [
+                { t: "容器平台 K8s", s: "编排与弹性", d: "服务以容器部署，按 CPU 与 QPS 自动扩缩容，滚动发布保证交易不中断。" },
+                { t: "监控告警", s: "指标与追踪", d: "采集机器与服务指标，配置阈值告警与链路追踪，快速定位慢接口与异常。" },
+                { t: "日志中心", s: "集中检索", d: "收集各服务日志与访问日志，统一检索分析，支撑问题排查与审计。" },
+                { t: "CI / CD", s: "构建发布", d: "代码提交后自动构建、单测与灰度发布，配合回滚机制降低上线风险。" }
+            ]
+        }
+    ];
+
+    var MM_BAND_X = 30, MM_BAND_W = 1040, MM_BAND_H = 84;
+    var MM_BOX_X = 56, MM_BOX_W = 1004;
+    var MM_BOX_TOP = 22, MM_BOX_H = 52;
+
+    // 生成每个模块的矩形坐标
+    function mm_layout() {
+        var nodes = [];
+        mm_layers.forEach(function (layer) {
+            var n = layer.items.length;
+            var gap = n >= 8 ? 10 : (n === 5 ? 14 : 18);
+            var w = Math.floor((MM_BOX_W - gap * (n - 1)) / n);
+            var totalW = w * n + gap * (n - 1);
+            var startX = MM_BOX_X + (MM_BOX_W - totalW) / 2;
+
+            layer.nodes = [];
+            layer.items.forEach(function (item, i) {
+                var node = {
+                    x: startX + i * (w + gap),
+                    y: layer.y + MM_BOX_TOP,
+                    w: w,
+                    h: MM_BOX_H,
+                    t: item.t,
+                    s: item.s,
+                    d: item.d,
+                    color: layer.color,
+                    layer: layer.name
+                };
+                layer.nodes.push(node);
+                nodes.push(node);
+            });
+            layer.boxW = w;
+        });
+        return nodes;
+    }
+
+    var mm_nodes = mm_layout();
+
+    // 层间连线（自上而下的请求动线）
+    var mm_connectors = [];
+    mm_layers.forEach(function (layer, i) {
+        var next = mm_layers[i + 1];
+        if (!next) { return; }
+        var y1 = layer.y + MM_BAND_H;
+        var y2 = next.y;
+        [330, 560, 790].forEach(function (x, k) {
+            mm_connectors.push({
+                x: x,
+                y1: y1,
+                y2: y2,
+                color: layer.color,
+                speed: 0.00055 + k * 0.00012,
+                offset: k * 0.33
+            });
+        });
+    });
+
+    // ============================================================
+    // 3. 交互状态
+    // ============================================================
+    var mm_hovered = null;
+    var mm_selected = null;
+    var mm_time = 0;
+
+    // ============================================================
+    // 4. 绘制工具
+    // ============================================================
+    function mm_rr(x, y, w, h, r) {
+        mm_ctx.beginPath();
+        mm_ctx.moveTo(x + r, y);
+        mm_ctx.lineTo(x + w - r, y);
+        mm_ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        mm_ctx.lineTo(x + w, y + h - r);
+        mm_ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        mm_ctx.lineTo(x + r, y + h);
+        mm_ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        mm_ctx.lineTo(x, y + r);
+        mm_ctx.quadraticCurveTo(x, y, x + r, y);
+        mm_ctx.closePath();
+    }
+
+    function mm_hexA(hex, a) {
+        var n = parseInt(hex.slice(1), 16);
+        return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+    }
+
+    // ============================================================
+    // 5. 背景
+    // ============================================================
+    function mm_bg() {
+        var g = mm_ctx.createLinearGradient(0, 0, MM_W, MM_H);
+        g.addColorStop(0, "#06090f");
+        g.addColorStop(0.5, "#0a1224");
+        g.addColorStop(1, "#0c0a1a");
+        mm_ctx.fillStyle = g;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+
+        // 网格
+        mm_ctx.strokeStyle = "rgba(120, 160, 255, 0.045)";
+        mm_ctx.lineWidth = 1;
+        for (var x = 0; x <= MM_W; x += 44) {
+            mm_ctx.beginPath(); mm_ctx.moveTo(x, 0); mm_ctx.lineTo(x, MM_H); mm_ctx.stroke();
+        }
+        for (var y = 0; y <= MM_H; y += 44) {
+            mm_ctx.beginPath(); mm_ctx.moveTo(0, y); mm_ctx.lineTo(MM_W, y); mm_ctx.stroke();
+        }
+
+        var glow = mm_ctx.createRadialGradient(MM_W / 2, 40, 0, MM_W / 2, 40, 520);
+        glow.addColorStop(0, "rgba(90, 150, 255, 0.14)");
+        glow.addColorStop(1, "rgba(90, 150, 255, 0)");
+        mm_ctx.fillStyle = glow;
+        mm_ctx.fillRect(0, 0, MM_W, MM_H);
+    }
+
+    // ============================================================
+    // 6. 标题
+    // ============================================================
+    function mm_title() {
+        var t = mm_ctx.createLinearGradient(30, 0, 430, 0);
+        t.addColorStop(0, "#67e8f9");
+        t.addColorStop(0.55, "#a78bfa");
+        t.addColorStop(1, "#34d399");
+        mm_ctx.fillStyle = t;
+        mm_ctx.font = "bold 26px 'Microsoft YaHei', sans-serif";
+        mm_ctx.textAlign = "left";
+        mm_ctx.fillText("电商系统 · 全站架构图", MM_BAND_X, 46);
+
+        mm_ctx.fillStyle = "rgba(140, 165, 200, 0.5)";
+        mm_ctx.font = "500 12px Consolas, monospace";
+        mm_ctx.textAlign = "right";
+        mm_ctx.fillText("E-COMMERCE  ·  LAYERED  ARCHITECTURE", MM_W - MM_BAND_X, 44);
+        mm_ctx.textAlign = "left";
+    }
+
+    // ============================================================
+    // 7. 分层色带
+    // ============================================================
+    function mm_bands() {
+        mm_layers.forEach(function (layer) {
+            mm_rr(MM_BAND_X, layer.y, MM_BAND_W, MM_BAND_H, 14);
+            mm_ctx.fillStyle = "rgba(255, 255, 255, 0.022)";
+            mm_ctx.fill();
+            mm_ctx.strokeStyle = mm_hexA(layer.color, 0.16);
+            mm_ctx.lineWidth = 1;
+            mm_ctx.stroke();
+
+            // 左侧色条
+            mm_ctx.fillStyle = mm_hexA(layer.color, 0.85);
+            mm_ctx.fillRect(MM_BAND_X, layer.y + 18, 3, MM_BAND_H - 36);
+
+            // 层名标签
+            mm_rr(MM_BAND_X + 14, layer.y - 11, 128, 22, 11);
+            mm_ctx.fillStyle = mm_hexA(layer.color, 0.16);
+            mm_ctx.fill();
+            mm_ctx.strokeStyle = mm_hexA(layer.color, 0.4);
+            mm_ctx.stroke();
+
+            mm_ctx.fillStyle = layer.color;
+            mm_ctx.font = "bold 12px 'Microsoft YaHei', sans-serif";
+            mm_ctx.textAlign = "left";
+            mm_ctx.fillText(layer.name, MM_BAND_X + 26, layer.y + 4);
+
+            mm_ctx.fillStyle = "rgba(200, 210, 230, 0.35)";
+            mm_ctx.font = "500 10px 'Microsoft YaHei', sans-serif";
+            mm_ctx.fillText(layer.note, MM_BAND_X + 26 + layer.name.length * 12 + 4, layer.y + 4);
+        });
+    }
+
+    // ============================================================
+    // 8. 连线 + 流动光点
+    // ============================================================
+    function mm_lines(t) {
+        mm_connectors.forEach(function (c) {
+            var g = mm_ctx.createLinearGradient(0, c.y1, 0, c.y2);
+            g.addColorStop(0, mm_hexA(c.color, 0.5));
+            g.addColorStop(1, mm_hexA(c.color, 0.12));
+            mm_ctx.strokeStyle = g;
+            mm_ctx.lineWidth = 1.4;
+            mm_ctx.beginPath();
+            mm_ctx.moveTo(c.x, c.y1);
+            mm_ctx.lineTo(c.x, c.y2 - 4);
+            mm_ctx.stroke();
+
+            // 箭头
+            mm_ctx.fillStyle = mm_hexA(c.color, 0.55);
+            mm_ctx.beginPath();
+            mm_ctx.moveTo(c.x, c.y2);
+            mm_ctx.lineTo(c.x - 4, c.y2 - 7);
+            mm_ctx.lineTo(c.x + 4, c.y2 - 7);
+            mm_ctx.closePath();
+            mm_ctx.fill();
+
+            // 两个沿连线移动的光点
+            for (var k = 0; k < 2; k++) {
+                var p = (t * c.speed + c.offset + k * 0.5) % 1;
+                var py = c.y1 + (c.y2 - c.y1) * p;
+                var alpha = 0.25 + Math.sin(p * Math.PI) * 0.65;
+                mm_ctx.fillStyle = mm_hexA(c.color, alpha);
+                mm_ctx.beginPath();
+                mm_ctx.arc(c.x, py, 2.4, 0, Math.PI * 2);
+                mm_ctx.fill();
+            }
+        });
+    }
+
+    // ============================================================
+    // 9. 模块
+    // ============================================================
+    function mm_nodesDraw() {
+        mm_nodes.forEach(function (n) {
+            var active = (n === mm_hovered || n === mm_selected);
+
+            mm_rr(n.x, n.y, n.w, n.h, 9);
+            var g = mm_ctx.createLinearGradient(n.x, n.y, n.x, n.y + n.h);
+            g.addColorStop(0, mm_hexA(n.color, active ? 0.3 : 0.12));
+            g.addColorStop(1, mm_hexA(n.color, active ? 0.16 : 0.04));
+            mm_ctx.fillStyle = g;
+            mm_ctx.fill();
+
+            mm_ctx.strokeStyle = mm_hexA(n.color, active ? 0.95 : 0.32);
+            mm_ctx.lineWidth = active ? 1.8 : 1;
+            mm_ctx.stroke();
+
+            if (active) {
+                mm_ctx.save();
+                mm_ctx.shadowColor = mm_hexA(n.color, 0.55);
+                mm_ctx.shadowBlur = 18;
+                mm_ctx.stroke();
+                mm_ctx.restore();
+            }
+
+            mm_ctx.textAlign = "center";
+            mm_ctx.fillStyle = active ? "#ffffff" : "#e2eaf8";
+            mm_ctx.font = "bold 13px 'Microsoft YaHei', sans-serif";
+            mm_ctx.fillText(n.t, n.x + n.w / 2, n.y + 23);
+
+            mm_ctx.fillStyle = mm_hexA(n.color, active ? 0.95 : 0.62);
+            mm_ctx.font = "500 10px 'Microsoft YaHei', sans-serif";
+            mm_ctx.fillText(n.s, n.x + n.w / 2, n.y + 41);
+
+            mm_ctx.textAlign = "left";
+        });
+    }
+
+    // ============================================================
+    // 10. 图例与页脚
+    // ============================================================
+    function mm_legend() {
+        var y = 664;
+        var x = MM_BAND_X + 6;
+        mm_ctx.font = "500 11px 'Microsoft YaHei', sans-serif";
+        mm_layers.forEach(function (layer) {
+            mm_ctx.fillStyle = mm_hexA(layer.color, 0.9);
+            mm_rr(x, y - 9, 12, 12, 3);
+            mm_ctx.fill();
+
+            mm_ctx.fillStyle = "rgba(180, 200, 230, 0.66)";
+            mm_ctx.fillText(layer.name, x + 18, y + 2);
+            x += 18 + layer.name.length * 11 + 18;
+        });
+
+        mm_ctx.fillStyle = "rgba(140, 165, 200, 0.4)";
+        mm_ctx.font = "500 11px Consolas, monospace";
+        mm_ctx.textAlign = "right";
+        mm_ctx.fillText("孟梦 · 高级网页设计 · 18-2", MM_W - MM_BAND_X, y + 2);
+        mm_ctx.textAlign = "left";
+    }
+
+    // ============================================================
+    // 11. 主循环
+    // ============================================================
+    var mm_last = 0;
+    function mm_loop(now) {
+        if (!mm_last) { mm_last = now; }
+        var delta = Math.min(now - mm_last, 40);
+        mm_last = now;
+        mm_time += delta;
+
+        mm_bg();
+        mm_title();
+        mm_bands();
+        mm_lines(mm_time);
+        mm_nodesDraw();
+        mm_legend();
+
+        requestAnimationFrame(mm_loop);
+    }
+
+    // ============================================================
+    // 12. 命中检测与信息面板
+    // ============================================================
+    function mm_toLogical(e) {
+        var rect = mm_canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX - rect.left) * (MM_W / rect.width),
+            y: (e.clientY - rect.top) * (MM_H / rect.height)
+        };
+    }
+
+    function mm_hit(pt) {
+        for (var i = 0; i < mm_nodes.length; i++) {
+            var n = mm_nodes[i];
+            if (pt.x >= n.x && pt.x <= n.x + n.w && pt.y >= n.y && pt.y <= n.y + n.h) {
+                return n;
+            }
+        }
+        return null;
+    }
+
+    function mm_showInfo(node) {
+        var title = document.getElementById("mm_infoTitle");
+        var tag = document.getElementById("mm_infoTag");
+        var desc = document.getElementById("mm_infoDesc");
+
+        if (!node) {
+            title.firstChild.textContent = "模块说明 ";
+            tag.textContent = "悬停任意模块";
+            desc.textContent = "把鼠标移到架构图中的任意模块上，这里会显示它的职责、依赖关系与常用技术选型。";
+            return;
+        }
+        title.firstChild.textContent = node.t + " ";
+        tag.textContent = node.layer;
+        desc.textContent = node.d;
+    }
+
+    mm_canvas.addEventListener("mousemove", function (e) {
+        var pt = mm_toLogical(e);
+        var hit = mm_hit(pt);
+        if (hit !== mm_hovered) {
+            mm_hovered = hit;
+            mm_canvas.style.cursor = hit ? "pointer" : "default";
+            if (!mm_selected) { mm_showInfo(hit); }
+        }
+    });
+
+    mm_canvas.addEventListener("mouseleave", function () {
+        mm_hovered = null;
+        mm_canvas.style.cursor = "default";
+        if (!mm_selected) { mm_showInfo(null); }
+    });
+
+    mm_canvas.addEventListener("click", function (e) {
+        var hit = mm_hit(mm_toLogical(e));
+        mm_selected = (hit === mm_selected) ? null : hit;
+        mm_showInfo(mm_selected || mm_hovered);
+    });
+
+    document.getElementById("mm_clear").addEventListener("click", function () {
+        mm_selected = null;
+        mm_showInfo(mm_hovered);
+    });
+
+    document.getElementById("mm_export").addEventListener("click", function () {
+        var link = document.createElement("a");
+        link.download = "电商系统架构图.png";
+        link.href = mm_canvas.toDataURL("image/png");
+        link.click();
+    });
+
+    requestAnimationFrame(mm_loop);
+</script>
+</body>
+</html>
